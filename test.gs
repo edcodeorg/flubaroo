@@ -1,10 +1,3 @@
-
-function testui()
-{
-  return UI.showStep1Grading();
-}
-
-
 // test.gs
 // ===========
 
