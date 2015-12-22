@@ -1,4 +1,4 @@
-// File: email.gas.gs
+// File: email.gs
 // Description:
 // This file contains all relevant functions for sending email.
 

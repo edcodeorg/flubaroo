@@ -1,4 +1,4 @@
-// File: grading.gas
+// File: grading.gs
 // Description:
 // This file contains all the general purpose functions for grading the assignment.
 

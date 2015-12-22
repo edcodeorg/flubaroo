@@ -1,4 +1,4 @@
-// lang.gas
+// lang.gs
 // Contains definitions for all localized strings in Flubaroo.
 // Any language specific string or message should be placed in this file in the format shown.
 

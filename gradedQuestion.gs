@@ -1,4 +1,4 @@
-// File: graded_question.gas
+// File: graded_question.gs
 // Description:
 // This file contains the class for a graded question.
 

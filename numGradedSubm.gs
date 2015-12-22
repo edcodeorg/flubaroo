@@ -1,4 +1,4 @@
-// num_graded_subm.gas.gs
+// num_graded_subm.gs
 // ======================
 //
 // Manage a local copy of the number of graded submissions.

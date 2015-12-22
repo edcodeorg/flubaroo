@@ -1,4 +1,4 @@
-// File: definitions.gas
+// File: definitions.gs
 // Description:
 // This file contains all constants and global variable definitions.
 

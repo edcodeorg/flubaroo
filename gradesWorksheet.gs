@@ -1,4 +1,4 @@
-// File: graded_worksheet.gas
+// File: graded_worksheet.gs
 // Description:
 // This file contains the class to hold the grades worksheet.
 

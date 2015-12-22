@@ -5,7 +5,7 @@ function testui()
 }
 
 
-// test.gas.gs
+// test.gs
 // ===========
 
 TESTS_QA_SHEET_ID = "0AhRtIprIrwuzdGFtUTBpb1ljWGhQYnZHcWhHcGo1Z2c";

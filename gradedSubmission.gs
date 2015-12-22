@@ -1,4 +1,4 @@
-// File: graded_submission.gas
+// File: graded_submission.gs
 // Description:
 // This file contains the class for a graded submiaaion from a student.
 

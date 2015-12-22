@@ -1,4 +1,4 @@
-// ui.gas
+// ui.gs
 // ------
 //
 // This file contains all of the functions that display a UI.
