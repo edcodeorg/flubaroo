@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<?!= HtmlService.createHtmlOutputFromFile('uiStyle').getContent(); ?>
+
+<div id="s2_mw">
+    <div id="s2_mw_instr">
+        <table border="0">
+        <tr>
+        <td><img src="<?= FLUBAROO_WELCOME_IMG_URL ?>"
+                     style="padding-right:15px;">
+        </td>
+        <td>
+        <?= langstr("FBL_STR_STEP2_INSTR") ?>
+        </td>
+        </tr>
+        </table>
+    </div>
+
+    <div id="s2_mw_alert" class="error" style="display:none;"></div>
+
+    <div class="vspacer"></div>
+
+    <div id="s2_mw_sel">
+    Loading...
+    </div>
+
+    <div style="float:right;margin-top:20px;">
+    <table border="0" id="s2_mw_continue"><tr>
+    <td><img id="s2_mw_working" src="<?= FLUBAROO_WORKING_IMG_URL ?>" style="display:none;"></td>
+    <td width="35px"></td>
+    <td><input type="button" class="action" value="Continue" onclick="step2Continue()" /></td>
+    </tr></table>
+    </div>
+
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+</script>
+
+<script>
+
+// run on load
+$(function() {
+    google.script.run.withSuccessHandler(populateAnswerKeyData)
+                     .uiStep2GetAnswerKeyData();
+});
+
+function populateAnswerKeyData(ak_data)
+{
+  var h = '<table id="s2_mw_sel_table">';
+
+  h += '<tr><td><b><?= langstr("FLB_STR_GRADE_STEP2_LABEL_SELECT") ?></b></td>';
+
+  for (var i=0; i < ak_data.aks_header.length; i++)
+    {
+      var header = ak_data.aks_header[i];
+      h += '<td class="s2_mw_sel_table_hspacer"><b>' + header + '</b></td>';
+    }
+  h += '</tr>';
+
+  for (var i=0; i < ak_data.aks_vals.length; i++)
+    {
+      var ak_val_row = ak_data.aks_vals[i];
+      var checked = "";
+
+      if (ak_data.aks_subm_rows[i] == ak_data.aks_last_selected)
+        {
+          checked = ' checked = "checked" ';
+        }
+
+      h += '<tr><td><input type="radio" name="ak_select" value="' + ak_data.aks_subm_rows[i] + '"' + checked + '></td>'
+
+      for (var j=0; j < ak_val_row.length; j++)
+        {
+          var akv = ak_val_row[j];
+
+          h += '<td class="s2_mw_sel_table_hspacer">' + akv + '</td>';
+        }
+      h += '</tr>';
+    }
+
+  h  += '</table>';
+
+  $('#s2_mw_sel').html(h);
+}
+
+// The code in this function runs when the page is loaded.
+function step2Continue()
+{
+  var ak_selected = false;
+  var ak_subm_row;
+
+  clearAlert();
+
+  // check that at least one option was selected
+  var ak_select = document.getElementsByName('ak_select');
+  for (var i=0; i < ak_select.length; i++)
+    {
+      if (ak_select[i].checked)
+        {
+          ak_selected = true;
+          ak_subm_row = ak_select[i].value;
+          break;
+        }
+    }
+
+  // Do client-side checks (at least one stud iden field)
+  if (!ak_selected)
+    {
+      showAlert('<?=langstr("FBL_STR_GRADE_STEP2_NO_AK_SELECTED")?>');
+      return;
+    }
+
+  // show the animation next to the continue button
+  $('#s2_mw_working').show();
+
+  // call server-side function, passing it the selected answer key row.
+  google.script.run.gradingStep2SubmitHandler(ak_subm_row);
+
+  // show please wait...
+
+}
+
+function showAlert(alert)
+{
+  $('#s2_mw_alert').html(alert);
+  $('#s2_mw_alert').show(200);
+}
+
+function clearAlert()
+{
+  $('#s2_mw_alert').html('');
+  $('#s2_mw_alert').hide(200);
+}
+
+
+</script>

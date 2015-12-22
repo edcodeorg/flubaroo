@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<?!= HtmlService.createHtmlOutputFromFile('uiStyle').getContent(); ?>
+
+<div id="mgr_mw">
+
+    <div id="mgr_mw_alert" style="display:none;font-weight:bold;color:#F26A00;"></div>
+
+    <table border="0" width="100%">
+    <tr>
+    <td valign="top" width="50%">
+      <div id = "mgr_mw_stud_ident">
+        <table border="0" width="90%">
+        <tr>
+            <td><b><?= langstr("FLB_STR_MANUAL_GRADING_STEP1") ?></b> &nbsp;
+              <input type="button" class="action" value="<<" style="min-width:10px;" onclick="prevStudent()" />
+              <input type="button" class="action" value=">>" style="min-width:10px;" onclick="nextStudent()" />
+            </td>
+        </tr>
+        <tr>
+            <td height="120" valign="top">
+                <table border="0" width="100%" id="mgr_mw_stud_ident_data">
+                </table>
+            </td>
+        </tr>
+        </table>
+      </div>
+    </td>
+
+    <td style="padding-left:50px;" valign="top" width="50%">
+    <div id="mgr_mw_sel">
+    <b><?= langstr("FLB_STR_MANUAL_GRADING_STEP2") ?></b>&nbsp;&nbsp;
+      <div style="padding-top:8px;">
+      <select id = "mgr_mw_sel_question" onchange="selectChange()">
+      </select>
+      </div>
+    </div>
+    </td>
+    </tr>
+    </table>
+
+    <br><br>
+    <table border="0" width="100%">
+    <tr>
+    <td width="50%">
+    <b><?= langstr("FLB_STR_MANUAL_GRADING_STEP3") ?></b> (<a href = "javascript:void(0)" onclick = "openAnswerKey()"><?= langstr("FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY") ?></a>)
+    <div id = "mgr_mw_stud_response">
+    </div>
+    </td>
+    <td style="padding-left:50px;" width="50%" >
+    <b><?= langstr("FLB_STR_MANUAL_GRADING_STEP4") ?></b>
+    <div id = "mgr_mw_teacher_response_div">
+    <textarea id="mgr_mw_teacher_response_textarea"></textarea>
+    </div>
+    </td>
+    </tr>
+    </table>
+
+    <br><br>
+    <div>
+    <b>5. Enter points:</b> <input type="text" id="mgr_mw_stud_score" size=4></input>
+    <b>&nbsp;/&nbsp;</b><span id="mgr_mw_stud_pts_possible"></span>
+    <span style="padding-left:65px;">
+    <input type="button" class="action" value="<?= langstr("FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE") ?>" id="mgr_mw_submit_button" onclick="setGradeAndComment()" />
+    </span>
+    </div>
+
+    <!-- Answer key shadow box -->
+    <div id="light" class="mgr_white_content"></div>
+    <div id="fade" class="mgr_black_overlay">
+          <div style="float:right;padding:10px;15px;0px;0px;"><a href = "javascript:void(0)" onclick = "closeAnswerKey()"><b><?= langstr("FLB_STR_MANUAL_GRADING_CLOSE_POPUP") ?> (X)</b></a></div>
+    </div>
+
+</div>
+
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+</script>
+
+<script>
+
+current_col_num_gbl = -1; // global current column number
+current_row_num_gbl = -1; // global current row number
+
+// run on load. sets up the ui fields. passing row and col as '0'
+// tells server this is first load of the UI.
+$(function() {
+    showLoading(true);
+
+    google.script.run.withSuccessHandler(populateQuestionList)
+                     .mgrGetManuallyGradedQuestionList();
+});
+
+function populateQuestionList(ques_data)
+{
+  var sel = document.getElementById("mgr_mw_sel_question");
+
+  for (var i=0; i < ques_data.question_col_nums.length; i++)
+    {
+      var option = document.createElement('option');
+      option.text = ques_data.question_text[i];
+      option.value = ques_data.question_col_nums[i];
+      sel.add(option);
+    }
+
+  if (ques_data.question_col_nums.length)
+    {
+      current_col_num_gbl = ques_data.question_col_nums[0];
+    }
+
+  current_row_num_gbl = Number(<?= getActiveGradesSheetRowNumber(); ?>);
+
+  google.script.run.withSuccessHandler(populateStudentTeacherData)
+                     .mgrGetNextManuallyGradedSubmission(current_col_num_gbl, current_row_num_gbl, 0);
+
+}
+
+function populateStudentTeacherData(data)
+{
+  if (data.status != 0)
+    {
+      showAlert("<?= langstr("FLB_STR_MANUAL_GRADING_ERROR_OCCURED") ?>");
+      return;
+    }
+
+  var student_response = data.student_response;
+  if (typeof student_response === 'string')
+    {
+      student_response = student_response.replace(/\n/g, "<br>");
+      student_response = activateHyperlink(student_response);
+    }
+  $('#mgr_mw_stud_response').html(student_response);
+
+  $('#mgr_mw_teacher_response_textarea').val(data.teacher_comment);
+  $('#mgr_mw_stud_score').val(data.score);
+  $('#mgr_mw_stud_pts_possible').html(data.pts_possible);
+  $("#mgr_mw_submit_button").prop('disabled', false);
+
+  var ak_html = data.answer_key;
+  if (typeof ak_html === 'string')
+    {
+      ak_html = ak_html.replace(/\n/g, "<br>");
+      ak_html = activateHyperlink(ak_html);
+    }
+  $('#light').html(ak_html);
+
+  var h = "";
+  var max_sids = Math.min(data.student_identifiers.sid_ques.length, 3);
+
+  for (var i=0; i < max_sids; i++)
+    {
+      h += "<tr><td><b>" + data.student_identifiers.sid_ques[i] + "</b></td>";
+      h += "<td>" + data.student_identifiers.sid_value[i] + "</td></tr>";
+    }
+
+  $('#mgr_mw_stud_ident_data').html(h);
+
+  current_row_num_gbl = data.row_num;
+
+  clearAlert();
+}
+
+function selectChange()
+{
+  current_col_num_gbl = $("#mgr_mw_sel_question").val();
+
+  showLoading(false);
+
+  google.script.run.withSuccessHandler(populateStudentTeacherData)
+                   .mgrGetNextManuallyGradedSubmission(current_col_num_gbl, current_row_num_gbl, 0);
+}
+
+function nextStudent()
+{
+  showLoading(true);
+
+  google.script.run.withSuccessHandler(populateStudentTeacherData)
+                   .mgrGetNextManuallyGradedSubmission(current_col_num_gbl, current_row_num_gbl, 1);
+}
+
+function prevStudent()
+{
+  showLoading(true);
+
+  google.script.run.withSuccessHandler(populateStudentTeacherData)
+                   .mgrGetNextManuallyGradedSubmission(current_col_num_gbl, current_row_num_gbl, -1);
+}
+
+function setGradeAndComment()
+{
+
+  var score = $('#mgr_mw_stud_score').val();
+
+  if (score == "" || isNaN(score))
+    {
+      showAlert('<?= langstr("FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE") ?>');
+      return;
+    }
+
+ // $('#mgr_mw_working').show();
+ $("#mgr_mw_submit_button").prop('value', '<?= langstr("FLB_STR_MANUAL_GRADING_BUTTON_WORKING") ?>');
+ $("#mgr_mw_submit_button").prop('disabled', true);
+
+  google.script.run.withSuccessHandler(handleGradeSet)
+                   .mgrSetStudentGrade(current_col_num_gbl, current_row_num_gbl, score);
+}
+
+function handleGradeSet()
+{
+  var comment = $('#mgr_mw_teacher_response_textarea').val();
+
+  google.script.run.withSuccessHandler(handleCommentSet)
+                   .mgrSetTeacherComment(current_col_num_gbl, current_row_num_gbl, comment);
+}
+
+function handleCommentSet()
+{
+  //$('#mgr_mw_working').hide();
+  $("#mgr_mw_submit_button").prop('value', '<?= langstr("FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE") ?>');
+  $("#mgr_mw_submit_button").prop('disabled', false);
+
+  showAlert('<?= langstr("FLB_STR_MANUAL_GRADING_GRADE_APPLIED") ?>');
+}
+
+
+function showLoading(clear_stud_id)
+{
+  $('#mgr_mw_stud_response').html("Loading...");
+  $('#mgr_mw_teacher_response_textarea').val("Loading...");
+
+  $('#mgr_mw_stud_score').val("");
+  $('#mgr_mw_stud_pts_possible').html("");
+
+  $("#mgr_mw_submit_button").prop('disabled', true);
+
+  if (clear_stud_id)
+    {
+      $('#mgr_mw_stud_ident_data').html("Loading...");
+    }
+}
+
+function showAlert(alert)
+{
+  clearAlert();
+
+  $('#mgr_mw_alert').html(alert);
+  $('#mgr_mw_alert').show(250);
+}
+
+function clearAlert()
+{
+  $('#mgr_mw_alert').hide(250);
+  $('#mgr_mw_alert').html('');
+}
+
+function openAnswerKey()
+{
+  $('#light').show(200);
+  $('#fade').show(200);
+}
+
+function closeAnswerKey()
+{
+  $('#light').hide(200);
+  $('#fade').hide(200);
+}
+
+
+// activateHyperlink:
+// Simple function to find the first (and probably only) webpage address in a string
+// of HTML and turn it into a hyperlink. Used to help if students want to submit their
+// answer in a Google doc, image, etc.
+function activateHyperlink(html)
+{
+  var regex = /"(http.+)"/;
+  var link = html;
+
+  // handle case of URL alone, which will be quoted by the spreadsheet (i.e. "http://.....")
+  var found = html.match(regex);
+  if (found != null)
+    {
+      link = link.replace(regex, '<a target="_blank" href="$1">$1</a>');
+    }
+
+  else
+    {
+      regex = /(.*)(http.+)/;
+      var found = html.match(regex);
+      if (found != null)
+        {
+          link = html.replace(regex, '$1<a target="_blank" href="$2">$2</a>');
+        }
+    }
+
+  return link;
+}
+
+
+</script>
