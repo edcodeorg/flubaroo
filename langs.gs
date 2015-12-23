@@ -1,4 +1,4 @@
-// lang.gs
+// lang.gas
 // Contains definitions for all localized strings in Flubaroo.
 // Any language specific string or message should be placed in this file in the format shown.
 
@@ -377,7 +377,7 @@ langs = {
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo is a free, time-saving tool that allows teachers to quickly grade multiple choice assignments and analyze the results",
 
         // About Flubaroo message (2 of 2)
-        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "To learn more, visit www.flubaroo.com. Also send feedback or ideas to dave@edcode.org.",
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "To learn more, visit www.flubaroo.com.",
 
         // Message that appears when "Student Submissions" sheet cannot be located.
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo could not determine which sheet contains the student submissions. Please locate this sheet, and rename it to: ",
@@ -824,7 +824,7 @@ langs = {
 
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo es una herramienta libre, que permite ahorrar tiempo a los profesores, ya que califica rápidamente pruebas de selección múltiple y analiza los resultados de forma automatizada.",
 
-        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Para aprender más visite www.flubaroo.com. También puede enviar sus comentarios o ideas a dave@edcode.org.",
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Para aprender más visite www.flubaroo.com.",
 
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo no puede determinar la hoja de cálculo que contiene los envíos de los estudiantes. Por favor localice esta hoja y renómbrela como: ",
 
@@ -1168,7 +1168,7 @@ langs = {
 
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo är ett verktyg som är gratis, sparar tid och låter lärare snabbt poängsätta flervalsuppgifter och analysera resultatet",
 
-        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Besök www.flubaroo.com för att lära dig mer. Skicka även feedback eller idéer till dave@edcode.org.",
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Besök www.flubaroo.com för att lära dig mer.",
 
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo kunde inte avgöra vilket blad som innehåller elevsvaren. Vänligen döp om den till: ",
 
@@ -1511,7 +1511,7 @@ langs = {
 
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo - бесплатный  инструмент, позволяющий учителю быстро оценить ответы	учеников и проанализировать результаты",
 
-        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Чтобы узнать больше, посетите наш сайт www.flubaroo.com. Для обратной связи и новых идей dave@edcode.org.",
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Чтобы узнать больше, посетите наш сайт www.flubaroo.com.",
 
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo не может определить, какой лист содержит ответы учеников. Выберите этот лист и переименуйте его в:",
 
@@ -1854,7 +1854,7 @@ langs = {
 
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo is een gratis en tijdbesparend hulpmiddel dat docenten in staat stelt om snel meerkeuzetoetsen te beoordelen en te analyseren.",
 
-        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Wil je meer weten, bezoek www.flubaroo.com. Stuur je feedback of ideeën naar dave@edcode.org",
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Wil je meer weten, bezoek www.flubaroo.com.",
 
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo kon niet vaststellen welk blad de inzendingen van de studenten bevat. Zoek het blad op en hernoem dit naar: ",
 
@@ -2745,7 +2745,7 @@ langs = {
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo est gratuit et vous permet de gagner du temps. Il corrige des questions simples, analyse les résultats et donne une rétroaction aux élèves",
 
         // About Flubaroo message (2 of 2)
-        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Pour en apprendre plus, il y a www.flubaroo.com. Adressez vos commentaires et vos suggestions à dave@edcode.org.",
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Pour en apprendre plus, il y a www.flubaroo.com.",
 
         // Message that appears when "Student Submissions" sheet cannot be located.
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo ne peut déterminer quelle feuille contient les soumissions des élèves.  Veuillez trouvez cette feuille et la renommer: ",
@@ -3198,7 +3198,7 @@ langs = {
 	  "FLB_STR_ABOUT_FLUBAROO_MSG1" : "פלובארו הוא כלי חינמי ופשוט לתפעול המאפשר למורים לדרג מטלות ביצוע המכילות שאלות בחירה-מרובה, ולנתח את התשובות שהתקבלו, בקלות ובמהירות",
 
 	  // About Flubaroo message (2 of 2)
-	  "FLB_STR_ABOUT_FLUBAROO_MSG2" : "כדי ללמוד עוד, בקרו באתר www.flubaroo.com או שלחו משוב והצעות לשיפור בכתובת dave@edcode.org.",
+	  "FLB_STR_ABOUT_FLUBAROO_MSG2" : "כדי ללמוד עוד, בקרו באתר www.flubaroo.com",
 
 	  // Message that appears when "Student Submissions" sheet cannot be located.
 	  "FLB_STR_CANNOT_FIND_SUBM_MSG" : ".פלובארו לא הצליח למצוא את גיליון הנתונים שבו הוזנו מטלות הביצוע של התלמידים. אנא אתר את גיליון זה, ושנה את שמו לשם: ",
@@ -3653,7 +3653,7 @@ langs = {
        "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo to bezpłatne, oszczędzające czas narzędzie, które pozwala nauczycielom szybko ocenić i przeanalizować wyniki testów jednokrotnego wyboru",
 
        // About Flubaroo message (2 of 2)
-       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Aby dowiedzieć się więcej, odwiedź www.flubaroo.com. Opinie lub pomysły wyślij na adres dave@edcode.org.",
+       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Aby dowiedzieć się więcej, odwiedź www.flubaroo.com.",
 
        // Message that appears when "Student Submissions" sheet cannot be located.
        "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo nie mógł określić, który arkusz zawiera odpowiedzi uczniów. Zlokalizuj ten arkusz i zmień jego nazwę na:",
@@ -4209,7 +4209,7 @@ langs = {
        "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo é uma ferramenta gratuita que permite aos professores poupar tempo, classificando automaticamente itens de resposta fechada e analisando os resultados",
 
        // About Flubaroo message (2 of 2)
-       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Para saber mais, visite www.flubaroo.com. Envie os seus comentários e sugestões para dave@edcode.org.",
+       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Para saber mais, visite www.flubaroo.com.",
 
        // Message that appears when "Student Submissions" sheet cannot be located.
        "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo não consegue determinar qual a folha que contém as submissões dos alunos. Por favor, localize essa folha e mude-lhe o nome para: ",
@@ -4603,7 +4603,7 @@ langs = {
 
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo é uma ferramenta gratuita que permite ganhar tempo ao avaliar formulários rapidamente de maneira automatizada.",
 
-    	"FLB_STR_ABOUT_FLUBAROO_MSG2" : "Para descobrir mais sobre o Flubaroo visite www.flubaroo.com. Você também pode enviar seus comentários ou idéias para dave@edcode.org.",
+    	"FLB_STR_ABOUT_FLUBAROO_MSG2" : "Para descobrir mais sobre o Flubaroo visite www.flubaroo.com.",
 
     	"FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo não pôde determinar o formulário de cálculo que contém as submissões dos estudantes. Por favor localize este formulário e o renomeie como: ",
 
@@ -5117,7 +5117,7 @@ langs = {
 
 
        // About Flubaroo message (2 of 2)
-       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Vil du vide mere, så besøg www.flubaroo.com. Du kan også sende feedback eller ideer til dave@edcode.org.",
+       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Vil du vide mere, så besøg www.flubaroo.com.",
 
 
        // Message that appears when "Student Submissions" sheet cannot be located.
@@ -5546,7 +5546,7 @@ langs = {
 "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo je zdarma dostupný doplněk umožňující učitelům rychlé vyhodnocení testů a následné analyzování výsledků.",
 
 // About Flubaroo message (2 of 2)
-"FLB_STR_ABOUT_FLUBAROO_MSG2" : "Pokud se chcete dozvědět více, navštivte www.flubaroo.com. Zpětnou vazbu můžete poslat na e-mailovou adresu dave@edcode.org.",
+"FLB_STR_ABOUT_FLUBAROO_MSG2" : "Pokud se chcete dozvědět více, navštivte www.flubaroo.com.",
 
 // Message that appears when "Student Submissions" sheet cannot be located.
 "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo nemůže najít list s odpověďmi. Najděte tento list a pojmenujte: ",
