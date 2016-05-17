@@ -378,7 +378,7 @@ GradedSubmission.prototype.gradeSubmission = function(q)
           // Found '%or' operator.
           key_list = this.processOrInKey(key);
         }
-      else if ((key.search(ANSKEY_OPERATOR_CHECKBOX) == 0) && (key.length > 4))
+      else if ((key.search(ANSKEY_OPERATOR_CHECKBOX + " ") == 0) && (key.length > 4))
         {
           var regex = /^%cb(\d+)?(\.\d+)? (.*)/i;
           var found = key.match(regex);
@@ -476,9 +476,11 @@ GradedSubmission.prototype.gradeSubmission = function(q)
       // to each.
       for (var i = 0; i < key_list.length; i++)
         {
+          //Debug.info("gradeSubmission(): comparing " + submission + " (type " + typeof submission + ") to " + key_list[i] + "(type " + typeof key_list[i] + ")");
           if (submission == key_list[i])
             {
               // Correct answer!
+              //Debug.info("gradeSubmission(): match!");
               grade_val = getPointsWorth(q.getGradingOption());
               break;
             }
