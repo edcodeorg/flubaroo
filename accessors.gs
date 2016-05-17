@@ -150,3 +150,4 @@ function gotSheetWithGrades(ss)
   return getSheetWithGrades(ss) !== null;
   
 } // gotSheetWithGrades()
+
