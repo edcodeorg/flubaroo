@@ -917,6 +917,11 @@ function showUpdateNotice()
 function emailUserAnnouncement()
 {
   var email_addr = Session.getActiveUser().getEmail();
+  if (!email_addr || email_addr == "")
+    {
+      email_addr = Session.getEffectiveUser().getEmail();
+    }
+  
   var msg_body = '<html><body>';
   msg_body += '<img style="padding:10px;" src="' + FLUBAROO_WELCOME_IMG_URL + '"><br>';
   msg_body += '<div style="font-face:Roboto,Arial;font-family:Sans-Serif;font-size:14px;padding:10px;">';      
