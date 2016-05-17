@@ -1,4 +1,11 @@
-// test.gs
+
+function testui()
+{  
+  return UI.showStep1Grading();
+}
+
+
+// test.gas.gs
 // ===========
 
 TESTS_QA_SHEET_ID = "0AhRtIprIrwuzdGFtUTBpb1ljWGhQYnZHcWhHcGo1Z2c";
@@ -10,11 +17,11 @@ TESTS_SUBMISSION_TIME_START = 7;
 TESTS_SUBMISSION_TIME_END = 51;
 
 // runTests()
-// ----------
+// ---------- 
 
 // TODO_AJR - Ultimately we want one of these for each file/class.
 
-unitTestFunctions =
+unitTestFunctions = 
 [
   testQAGradesSheet,
   testDebugClass,
@@ -27,7 +34,7 @@ function runTests()
 
   var passed = true;
   var i = 0;
-
+  
   for (; i < unitTestFunctions.length; i++)
     {
       if (!unitTestFunctions[i]())
@@ -46,12 +53,12 @@ function runTests()
 // -----------------
 //
 // To test the grading feautures of Flubaroo the submission
-// sheet from the "Flubaroo QA Spreadsheet" need to be copied
-// into the submission sheet and the resulting grades sheet is
+// sheet from the "Flubaroo QA Spreadsheet" need to be copied 
+// into the submission sheet and the resulting grades sheet is 
 // compared against the manually checked results.
 //
 // See http://www.edcode.org/kb/flubaroo/testing-your-changes
-// for details although a newer answer sheet was needed - as
+// for details although a newer answer sheet was needed - as 
 // described by the ID above.
 //
 // When grading:
@@ -63,10 +70,15 @@ function runTests()
 //   All other questions: 1 point (except student identifiers)
 //   Row 3 (with Full Name of "Answer Key") is the answer key to be used in Step 2.
 //
-// The spreadsheet need to be set to the local timezone for the
+// The spreadsheet need to be set to the local timezone for the 
 // date comparisons to work (File>Spreadsheet settings...).
 
-function testQAGradesSheet()
+function x()
+{
+  Browser.msgBox(testQAGradesSheet());
+}
+
+function testQAGradesSheet() 
 {
   Debug.info("testQAGradesSheet()");
 
@@ -81,7 +93,7 @@ function testQAGradesSheet()
                               .getSheetByName(gbl_grades_sheet_name)
                               .getRange(1, 1, TESTS_NUM_ROWS, TESTS_NUM_COLS)
                               .getValues();
-
+          
   var expected;
   var actual;
 
@@ -89,32 +101,70 @@ function testQAGradesSheet()
   for (var i = 0, passed = true; i < TESTS_NUM_ROWS; i++)
     {
       for (var j = 0; j < TESTS_NUM_COLS; j++)
-        {
+        {        
           expected = answers[i][j];
           actual = results[i][j];
-
-          if (j === 0 &&
+         
+          if (j === 0 && 
               (i >= TESTS_SUBMISSION_TIME_START && i <= TESTS_SUBMISSION_TIME_END))
             {
-              // This is a submission times so ignore these as they
+              // This is a submission times so ignore these as they 
               // are always different - some time zone stuff going on.
               // TODO_AJR - Bring these tests back in.
               continue;
             }
-
+         
           if (actual !== expected)
             {
-              Debug.info("testQAGradesSheet() - TEST FAILED: " +
-                        "[" + (i + 1) + "]" +
+              Debug.info("testQAGradesSheet() - TEST FAILED: " + 
+                        "[" + (i + 1) + "]" + 
                         "[" + (j + 1) + "] - " + " " +
                         "Expected: " + expected + " " +
                         "Actual: " + actual);
-
+                        
               passed = false;
             }
-        }
+        }        
     }
-
+  
   return passed;
-
+  
 } // testQAGradesSheet()
+
+
+// DAA testing
+function testFormulaExpand()
+{
+  var rf = 'CELL("contents", INDIRECT(ADDRESS($A$1+ROW()-5, COLUMN(), 3, TRUE)))';
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var grades_sheet = getSheetWithGrades(ss);
+  
+  var ar = grades_sheet.getActiveRange();
+  
+  var formulas = ar.getFormulas();
+  
+  for (var i=0; i < formulas.length; i++)
+    {
+      var str = formulas[i][0];
+      str = str.replace("FLB_STUDENT_RESPONSE", rf);
+      
+      formulas[i][0] = str;
+    }
+  
+  ar.setFormulas(formulas);
+  
+}
+
+
+function testFormulaWrite()
+{
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("formulas");
+  
+  var r = sheet.getRange(1, 1, 1, 4);
+  
+  var v = [ ['0', 0, 'abc', "=if(EQ(1, 1), \"a\", \"b\")"] ];
+      
+  r.setValues(v);  
+}

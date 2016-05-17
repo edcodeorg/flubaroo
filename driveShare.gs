@@ -1,5 +1,5 @@
 // File: driveShare.gs
-// Description:
+// Description: 
 // This file contains functions needed for sharing grades in Google Drive.
 
 // createAssignmentFolder:
@@ -9,7 +9,7 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
 {
   var af = null;
   var mydrive_folder_id = mydrive_folder.getId();
-
+  
   // First locate the main "Flubaroo - Shared Grades" folder. If doesn't exist, create it.
   var drive_iter = DriveApp.getFoldersByName(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"));
   var main_folder = null;
@@ -21,10 +21,10 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
     {
       main_folder = DriveApp.createFolder(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"))
     }
-
+ 
   // Next locate the folder for this assignment in the main folder. If it doesn't exist, create it.
   drive_iter = main_folder.getFoldersByName(drive_share_assignment_folder_name);
-
+  
   if (drive_iter.hasNext())
     {
       // folder for this assignment already exists (previous grading)
@@ -37,7 +37,7 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
       Debug.info("Folder '" + drive_share_assignment_folder_name + "' didn't exist. Creating it.");
       af = DriveApp.createFolder(drive_share_assignment_folder_name);
     }
-
+  
   // move the folder for this assignment into the main folder. but first, remove it from "My Drive"
   drive_iter = af.getParents();
   while (drive_iter.hasNext())
@@ -48,9 +48,9 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
           break;
         }
     }
-
+  
   main_folder.addFolder(af);
-
+  
   return af;
 }
 
@@ -58,28 +58,28 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
 // Creates a document with a summary of grades for a specific graded submission, places it in the
 // teacher's folder for the assignment, and then shares it with the student ('Comment' access).
 // Returns the document as a Drive File object.
-function createGradeDocument(mydrive_folder, assignment_name, assignment_folder,
+function createGradeDocument(mydrive_folder, assignment_name, assignment_folder, 
                              instructor_message, show_questions, show_answers,
-                             points_possible, email_address,
+                             points_possible, email_address, 
                              has_manually_graded_ques, graded_subm)
 
 {
   var doc_title = langstr("FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE") + " " + email_address + ": " + assignment_name;
-
+      
   var new_doc = createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title);
-
+    
   Debug.info("New file has been created with title: " + doc_title);
   Debug.info("Now writing contents...");
-
+  
   writeContentsOfGradeDocument(new_doc,
                                assignment_name, instructor_message, show_questions, show_answers,
                                points_possible, has_manually_graded_ques, graded_subm, false);
-
+      
   // save and close the doc
   new_doc.saveAndClose();
-
+  
   Debug.info("Contents of new file have been written! Now sharing with student: " + email_address);
-
+  
   // share the document with the student
   var new_doc_drive_file = DriveApp.getFileById(new_doc.getId());
 
@@ -94,23 +94,23 @@ function createGradeDocument(mydrive_folder, assignment_name, assignment_folder,
    {
      'sendNotificationEmails': 'false'
    });
-
+    
   Debug.info("Shared successfully!");
-
+  
   return new_doc_drive_file;
 }
-
+  
 // startPrintableGradesDocument:
 // Creates an empty document that will hold the printable grades. Places it in the
 // teacher's folder for the assignment. Returns the document as a Drive File object.
 function startPrintableGradesDocument(mydrive_folder, assignment_name, assignment_folder)
 {
   var doc_title = langstr("FBL_STR_PRINT_GRADES_TITLE_PRE") + " " + assignment_name;
-
+  
   // Create new doc, and remove it from "My Drive" just after creation.
   // (less clutter in My Drive view this way).
   var new_doc = createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title);
-
+  
   return new_doc;
 }
 
@@ -119,7 +119,7 @@ function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
   // find if this doc already exists, and if so, remove it.
   Debug.info("searching for existing file: " + doc_title);
   var d_iter = assignment_folder.searchFiles("title = '" + doc_title + "'");
-
+    
   if (d_iter.hasNext())
     {
       // file exists in the assignment folder. remove it and trash it.
@@ -127,13 +127,13 @@ function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
       assignment_folder.removeFile(existing_doc);
       existing_doc.setTrashed(true);
     }
-
+  
   // Create new doc, and remove it from "My Drive" just after creation.
   // (less clutter in My Drive view this way).
   var new_doc = DocumentApp.create(doc_title);
-
+  
   var body = new_doc.getBody();
-
+  
   // put document in landscape mode with narrow margins and 10pt Arial font
   var page_height = 8.5; // inches
   var page_width = 11;   // inches
@@ -144,16 +144,16 @@ function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
   body.setMarginRight(in2Pts(margin));
   body.setMarginBottom(in2Pts(margin));
   body.setMarginLeft(in2Pts(margin));
-
+  
   var style = {};
   style[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
   style[DocumentApp.Attribute.FONT_SIZE] = 10;
-  body.setAttributes(style);
-
+  body.setAttributes(style); 
+  
   var new_doc_drive_file = DriveApp.getFileById(new_doc.getId());
-
+  
   mydrive_folder.removeFile(new_doc_drive_file);
-
+  
   assignment_folder.addFile(new_doc_drive_file);
 
   return new_doc;
@@ -170,7 +170,7 @@ function writeContentsOfGradeDocument(grades_doc,
 
   // write a header that includes the assignment name, student identifying information and timestamp
   var header = assignment_name + "\r\r";
-
+  
   for (var q = graded_subm.getFirstQuestion(); q != null; q = graded_subm.getNextQuestion(q))
     {
       if (q.getGradingOption() === GRADING_OPT_STUD_ID)
@@ -178,12 +178,12 @@ function writeContentsOfGradeDocument(grades_doc,
           header += q.getFullSubmissionText() + "\r";
         }
     }
-
+  
   header += graded_subm.getTimestamp();
-
+  
   var par;
   if (!append)
-    {
+    {      
       par = body.insertParagraph(0, header);
     }
   else
@@ -191,11 +191,11 @@ function writeContentsOfGradeDocument(grades_doc,
       par = body.appendParagraph(header);
     }
   par.setBold(true);
-
+  
   var style = {};
   style[DocumentApp.Attribute.FONT_SIZE] = 11;
   par.setAttributes(style);
-
+  
   var score_str = "";
   if (isInt(graded_subm.getScorePoints()))
     {
@@ -205,17 +205,17 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       score_str = floatToPrettyText(graded_subm.getScorePoints());
     }
-
+  
   // write out the students score. put it in a "box" (a 1x1 table).
-  var pts_string = langstr("FLB_STR_EMAIL_GRADES_YOUR_GRADE") + ": "
-                   + score_str + " / " + points_possible
+  var pts_string = langstr("FLB_STR_EMAIL_GRADES_YOUR_GRADE") + ": " 
+                   + score_str + " / " + points_possible 
                    + " (" + floatToPrettyText(graded_subm.getScorePercent() * 100) + "%)";
   par = body.appendParagraph(pts_string);
   par.setBold(true);
   style = {};
   style[DocumentApp.Attribute.FONT_SIZE] = 11;
   par.setAttributes(style);
-
+  
   if (instructor_message !== "")
     {
       par = body.appendParagraph('\r' + langstr("FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW"));
@@ -226,12 +226,12 @@ function writeContentsOfGradeDocument(grades_doc,
       par.setIndentFirstLine(in2Pts(0.5));
       par.setIndentStart(in2Pts(0.5));
     }
-
+     
   if (graded_subm.getStudentFeedback() !== "")
     {
       var student_feedback = graded_subm.getStudentFeedback();
       student_feedback = student_feedback.replace(/\n/g, "\r");
-
+        
       par = body.appendParagraph('\r' + langstr("FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW"));
       par.setBold(true);
       par = body.appendParagraph(student_feedback);
@@ -240,14 +240,14 @@ function writeContentsOfGradeDocument(grades_doc,
       par.setIndentFirstLine(in2Pts(0.5));
       par.setIndentStart(in2Pts(0.5));
     }
-
-  if (!show_questions)
+  
+  if (show_questions === 'false')
     {
       // we're done!
       return;
     }
 
-  par = body.appendParagraph("");
+  par = body.appendParagraph("");    
   par.setItalic(false);
 
   // create and append a table with all of the information about the submission.
@@ -268,27 +268,30 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       header_row.push(langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER"));
     }
-
+  
   var table_data = [ header_row ];
-
-  for (q = graded_subm.getFirstQuestion();
-       q != null;
+  
+  for (q = graded_subm.getFirstQuestion(); 
+       q != null; 
        q = graded_subm.getNextQuestion(q))
     {
       if (q.isTimestamp())
         {
           continue;
         }
-
+            
        var gopt = q.getGradingOption();
+            
+       if (gopt === GRADING_OPT_STUD_ID 
+           || gopt === GRADING_OPT_COPY_FOR_REFERENCE
+           || gopt === GRADING_OPT_IGNORE)
 
-       if (gopt === GRADING_OPT_STUD_ID)
          {
            continue;
          }
 
-       var ak_value = makePrettyAnswerKeyValue(q.getAnswerKeyText());
-
+       var ak_value = makePrettyAnswerKeyValue(q.getAnswerKeyText());      
+      
        var score = "";
        if (gopt === GRADING_OPT_SKIP)
          {
@@ -307,8 +310,8 @@ function writeContentsOfGradeDocument(grades_doc,
                else
                  {
                    score_str = floatToPrettyText(q.getGradedVal());
-                 }
-
+                 }     
+               
                score = score_str + " / " + getPointsWorth(q.getGradingOption());
              }
            else
@@ -317,7 +320,7 @@ function writeContentsOfGradeDocument(grades_doc,
                score = langstr("FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED");
              }
          }
-
+      
       var row_data = [];
 
       row_data.push(q.getFullQuestionText());
@@ -331,15 +334,15 @@ function writeContentsOfGradeDocument(grades_doc,
         {
           row_data.push(q.getGradedTeacherComment());
         }
-
+      
       if (graded_subm.getHelpTipsPresent())
         {
           row_data.push(q.getHelpTip());
         }
-
+      
       table_data.push(row_data);
-    }
-
+    }      
+ 
   var question_col_index = 0;
   var your_ans_col_index = 1;
   var correct_ans_col_index = 2; // if present
@@ -356,15 +359,15 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       help_tip_col_index--;
     }
-
-  var table_in_doc = body.appendTable(table_data);
+  
+  var table_in_doc = body.appendTable(table_data);  
   table_in_doc.getRow(0).setBold(true);
-
+  
   var additional_width = 0.0;
   if (show_answers === 'false')
     {
       additional_width += 0.4;
-    }
+    }   
   if (!has_manually_graded_ques)
     {
       additional_width += 0.4;
@@ -373,17 +376,17 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       additional_width += 0.58;
     }
-
+  
   style = {};
   style[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
   style[DocumentApp.Attribute.FONT_SIZE] = 9;
   table_in_doc.setAttributes(style);
-
-  table_in_doc.setColumnWidth(question_col_index, in2Pts(1.9 + additional_width));
-  table_in_doc.setColumnWidth(your_ans_col_index, in2Pts(1.75 + additional_width));
+  
+  table_in_doc.setColumnWidth(question_col_index, in2Pts(1.9 + additional_width)); 
+  table_in_doc.setColumnWidth(your_ans_col_index, in2Pts(1.75 + additional_width)); 
   if (show_answers === 'true')
     {
-      table_in_doc.setColumnWidth(correct_ans_col_index, in2Pts(1.75 + additional_width));
+      table_in_doc.setColumnWidth(correct_ans_col_index, in2Pts(1.75 + additional_width)); 
     }
 
   table_in_doc.setColumnWidth(pts_col_index, in2Pts(0.7));
@@ -392,21 +395,22 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       table_in_doc.setColumnWidth(mgr_teacher_comment_col_index, in2Pts(2.0));
     }
-
+  
   if (graded_subm.getHelpTipsPresent())
     {
-      table_in_doc.setColumnWidth(help_tip_col_index, in2Pts(1.75 + additional_width));
+      table_in_doc.setColumnWidth(help_tip_col_index, in2Pts(1.75 + additional_width)); 
     }
-
+  
   if (append)
     {
       body.appendPageBreak();
     }
 }
-
+     
 // in2Pts: Converts inches to points.
 function in2Pts(inches)
 {
   var ppi = 72; // points per inch
   return ppi * inches;
 }
+

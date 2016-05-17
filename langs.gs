@@ -2,7 +2,7 @@
 // Contains definitions for all localized strings in Flubaroo.
 // Any language specific string or message should be placed in this file in the format shown.
 
-// ** For instructions on how to add your own translation, see here:
+// ** For instructions on how to add your own translation, see here: 
 //         http://www.edcode.org/kb/flubaroo/translation-instructions
 
 // To do (June 7, 13): Strings in histogram are not translated. need to url encode translated versions in the code, first.
@@ -10,35 +10,35 @@
 gbl_lang_id = ""; // identifies the language if the UI.
 
 function setLanguage()
-{
+{   
    var ss = SpreadsheetApp.getActiveSpreadsheet();
    var app = UiApp.createApplication()
                       .setTitle(langstr("FLB_STR_MENU_SET_LANGUAGE"))
                       .setWidth("320").setHeight("100");
 
    var handler = app.createServerClickHandler('setLanguageHandler');
-
+  
    // create the main panel to hold all content in the UI for this step,
    var main_panel = app.createVerticalPanel()
                        .setStyleAttribute('border-spacing', '10px');
    app.add(main_panel);
-
+  
    ss.show(app);
-
+ 
    // create a pull-down box containing all the questions which identify a
-   // student.
+   // student. 
    var lbox_name = "language_select";
    var lbox = app.createListBox(false).setId(lbox_name).setName(lbox_name);
    var position = -1;
-
+   
    for (var item in langs)
      {
        lbox.addItem(langs[item]["FLB_LANG_IDENTIFIER"], item);
      }
-
-   lbox.setSelectedIndex(0);
-   handler.addCallbackElement(lbox);
-
+   
+   lbox.setSelectedIndex(0);    
+   handler.addCallbackElement(lbox);  
+  
     var hpanel = app.createHorizontalPanel()
        .setStyleAttribute('border-spacing', '6px')
     .add(app.createLabel(langstr("FLB_STR_MENU_SET_LANGUAGE") + ":"))
@@ -46,10 +46,10 @@ function setLanguage()
    main_panel.add(hpanel);
 
    var btnSubmit = app.createButton(langstr("FLB_STR_BUTTON_CONTINUE"),handler).setId('CONTINUE');
-
+  
    main_panel.add(btnSubmit);
-
-   ss.show(app);
+ 
+   ss.show(app);   
  }
 
 function setLanguageHandler(e)
@@ -58,17 +58,17 @@ function setLanguageHandler(e)
    var app = UiApp.getActiveApplication();
 
    var up = PropertiesService.getUserProperties();
-
+   
    var language_id = e.parameter.language_select;
-
+ 
    up.setProperty(USER_PROP_LANGUAGE_ID, language_id);
-
+   
    // reload menu
    createFlubarooMenu();
-
+   
    // rename Student Submissions sheet, if it was already set to an English name.
    //renameSubmissionsSheet();
-
+   
    app.close()
    return app;
  }
@@ -83,14 +83,14 @@ function langstr(id)
     {
       // not yet defined. look it up!
       gbl_lang_id = up.getProperty(USER_PROP_LANGUAGE_ID);
-
+      
       if (gbl_lang_id == "" || gbl_lang_id == null || gbl_lang_id === undefined)
         {
           // never explicitly set by user (via menu). set to default.
           gbl_lang_id = "en-us"; // default
         }
     }
-
+  
   // Return the specified string in the language selected. if not defined, return the English version.
   if (langs[gbl_lang_id][id])
     {
@@ -108,19 +108,22 @@ function langstr_en(id)
   return langs["en-us"][id];
 }
 
-// checkForMissingTranslations: Used for testing purposes only, before publishing a
+// checkForMissingTranslations: Used for testing purposes only, before publishing a 
 // new Add-on when a new language has been added.
 function listMissingTranslations()
-{
-  var new_doc = DocumentApp.create("Missing Flubaroo Translations");
-
+{    
+  var new_doc = DocumentApp.openById('19p5HgdIhwLZNn4ShcMATw4_pzIBl3PzD-L-CE4-AdSU');
+  var b = new_doc.getBody();
+  b.clear();
+  
   var body = new_doc.getBody();
-
+  
   var en_translations = langs['en-us']; // dont' change
-
+  
   var count = 0;
   for (var lang_to_check in langs)
-    {
+    { 
+      /*
       try
         {
           LanguageApp.translate("test translation", "en-us", lang_to_check);
@@ -129,28 +132,33 @@ function listMissingTranslations()
         {
           continue; // next lang
         }
-
+        */
+      
       body.appendParagraph("");
       body.appendHorizontalRule();
-      body.appendParagraph("language: " + lang_to_check + "\r\r");
+      var p = body.appendParagraph("language: " + lang_to_check + "\r\r");
       for (var en_str_to_check in en_translations)
         {
           if (!(en_str_to_check in langs[lang_to_check]))
             {
-              var line = '        "' + en_str_to_check + '": "' + LanguageApp.translate(langs['en-us'][en_str_to_check], "en-us", lang_to_check) + '",';
+              var line = '        "' + en_str_to_check + '": ""'; // + LanguageApp.translate(langs['en-us'][en_str_to_check], "en-us", lang_to_check) + '",';
               body.appendParagraph(line);
               body.appendParagraph("");
             }
         }
+
+      body.appendPageBreak();
     }
+  
+  new_doc.saveAndClose();
 }
 
 // langs:
-// Global collection of localized strings used in Flubaroo.
-langs = {
+// Global collection of localized strings used in Flubaroo. 
+langs = { 
 
     // START ENGLISH ////////////////////////////////////////////////////////////////////////////////
-
+  
     "en-us": {
         // Name to identify language in language selector
         "FLB_LANG_IDENTIFIER": "English",
@@ -160,16 +168,16 @@ langs = {
 
         // Grading option which tells Flubaroo to skip grading on a question
         "FLB_STR_GRADING_OPT_SKIP_GRADING" : "Skip Grading",
-
+      
         // Message shown when grading is complete (1 of 2).
         "FLB_STR_RESULTS_MSG1" : "A new worksheet called 'Grades' has been created. This worksheet contains a grade for each submission, and a summary of all grades at the top. The very last row shows the percent of students who got each question correct, with overall low-scoring questions highlighted in orange. Individual students who scored below passing will appear in red font.",
 
         // Message shown when grading is complete (2 of 2).
         "FLB_STR_RESULTS_MSG2" : "<b>IMPORTANT</b>: The 'Grades' sheet is not meant to be modified in any way, as this can interfere with emailing grades. If you need to modify this sheet, copy it and modify the copy.",
-
+        
         // Follows the Flubaroo tip, directing users to read the corresponding article.
         "FLB_STR_RESULTS_TIP_READ_ARTICLE" : "Click <a target=_blank href=\"%s\">here</a> to find out more.",
-
+        
         // Instructions shown on Step 1 of grading.
         "FBL_STR_STEP1_INSTR" : "Please select a grading option for each of the questions in the assignment. Flubaroo has done its best to guess the best option for you, but you should check the option for each question yourself.",
 
@@ -208,7 +216,7 @@ langs = {
 
         // "Question" label that appears over third column in Step 1 of grading.
         "FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Question",
-
+     
         // "Select" label that appears over radio button in first column of Step 2 of grading.
         "FLB_STR_GRADE_STEP2_LABEL_SELECT" : "Select",
 
@@ -218,10 +226,10 @@ langs = {
         // Label for "View Grades" button shown when grading completes.
         "FLB_STR_GRADE_BUTTON_VIEW_GRADES" : "View Grades",
 
-        // Used for "summary" text shown at top of Grades sheet, and in report.
+        // Used for "summary" text shown at top of Grades sheet, and in report. 
         "FLB_STR_GRADE_SUMMARY_TEXT_SUMMARY" : "Summary",
 
-        // Used for report and report email. Ex: "Report for 'My Test'"
+        // Used for report and report email. Ex: "Report for 'My Test'" 
         "FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR" : "Report for",
 
         // Points Possible. Used for text shown at top of Grades sheet, and in report.
@@ -259,7 +267,7 @@ langs = {
 
         // Notice that grades cannot be emailed because the user has exceeded their daily quota.
         "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo cannot email grades at this time because you have exceeded your daily quota of emails per day. This quota is set by Google for all Add-ons. Please try again later.",
-
+      
         // Message about how many grade emails *have* been sent. This message is preceeded by a number.
         // Example: "5 grades were successfully emailed"
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "grades were successfully shared",
@@ -268,9 +276,9 @@ langs = {
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "grades were not shared due to invalid or blank email addresses, because they have already had their grade shared with them, or because you have exceeded your daily email quota.",
 
         // Message about how many grade emails *have NOT* been sent.
-        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "No grades were shared because no valid email addresses were found, because all students have already had their grades shared with them, or because you have exceeded your daily email quota.",
-
-        // Subject of the email students receive. Followed by assignment name.
+        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "No grades were shared because no valid email addresses were found, because all students have already had their grades shared with them, or because you have exceeded your daily email quota.",     
+      
+        // Subject of the email students receive. Followed by assignment name. 
         // Example: Here is your grade for "Algebra Quiz #6"
         "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Here is your grade for",
 
@@ -414,33 +422,33 @@ langs = {
 
         // Menu title for "Advanced" sub-menu
         "FLB_STR_MENU_ADVANCED" : "Advanced",
-
+      
         // Menu title for Advanced > Options
         "FLB_STR_MENU_ADV_OPTIONS" : "Advanced Options",
-
+      
         // Menu option to choose the language.
         "FLB_STR_MENU_SET_LANGUAGE" : "Set Language",
 
         // Menu option to enable autograde.
         "FLB_STR_MENU_ENABLE_AUTO_GRADE" : "Enable Autograde",
-
+  
         // Menu option to disable autograde.
         "FLB_STR_MENU_DISABLE_AUTO_GRADE" : "Disable Autograde",
-
+      
         // Menu option to see reamining daily email quota
         "FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Check Email Quota",
-
+      
         // Menu option shown to enable Flubaroo in a sheet where it's never been used before
         "FLB_STR_MENU_ENABLE" : "Enable Flubaroo in this sheet",
-
+      
         // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
         "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo has been enabled for this sheet. You may now access it from the menu.",
-
+      
         // Word that appears on the "Continue" button in grading and emailing grades.
         "FLB_STR_BUTTON_CONTINUE" : "Continue",
 
         // Name of "Student Submissions" sheet
-        "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,
+        "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,     
 
         // Name of "Grades" sheet
         "FLB_STR_SHEETNAME_GRADES" : gbl_grades_sheet_name,
@@ -462,7 +470,7 @@ langs = {
 
         // For emailing grades, asks user if answer key should be sent...
         "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Include Answer Key: ", // note the space after ":"
-
+        
         // For emailing grades, appears before text box for optional instructor message.
         "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Message To Include (optional):",
 
@@ -483,191 +491,216 @@ langs = {
 
         // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
         "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "The report has been emailed to",
-
-        // Message to show the user in the top-left cell of the Grading sheet when grading starts.
-        "FLB_STR_GRADING_CELL_MESSAGE" : "Grading latest submissions...",
-
+      
+        // Message to show the user in the top-left cell of the Grading sheet when grading starts. 
+        "FLB_STR_GRADING_CELL_MESSAGE" : "Grading in progress...",
+      
         // Message that pops up to notify the user that autograde is on.
         "FLB_STR_AUTOGRADE_IS_ON" : "Autograde is enabled. Flubaroo is waiting for new submissions to grade. Don't make changes to any sheets until autograde is turned off.",
 
         // Message that pops up to notify the user that autograde is on.
         "FLB_STR_AUTOGRADE_IS_OFF" : "Autograde has been turned off.",
-
+      
         // Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
         "FLB_STR_AUTOGRADE_GRADE_RECENT" : "Some recent submissions have yet to be graded. Would you like Flubaroo to grade them first, before autograde is enabled?",
 
-        // Message to tell the user that autograde must gather grading and email settings before being turned on.
+        // Message to tell the user that autograde must gather grading and email settings before being turned on.      
         "FLB_STR_AUTOGRADE_SETUP" : "Before enabling autograde you must first setup your grading and email settings. Click 'OK' to proceed.",
-
+ 
         // Message asking user if they'd like to update their grading and email settings before turning on autograde.
         "FLB_STR_AUTOGRADE_UPDATE" : "Before enabling autograde, would you like to update your grading and email settings?",
-
+      
         // Title of Advanced Options window
         "FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Advanced Options",
 
         // Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
         "FLB_STR_ADV_OPTIONS_NOTICE" : "Only change these settings if you have read the correponding help articles",
-
-        // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.
+      
+        // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.      
         "FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Use my return address when emailing grades, rather than the noreply@ address.",
-
+     
         // Text for Advanced Options, describing option to send each student a link to edit their response.
         "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "Upon submission, auto-email the student a link to quickly edit their response.",
-
+      
         // Text for Advanced Options, describing option to change the 70% pass rate.
         "FLB_STR_ADV_OPTIONS_PASS_RATE" : "Percentage below which student info is highlighted in red: ",
 
-        // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.
+        // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.  
         "FLB_STR_EMAIL_QUOTA_MSG" : "You have this many emails left in your daily quota: ",
-
+     
         // "Points" label that appears over second column in Step 1 of grading.
         "FLB_STR_GRADE_STEP1_LABEL_POINTS" : "Points",
-
+      
         // Error message shown in Step 1 of grading if no fields selected with "Identifies Student"
         "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR" : "You must select at least one question that identifies a student before continuing.",
-
+       
         // Error message shown in Step 1 of grading if no fields selected that are gradeable
         "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR" : "You must select at least one question that is gradeable.",
-
+            
         // Error message shown in Step 2 of grading if no answer key selected.
         "FBL_STR_GRADE_STEP2_NO_AK_SELECTED" : "You must select an answer key before continuing.",
-
+      
         // Grading option which indicates Normal Grading (for display only in Step 1)
         "FLB_STR_GRADING_OPT_NORMAL_GRADING" : "Normal Grading",
 
         // Grading option which indicates Manual Grading (for display only in Step 1)
         "FLB_STR_GRADING_OPT_MANUAL_GRADING" : "Grade by Hand (New!)",
-
+      
         // Message shown if user tries to enable autograde when a question is set for Manual Grading.
         "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS" : "Autograde cannot be enabled because you have one or more questions that are set to be hand graded.",
-
+        
         // Message shown if some questions are identical. All questions must be unique for Flubaroo to grade properly.
         "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS" : "You selected one or more questions to be Graded by Hand. But grading cannot continue because \
                                                 some of those questions are not distinct from one another. For example, you may have two questions \
                                                 both titled \"Question\". Please modify the text of those \
                                                 questions in Row 1 so that they are unique (i.e. \"Question 1\" and \"Question 2\"), and then try grading again.",
-
+            
         // Label for manually graded questions in new style email summary of grades
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL" : "Hand Graded",
 
-        // Instructions that show-up in window when manual grading is selected.
+        // Instructions that show-up in window when manual grading is selected.      
         "FBL_STR_MANUAL_GRADING_INSTR" : "Use the controls below to assign grades by hand. Note that this will only work properly on \
                                           questions for which you selected \"Grade By Hand\" in Step 1 of grading.",
-
+      
         // Menu option to open window for manual (by hand) grading of questions.
         "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS" : "Grade Questions by Hand",
-
+      
         // Message shown in email to students if manually graded question wasn't assigned any points.
         "FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED" : "No points assigned",
-
+      
         // Header for the column in the table of scores in the email which lists the Help Tip (if provided)
         "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER" : "Comments made by your instructor",
 
-        // Title for the "Grade by Hand" window
+        // Title for the "Grade by Hand" window      
         "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE" : "Flubaroo - Grade Questions by Hand",
-
+      
         // Label next to the first step in the "Grade by Hand" window, which allows the teacher to select the student.
         "FLB_STR_MANUAL_GRADING_STEP1" : "1. Select Student:",
-
+      
         // Label next to the second step in the "Grade by Hand" window, which allows the teacher to select which question.
         "FLB_STR_MANUAL_GRADING_STEP2" : "2. Select Question:",
-
+      
         // Label next to the third step in the "Grade by Hand" window, which allows the teacher to read the submission.
-        "FLB_STR_MANUAL_GRADING_STEP3" : "3. Read Student's Submission:",
-
+        "FLB_STR_MANUAL_GRADING_STEP3" : "3. Read Student's Submission:", 
+      
         // Label next to the fourth step in the "Grade by Hand" window, which allows the teacher to enter notes.
-        "FLB_STR_MANUAL_GRADING_STEP4" : "4. Enter Notes for Student (sent in email):",
-
+        "FLB_STR_MANUAL_GRADING_STEP4" : "4. Enter Notes for Student (sent in email):", 
+      
         // Text for the link that shows the teacher's answer key / rubric in the "Grade by Hand" window.
-        "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "review answer key",
-
+        "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "review answer key", 
+      
         // Text for the button that is used to set the grade in the "Grade by Hand" window.
         "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE" : "Set Grade",
-
+      
         // Text that appears in the button while the grade is being applied in the "Grade by Hand" window.
         "FLB_STR_MANUAL_GRADING_BUTTON_WORKING" : "Working",
-
+      
         // Message that appears at the top of the "Grade by Hand" window after the grade has been successfully applied.
         "FLB_STR_MANUAL_GRADING_GRADE_APPLIED" : "Grade has been applied.",
-
+      
         // Message that appears at the top of the "Grade by Hand" window if the teacher doesn't enter a valid score in the box.
         "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE" : "Please enter a valid grade.",
-
+      
         // Message that appears at the top of the "Grade by Hand" window if an error occurs while setting the grade.
         "FLB_STR_MANUAL_GRADING_ERROR_OCCURED" : "An error occured.",
-
+      
         // Text for "Close X" link that allows the teacher to close the pop-up window that contains the answer key in the "Grade by Hand" window.
         "FLB_STR_MANUAL_GRADING_CLOSE_POPUP" : "Close",
-
+      
         // Message that appears if a teacher tries to disable autograde while grading is in process.
         "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW" : "Autograde is presently grading one or more new submissions, so cannot be disabled. Try again shortly.",
-
+      
         // Message that is shown to the user if grading cannot complete because no valid submissions were found in the submissions sheet (i.e. oinly blank rows).
         "FLB_STR_NO_VALID_SUBMISSIONS" : "A Grades sheet was not created because no valid submissions were found.",
-
+      
         // Title of the window that informs the user that their Grades sheet is corrupted (badly formed).
         "FLB_STR_INVALID_GRADE_SHEET_TITLE": "Corrupted Grades Sheet - Cannot Continue",
-
+      
         // Message shown in the "Corrupted Grades Sheet" window.
         "FLB_STR_INVALID_GRADES_SHEET" : "<p>Flubaroo cannot continue because your Grades sheet has been corrupted. Did you perhaps delete \
                                           rows, columns, or other data from the Grades sheet after grading last completed?</p>\
-                                          <p>See <a href=\"http://www.flubaroo.com/hc/corrupted-grades-sheet\">this article</a> for assistance.</p>",
-
+                                          <p>See <a href=\"http://www.flubaroo.com/hc/corrupted-grades-sheet\" target=\"_blank\">this article</a> for assistance.</p>",
+      
         // Short message that is included at the top of the Grades sheet in bold, instructing users not to modify the Grades sheet.
-        "FLB_STR_DO_NOT_DELETE_MSG" : "TO ENSURE FLUBAROO FUNCTIONS PROPERLY, DO NOT DELETE ROWS OR COLUMNS IN THIS SHEET",
-
+        "FLB_STR_DO_NOT_DELETE_MSG" : "TO ENSURE FLUBAROO FUNCTIONS PROPERLY, DO NOT DELETE ROWS OR COLUMNS IN THIS SHEET", 
+      
         // Label for the "Share Grades" window, which asks the user how they would like to share the grades (email, drive, or both).
         "FLB_STR_GRADES_SHARE_LABEL" : "Grade Sharing Method:",
-
+      
         // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via email.
         "FLB_STR_GRADES_SHARE_EMAIL" :  "Share via email (typical)", // always at index 0
-
+      
         // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via Google Drive.
         "FLB_STR_GRADES_SHARE_DRIVE" :  "Share via Google Drive (no email)",  // always at index 1
-
+        
         // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via both email and Drive.
         "FLB_STR_GRADES_SHARE_BOTH" :   "Share via both email and Drive", // always at index 2
-
+      
         // Name of the folder where shared and printed grades get put in the teacher's My Drive.
         "FLB_STR_DRIVE_SHARE_FOLDER_NAME" : "Flubaroo - Shared Grades",
-
+      
         // Text that begins the shared Google Document. Example: "Grade for dave@edcode.org - Exam #2"
         "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE" : "Grade for",
-
+      
         // Text/Link that is included in the emails to students if the "both" method of grade sharing was selected by the teacger.
         "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG" : "Click to view this grade report in Google Drive",
-
+      
         // Title for window that allows teachers to print the grades.
         "FLB_STR_PRINT_GRADES_WINDOW_TITLE" : "Flubaroo - Print Grades",
-
+      
         // Instructions for the "Print Grades" window
         "FLB_STR_PRINT_GRADES_INSTR" : "Flubaroo will create a single Google Document containing grades for all students which you can then print and distribute. \
                                         You may specify a message to include in each document, as well as whether to include the list of questions and/or the correct answers.",
-
+      
         // Title for the "Share Grades" window.
         "FLB_STR_SHARE_GRADES_WINDOW_TITLE" : "Flubaroo - Share Grades",
-
+      
         // Instructions for the "Share Grades" window.
         "FLB_STR_SHARE_GRADES_INSTR" : "Flubaroo can share with each student their grade via email, Google Drive, or both. Use the pull-down menu to select the question that asked students for their email address. If email addresses were not collected, then you will not be able to share grades.",
-
+      
         // Success message shown after grades have been printed. Followed by a link to the printable document.
         "FBL_STR_PRINT_GRADES_SUCCESS" : "A Google document has been created containing all student grades. Click the file name below to open it. Then print it and hand each student their print-out.",
-
+      
         // Text that begins the name of the Google Document containing the printable grades. Example: "Printable grades for: Exam #2"
         "FBL_STR_PRINT_GRADES_TITLE_PRE": "Printable grades for:",
-
+      
         // Menu option to share grades.
         "FLB_STR_MENU_SHARE_GRADES" : "Share Grades",
-
+      
         // Menu option to print grades.
         "FLB_STR_MENU_PRINT_GRADES" : "Print Grades",
-
+      
         // Grading option for "Extra Credit" on questions.
         "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Extra Credit",
-
-         // Text for Advanced Options, describing option to allow extra credit.
+     
+         // Text for Advanced Options, describing option to allow extra credit.      
         "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Allow extra credit when assigning points to questions",
+ 
+        // Text for Advanced Options, asking if user wants to show some additional options in the pull-down menu in Step 1 of grading.
+        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS" : "Show additional grading options in Step 1 of grading",
+      
+        // Notice for Grades sheet (shown at top) if Autograde is enabled. Tells the user that grading isn't only considering a student's most recent submission.
+        "FLB_STR_AUTOGRADE_NOT_SUMMARIZED" : "BECAUSE OF YOUR AUTOGRADE SETTINGS, THIS SHEET MAY CONTAIN MORE THAN ONE GRADED SUBMISSION PER STUDENT",
+      
+        // Text for Advanced Options, letting user decide if they want Autograde to grade only a student's most recent submission (if checked).
+        "FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY" : "Autograde will process only a student's most recent submission (see <a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\">this article</a>).",
+      
+        // Text for Advanced Options, asking user if when using the "Grade Questions by Hand" tool, if it should auto advance to the next question when
+        // a score is set (versus the next student).
+        "FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION" : "When using \"Grade Questions by Hand\", auto-advance to next question (instead of next student)",
+      
+        // Advanced menu option that will expand the special tokens in formulas written by the teacher in the Grades sheet.
+        "FLB_STR_MENU_EXPAND_FORMULAS" : "Expand Custom Formulas",
+       
+         // Grading option which ignores a question
+        "FLB_STR_GRADING_OPT_IGNORE" : "Ignore",
 
+         // Grading option which copies a column for reference to the Grades sheet
+        "FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE" : "Copy for Reference",
+      
+        // Message shown in sidebar for Flubaroo update announcements
+        "FLB_STR_EMAIL_ME_THIS_ANNOUCNEMENT" : "Email Me This Announcement",
+      
         // Flubaroo Tips, shown when grading completes.
         "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Tip #1:</b> Flubaroo can accept more than one correct answer.",
         "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Tip #2:</b> Flubaroo can grade numeric ranges for science and math assignments.",
@@ -679,7 +712,7 @@ langs = {
         "FLB_STR_TIP_MSG_NUMBER_8" : "<b>Flubaroo Tip #8:</b> In a GAFE school? Collect email addresses automatically!",
         "FLB_STR_TIP_MSG_NUMBER_9" : "<b>Flubaroo Tip #9:</b> Can't share grades via email? Share then via Google Drive!",
         "FLB_STR_TIP_MSG_NUMBER_10" : "<b>Flubaroo Tip #10:</b> Want a hard copy of grades for your students? Learn how to print them!",
-
+      
     },
     // END ENGLISH //////////////////////////////////////////////////////////////////////////////////
 
@@ -746,7 +779,7 @@ langs = {
 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Número de Envíos",
 
-        "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "¿Calificaciones enviadas?",
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "¿Calificaciones enviadas?", 
 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_STUDENT_FEEDBACK" : "Comentario para el alumno (Opcional)",
 
@@ -755,7 +788,7 @@ langs = {
         "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo puede enviar por correo a cada alumno su calificación, así como las respuestas correctas. Use el menú desplegable para seleccionar la pregunta que contiene la dirección de correo electrónico. Si las direcciones de correo electrónico no fueron enviadas por los alumnos, no será posible enviar las calificaciones.",
 
         "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo no puede enviar por correo electrónico los calificaciones en este momento, ya que ha superado su cuota diaria de correos electrónicos por día. Esta cuota es fijada por Google. Por favor, inténtelo de nuevo más tarde.",
-
+      
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : " informes de Calificaciones se enviaron corectamente",
 
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "envíos no se han realizado - dirección incorrecta,en blanco o ya fueron efectuados con anterioridad.",
@@ -881,7 +914,7 @@ langs = {
         "FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Enviarme el informe por correo",
 
         "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "El informe ha sido enviado a",
-
+      
         "FLB_STR_RESULTS_TIP_READ_ARTICLE": "Haga clic en <a target=_blank href=\"%s\"> aquí </a> para obtener más información.",
 
         "FLB_STR_MENU_ADVANCED": "Avanzado",
@@ -1026,8 +1059,8 @@ langs = {
 
     },
     // END SPANISH ////////////////////////////////////////////////////////////////////////////////
-
-    // START SWEDISH //////////////////////////////////////////////////////////////////////////////
+  
+    // START SWEDISH ////////////////////////////////////////////////////////////////////////////// 
     // Thanks to these contributors for the Swedish translation: Carl Holmberg
     "sv-se": {
         "FLB_LANG_IDENTIFIER": "Svenska (Swedish)",
@@ -1037,7 +1070,7 @@ langs = {
         "FLB_STR_GRADING_OPT_SKIP_GRADING" : "Poängsätt inte",
 
         "FLB_STR_RESULTS_MSG1" : "Poängsättning har avslutats! Ett nytt blad med namnet 'Poäng' har skapats. Detta blad innehåller poängen för varje elev och en sammanfattning av alla poäng överst. ** Observera: Det är inte tänkt att bladet 'Poäng' ska ändras på något sätt då detta kan störa epostandet av poängen. Om du behöver ändra i bladet så kan du kopiera bladet och ändra i kopian.",
-
+      
         "FLB_STR_RESULTS_MSG2" : "Tips: Sista raden visar hur många procent av eleverna som hade rätt svar och med frågor med generellt låga poäng markerade i orange. Dessutom markeras elever med mindre än 70% av poängen i rött.",
 
         "FBL_STR_STEP1_INSTR" : "Vänligen välj ett poängsättningsalternativ för varje fråga i uppgiften. Flubaroo har försökt gissa det bästa alternativet, men du bör själv kontrollera varje val.",
@@ -1099,12 +1132,12 @@ langs = {
         "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo kan eposta poängen till varje elev inklusive rätta svaren. Använd menyn för att välja frågan som motsvarar elevernas epostadress. Om epostadresser inte samlades in så kommer du inte kunna eposta poängen.",
 
         "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo kan inte maila betyg just nu eftersom den har överskridit sin dagliga kvot på e-postmeddelanden per dag. Denna kvot är satt av Google. Försök igen senare.",
-
+      
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "poäng epostades",
 
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "poäng epostades inte på grund av ogiltiga/saknade epostadresser eller att de redan fått sina poäng skickade.",
 
-        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Inga poäng skickades då giltiga epostadresser saknades eller för att eleverna redan fått sina poäng skickade.",
+        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Inga poäng skickades då giltiga epostadresser saknades eller för att eleverna redan fått sina poäng skickade.",     
 
         "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Här är dina poäng för",
 
@@ -1196,7 +1229,7 @@ langs = {
 
         "FLB_STR_BUTTON_CONTINUE" : "Fortsätt",
 
-        "FLB_STR_SHEETNAME_STUD_SUBM" : "Elevsvar",
+        "FLB_STR_SHEETNAME_STUD_SUBM" : "Elevsvar", 
 
         "FLB_STR_SHEETNAME_GRADES" : "Poäng",
 
@@ -1208,7 +1241,7 @@ langs = {
 
         "FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Fråga med epostadress: ",
 
-        "FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Bifoga lista med frågor och poäng: ",
+        "FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Bifoga lista med frågor och poäng: ", 
 
         "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Bifoga svarsnyckel: ",
 
@@ -1225,7 +1258,7 @@ langs = {
         "FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Eposta rapporten till mig",
 
         "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Rapporten har inte epostats till",
-
+      
         "FLB_STR_RESULTS_TIP_READ_ARTICLE": "Klicka <a target=_blank href=\"%s\"> här </a> ta reda på mer.",
 
         "FLB_STR_MENU_ADVANCED": "Avancerad",
@@ -1333,7 +1366,7 @@ langs = {
         "FLB_STR_GRADES_SHARE_DRIVE": "Dela via Google Drive (ingen e-post)",
 
         "FLB_STR_GRADES_SHARE_BOTH": "Tipsa en vän med både e-post och Drive",
-
+      
         "FLB_STR_DRIVE_SHARE_FOLDER_NAME" : "Flubaroo - Delade Poäng",
 
         "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE": "Poäng för",
@@ -1368,207 +1401,207 @@ langs = {
 
         "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Tips # 7: </ b> Du har frågor? Vi har svaren på våra frågor!",
     },
-    // END SWEDISH //////////////////////////////////////////////////////////////////////////////
+    // END SWEDISH ////////////////////////////////////////////////////////////////////////////// 
 
-    // START RUSSIAN ////////////////////////////////////////////////////////////////////////////
+    // START RUSSIAN //////////////////////////////////////////////////////////////////////////// 
     // Thanks to these contributors for the Russian translation: Lyudmila Rozhdestvenskaya, Alexandra Barysheva and Boris Yarmakhov
     "ru-ru": {
         "FLB_LANG_IDENTIFIER": "русский (Russian)",
-
+      
         "FLB_STR_GRADING_OPT_STUD_ID" : "Имя учащегося",
-
+ 
         "FLB_STR_GRADING_OPT_SKIP_GRADING" : "Не оценивать",
-
+ 
         "FLB_STR_RESULTS_MSG1" : "Оценивание завершено! В таблице был создан новый лист “Оценки”. В этом листе находятся оценки всех ответов, а также статистика по всем оценкам. ** Внимание: Лист 'Оценки' нельзя изменять, поскольку это может повлиять на отчеты, рассылаемые по e-mail Если вы хотите внести в него изменения, скопируйте его и работайте с копией",
-
+ 
         "FLB_STR_RESULTS_MSG2" : "Обратите внимание: В последней строке указан процент учащихся, ответивших на каждый вопрос правильно, Оранжевым цветом выделяются вопросы, на которые было получено более всего неправильных оценок. Имена учащихся, набравших менее 70% правильных ответов, выделяются красным шрифтом.",
-
+ 
         "FBL_STR_STEP1_INSTR" : "Пожалуйста, выберите вариант ответа для каждого вопроса в задании. Flobaroo разработан таким образом, чтобы работа с ним была бы максимально удобной, Однако, для каждого из заданий вам следует проверить настройки самостоятельно.",
-
+ 
         "FBL_STR_STEP2_INSTR" : "Пожалуйста, выберите те ответы в форме, которые должны использоваться, как ключи к ответам. Как правило, это будут ответы, предоставленные вами. Все остальные ответы будут оцениваться в соответствии с ключами, поэтому убедитесь, что вы выбрали правильный вариант.",
-
+ 
         "FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "В форме должно быть не менее 2-х ответов для выполнения процедуры оценивания. Пожалуйста, повторяйте процедуру каждый раз, когда новые ученики отправляют свои ответы в форму.",
-
+ 
         "FLB_STR_WAIT_INSTR1" : "Flubaroo оценивает ваше задание. Пожалуйста, подождите...",
-
+ 
         "FLB_STR_WAIT_INSTR2" : "Подождите, ваше задание оценивается. Это может занять минуту или две",
-
+ 
         "FLB_STR_REPLACE_GRADES_PROMPT" : "Это приведет к замене существующих оценок. Уверены, что хотите продолжить?",
-
+ 
         "FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - Подготовка к оцениванию",
-
+ 
         "FLB_STR_GRADING_WINDOW_TITLE" : "Flubaroo - задание оценивается",
-
+ 
         "FLB_STR_GRADING_COMPLETE_TITLE" : "Flubaroo - Оценивание выполнено!",
-
+ 
         "FLB_STR_GRADE_STEP1_WINDOW_TITLE" : "Flubaroo - Оценивание. Шаг 1. ",
-
+ 
         "FLB_STR_GRADE_STEP2_WINDOW_TITLE" : "Flubaroo - Оценивание. Шаг 2. ",
-
+ 
         "FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Настройки оценивания",
-
+ 
         "FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Вопросы",
-
+ 
         "FLB_STR_GRADE_STEP2_LABEL_SELECT" : "Выбрать",
-
+ 
         "FLB_STR_GRADE_STEP2_LABEL_SUBMISSION_TIME" : "Время отправки",
-
+ 
         "FLB_STR_GRADE_BUTTON_VIEW_GRADES" : "Посмотреть результаты",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_SUMMARY" : "Результаты",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR" : "Отчет по",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE" : "Максимальный балл",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS" : "Средний балл",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Количество ответов",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Количество ответов с низким результатом",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_TOTAL_POINTS" : "Баллы",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_PERCENT" : "Проценты",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Количество попыток",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "Письмо отправлено?",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_STUDENT_FEEDBACK" : "Обратная связь (по выбору)",
-
+ 
         "FLB_STR_EMAIL_GRADES_WINDOW_TITLE" : "Flubaroo - Послать результаты по e-mail",
-
+ 
         "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo может отправить каждому учащемуся его баллы, а также правильные ответы. Используйте выпадающее меню для выбора вопроса, запрашивающего электронные адреса учеников. Если адреса электронной почты не были собраны, то вы не сможете отправить оценки по электронной почте. ",
 
         "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo не может сорта по электронной почте в это время, потому что он превысил свои ежедневные квоты писем в день. Эта квота устанавливается Google. Пожалуйста, повторите попытку позже.",
-
+      
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "оценок  успешно отправлены",
-
+ 
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "оценки не были отправлены из-за недействительных или пропущенных адресов электронной почты, или т.к. ученики уже получили свои результаты по электронной почте. ",
-
+ 
         "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Результаты не были отправлены по электронной почте, т.к. не были найдены действительные адреса электронной почты или т.к. ученики уже получили свои результаты по электронной почте.",
-
+ 
         "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Вот ваша оценка за",
-
+ 
         "FLB_STR_EMAIL_GRADES_EMAIL_BODY_START" : "Это письмо содержит ваши результаты за",
-
+ 
         "FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG" : "Не отвечайте на это письмо.",
-
+ 
         "FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Ваша оценка",
-
+ 
         "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Ниже находится сообщение от вашего преподавателя, отправленное всему классу",
-
+ 
         "FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW" : "Комментарий преподавателя лично для вас",
-
+ 
         "FLB_STR_EMAIL_GRADES_SUBMISSION_SUMMARY" : "Сводка результатов по выполненному заданию",
-
+ 
         "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE" : "Ниже ваш балл за каждый вопрос",
-
+ 
         "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "Ниже ваш балл за каждый вопрос вместе с правильными ответами",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER" : "Вопросы",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER" : "Ваш ответ",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER" : "Правильный ответ",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_SCORE_HEADER" : "Ваш результат",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS_POSSIBLE_HEADER" : "Максимально возможный балл",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER" : "Подсказка для вопроса ",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS" : "балл(ы) ",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT" : "Верно",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT" : "Неверно",
-
+ 
         "FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Это письмо сгенерировано с помощью приложения Flubaroo, бесплатного инструмента для оценивания.",
-
+ 
         "FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Посетите www.flubaroo.com.",
-
+ 
         "FLB_STR_EMAIL_RECORD_EMAIL_SUBJECT" : "Сообщение об отправке результатов за",
-
+ 
         "FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME" : "Название задания",
-
+ 
         "FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT" : "Количество отправленных писем",
-
+ 
         "FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM" : "Количество оцененных заданий",
-
+ 
         "FLB_STR_EMAIL_RECORD_AVERAGE_SCORE" : "Средний результат (балл)",
-
+ 
         "FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE" : "Максимально возможный результат (балл)",
-
+ 
         "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED" : "Предоставлен ли ключ с правильными ответами?",
-
+ 
         "FLB_STR_EMAIL_RECORD_ANSWER_KEY_NO" : "Нет",
-
+ 
         "FLB_STR_EMAIL_RECORD_ANSWER_KEY_YES" : "Да",
-
+ 
         "FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE" : "Вы также  включили это сообщение",
-
+ 
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo - бесплатный  инструмент, позволяющий учителю быстро оценить ответы	учеников и проанализировать результаты",
-
+ 
         "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Чтобы узнать больше, посетите наш сайт www.flubaroo.com.",
-
+ 
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo не может определить, какой лист содержит ответы учеников. Выберите этот лист и переименуйте его в:",
-
+ 
         "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo не может определить, какой лист содержит результаты оценивания. Выполните процедуру оценивания  или выберите этот лист и переименуйте его в: ",
-
+ 
         "FLB_STR_MENU_GRADE_ASSIGNMENT" : "Произвести оценивание",
-
+ 
         "FLB_STR_MENU_REGRADE_ASSIGNMENT" : "Повторить оценивание",
-
+ 
         "FLB_STR_MENU_EMAIL_GRADES" : "Отправить результаты по e-mail",
-
+ 
         "FLB_STR_MENU_HIDE_FEEDBACK" : "Скрыть комментарии учащихся",
-
+ 
         "FLB_STR_MENU_EDIT_FEEDBACK" : "Редактировать комментарии учащихся",
-
+ 
         "FLB_STR_MENU_HIDE_HELP_TIPS" : "Скрыть подсказки",
-
+ 
         "FLB_STR_MENU_EDIT_HELP_TIPS" : "Редактировать подсказки",
-
+ 
         "FLB_STR_MENU_VIEW_REPORT" : "Посмотреть результаты",
-
+ 
         "FLB_STR_MENU_ABOUT" : "О программе Flubaroo",
-
+ 
         "FLB_STR_MENU_SET_LANGUAGE" : "Выбрать язык",
-
+ 
         "FLB_STR_BUTTON_CONTINUE" : "Продолжить",
-
+ 
         "FLB_STR_SHEETNAME_STUD_SUBM" : "Ответы",
-
+ 
         "FLB_STR_SHEETNAME_GRADES" : "Оценки",
-
+ 
         "FLB_STR_NOT_GRADED" : "Не оценено",
-
+ 
         "FLB_STR_NEW_VERSION_NOTICE" : "Вы установили новую версию Flubaroo! Посетите flubaroo.com/blog и познакомьтесь с последними новостями.",
-
+ 
         "FLB_STR_NOTIFICATION" : "Оповещение Flubaroo: ",
-
+ 
         "FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Ваш адрес e-mail: ",
-
+ 
         "FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Добавить список вопросов и результатов: ",
-
+ 
         "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Добавить ключи ответов: ",
-
+ 
         "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Добавить сообщение (по выбору)",
-
+ 
         "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Отчет",
-
+ 
         "FLB_STR_VIEW_REPORT_HISTOGRAM_CHART_TITLE" : "Гистограмма оценок",
-
+ 
         "FLB_STR_VIEW_REPORT_HISTOGRAM_Y-AXIS_TITLE" : "Ответы учеников",
-
+ 
         "FLB_STR_VIEW_REPORT_HISTOGRAM_X-AXIS_TITLE" : "Набранные баллы",
-
+ 
         "FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Отправить мне Отчет",
-
+ 
         "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Отчет был отправлен на адрес",
-
+      
         "FLB_STR_RESULTS_TIP_READ_ARTICLE": "Нажмите <a target=_blank href=\"%s\"> здесь </a>, чтобы узнать больше.",
 
         "FLB_STR_MENU_ADVANCED": "Передовой",
@@ -1709,209 +1742,209 @@ langs = {
 
         "FLB_STR_TIP_MSG_NUMBER_6": "<B> Flubaroo Совет # 6: </ B> Хотите, чтобы ваш задания оцениваются автоматически?",
 
-        "FLB_STR_TIP_MSG_NUMBER_7": "<B> Flubaroo Совет # 7: </ B> Ты есть вопросы? Мы получили ответы на часто задаваемые вопросы наших!",
+        "FLB_STR_TIP_MSG_NUMBER_7": "<B> Flubaroo Совет # 7: </ B> Ты есть вопросы? Мы получили ответы на часто задаваемые вопросы наших!",      
     },
-    // END RUSSIAN //////////////////////////////////////////////////////////////////////////////
+    // END RUSSIAN //////////////////////////////////////////////////////////////////////////////   
 
-    // START DUTCH //////////////////////////////////////////////////////////////////////////////
+    // START DUTCH ////////////////////////////////////////////////////////////////////////////// 
     // Thanks to these contributors for the Dutch translation: Ingmar Remmelzwaal
     "nl-nl": {
         "FLB_LANG_IDENTIFIER": "Nederlands (Dutch)",
-
+      
         "FLB_STR_GRADING_OPT_STUD_ID" : "Identificeert student",
-
+ 
         "FLB_STR_GRADING_OPT_SKIP_GRADING" : "Beoordeling overslaan",
 
         "FLB_STR_RESULTS_MSG1" : "Het beoordelen is afgerond! Een nieuw werkblad met de naam 'Beoordelingen' is gemaakt. Dit werkblad bevat de beoordeling van iedere inzending en bovenaan staat een samenvatting van alle beoordelingen. ** Opmerking: Het is niet de bedoeling dat het blad 'Beoordelingen' handmatig gewijzigd wordt. Dit kan het e-mailen van de beoordelingen verstoren. Als je het blad wilt wijzigen, maak een kopie en wijzig deze.",
-
+ 
         "FLB_STR_RESULTS_MSG2" : "Tips: De allerlaatste rij laat het percentage zien van studenten die iedere vraag goed hebben, vragen die over de gehele linie laag scoren zijn oranje. Individuele studenten die lager dan 70% scoren worden in een rood lettertype weergegeven.",
-
+ 
         "FBL_STR_STEP1_INSTR" : "Selecteer een beoordelingsoptie voor iedere vraag in de toets. Flubaroo heeft geprobeerd om de beste optie voor jou te raden, maar je moet dit voor iedere optie zelf nagaan.",
-
+ 
         "FBL_STR_STEP2_INSTR" : "Selecteer welke inzending gebruikt moet worden als de oplossing. Meestal is dit de inzending die door jou gemaakt is. Alle andere inzendingen zullen beoordeeld worden aan de hand van deze oplossing. Dus let op dat je de juiste selecteert.",
-
+ 
         "FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "Er moeten op zijn minst 2 inzendingen zijn om een beoordeling te maken. Probeer het opnieuw als er meer studenten hun antwoorden hebben verstuurd.",
-
+ 
         "FLB_STR_WAIT_INSTR1" : "Flubaroo voert je opdracht uit. Even geduld...",
-
+ 
         "FLB_STR_WAIT_INSTR2" : "Wacht even totdat je toets is beoordeeld. Dit kan één tot twee minuten duren.",
-
+ 
         "FLB_STR_REPLACE_GRADES_PROMPT" : "Dit zal je bestaande beoordelingen vervangen. Weet je zeker dat je door wilt gaan?",
-
+ 
         "FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - Beoordeling voorbereiden",
-
+ 
         "FLB_STR_GRADING_WINDOW_TITLE" : "Flubaroo - Toets beoordelen",
-
+ 
         "FLB_STR_GRADING_COMPLETE_TITLE" : "Flubaroo - Beoordeling afgerond",
-
+ 
         "FLB_STR_GRADE_STEP1_WINDOW_TITLE" : "Flubaroo - Beoordeling STAP 1",
-
+ 
         "FLB_STR_GRADE_STEP2_WINDOW_TITLE" : "Flubaroo - Beoordeling STAP 2",
-
+ 
         "FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Beoordelingsoptie",
-
+ 
         "FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Vraag",
-
+ 
         "FLB_STR_GRADE_STEP2_LABEL_SELECT" : "Selecteer",
-
+ 
         "FLB_STR_GRADE_STEP2_LABEL_SUBMISSION_TIME" : "Inzendtijd",
-
+ 
         "FLB_STR_GRADE_BUTTON_VIEW_GRADES" : "Bekijk beoordelingen",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_SUMMARY" : "Resultaten",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR" : "Rapportage voor",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE" : "Maximum te behalen punten",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS" : "Gemiddeld aantal punten",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Aantal inzendingen",
-
+ 
         "FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Aantal laag scorende vragen",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_TOTAL_POINTS" : "Puntentotaal",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_PERCENT" : "Percentage",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Aantal keer verstuurd",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "Beoordeling verstuurd",
-
+ 
         "FLB_STR_GRADES_SHEET_COLUMN_NAME_STUDENT_FEEDBACK" : "Feedback voor student (Optioneel)",
-
+ 
         "FLB_STR_EMAIL_GRADES_WINDOW_TITLE" : "Flubaroo - Verstuur beoordelingen",
-
+ 
         "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo kan iedere student een e-mail sturen met de beoordeling en eventueel met de goede antwoorden. Gebruik het keuzemenu om de vraag te selecteren dat de studenten naar hun e-mailadres vroeg. Als er geen e-mailadressen zijn verzameld, kun je geen beoordelingen versturen.",
-
+      
         "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo kan niet rangen e-mail op dit moment omdat het zijn dagelijkse quotum van e-mails per dag is overschreden. Dit contingent wordt door Google ingesteld. Probeer het later opnieuw.",
-
+      
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : " beoordelingen werden succesvol verstuurd",
-
+ 
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : " beoordelingen zijn niet verstuurd omdat het geen of een ongeldig e-mailadres bevat",
-
+ 
         "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Er zijn geen beoordelingen verstuurd omdat er geen geldig e-mailadres werd gevonden of omdat alle studenten al hun beoordeling hebben ontvangen.",
-
+ 
         "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Dit is je beoordeling voor",
-
+ 
         "FLB_STR_EMAIL_GRADES_EMAIL_BODY_START" : "Deze e-mail bevat je beoordeling voor",
-
+ 
         "FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG" : "Beantwoord deze e-mail niet!",
-
+ 
         "FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Je beoordeling",
-
+ 
         "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Hieronder staat een bericht dat je docent naar de hele klas heeft gestuurd",
-
+ 
         "FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW" : "Jouw docent heeft de volgende feedback voor jou",
-
+ 
         "FLB_STR_EMAIL_GRADES_SUBMISSION_SUMMARY" : "Samenvatting van je inzending",
-
+ 
         "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE" : "Hieronder staat voor iedere vraag je score",
-
+ 
         "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "Hieronder staat je score voor iedere vraag met daarbij het goede antwoord",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER" : "Vraag",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER" : "Jouw antwoord",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER" : "Het juiste antwoord",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_SCORE_HEADER" : "Jouw score",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS_POSSIBLE_HEADER" : "Maximum te behalen punten",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER" : "Hulp bij deze vraag",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS" : "punt(en)",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT" : "Goed",
-
+ 
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT" : "Fout",
-
+ 
         "FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Deze e-mail werd samengesteld door Flubaroo, een gratis hulpmiddel voor het automatisch nakijken en beoordelen van toetsen",
-
+ 
         "FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Bezoek flubaroo.com",
-
+ 
         "FLB_STR_EMAIL_RECORD_EMAIL_SUBJECT" : "Overzicht van verstuurde beoordelingen voor",
-
+ 
         "FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME" : "Naam van toets",
-
+ 
         "FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT" : "Aantal verzonden e-mails",
-
+ 
         "FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM" : "Aantal beoordeelde inzendingen",
-
+ 
         "FLB_STR_EMAIL_RECORD_AVERAGE_SCORE" : "Gemiddelde score (punten)",
-
+ 
         "FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE" : "Maximum te behalen punten",
-
+ 
         "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED" : "Antwoorden verstrekt",
-
+ 
         "FLB_STR_EMAIL_RECORD_ANSWER_KEY_NO" : "Nee",
-
+ 
         "FLB_STR_EMAIL_RECORD_ANSWER_KEY_YES" : "Ja",
-
+ 
         "FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE" : "Je hebt ook dit bericht bijgevoegd",
-
+ 
         "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo is een gratis en tijdbesparend hulpmiddel dat docenten in staat stelt om snel meerkeuzetoetsen te beoordelen en te analyseren.",
-
+ 
         "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Wil je meer weten, bezoek www.flubaroo.com.",
-
+ 
         "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo kon niet vaststellen welk blad de inzendingen van de studenten bevat. Zoek het blad op en hernoem dit naar: ",
-
+ 
         "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo kon niet vaststellen welk blad de beoordelingen bevat. Beoordeel eerst de toets of zoek het blad op en hernoem dit naar: ",
-
+ 
         "FLB_STR_MENU_GRADE_ASSIGNMENT" : "Beoordeel toets",
-
+ 
         "FLB_STR_MENU_REGRADE_ASSIGNMENT" : "Beoordeel toets opnieuw",
-
+ 
         "FLB_STR_MENU_EMAIL_GRADES" : "E-mail de beoordelingen",
-
+ 
         "FLB_STR_MENU_HIDE_FEEDBACK" : "Verberg feedback voor student",
-
+ 
         "FLB_STR_MENU_EDIT_FEEDBACK" : "Bewerk feedback voor student",
 
         "FLB_STR_MENU_HIDE_HELP_TIPS" : "Verberg helptips",
 
-        "FLB_STR_MENU_EDIT_HELP_TIPS" : "Bewerk helptips",
-
+        "FLB_STR_MENU_EDIT_HELP_TIPS" : "Bewerk helptips",         
+      
         "FLB_STR_MENU_VIEW_REPORT" : "Bekijk overzicht",
-
+ 
         "FLB_STR_MENU_ABOUT" : "Over Flubaroo",
-
+ 
         "FLB_STR_MENU_SET_LANGUAGE" : "Selecteer taal",
-
+ 
         "FLB_STR_BUTTON_CONTINUE" : "Ga verder",
-
+ 
         "FLB_STR_SHEETNAME_STUD_SUBM" : "Antwoorden",
-
+ 
         "FLB_STR_SHEETNAME_GRADES" : "Beoordelingen",
-
+ 
         "FLB_STR_NOT_GRADED" : "Niet beoordeeld",
-
+ 
         "FLB_STR_NEW_VERSION_NOTICE" : "Je hebt een nieuwe versie van Flubaroo geïnstalleerd! Lees op flubaroo.com/blog wat nieuw is.",
-
+ 
         "FLB_STR_NOTIFICATION" : "Flubaroo melding",
-
+ 
         "FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Vraag naar e-mailadres: ",
-
+ 
         "FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Voeg lijst toe van vragen en scores: ",
-
+ 
         "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Voeg juiste antwoorden toe: ",
-
+ 
         "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Voeg bericht aan e-mail toe (optioneel): ",
-
+ 
         "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Beoordelingsoverzicht",
-
+ 
         "FLB_STR_VIEW_REPORT_HISTOGRAM_CHART_TITLE" : "Grafiek met verdeling van scores",
-
+ 
         "FLB_STR_VIEW_REPORT_HISTOGRAM_Y-AXIS_TITLE" : "Inzendingen",
-
+ 
         "FLB_STR_VIEW_REPORT_HISTOGRAM_X-AXIS_TITLE" : "Behaalde punten",
-
+ 
         "FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Stuur mij het overzicht",
-
+ 
         "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Het overzicht is gestuurd naar",
-
+      
         "FLB_STR_RESULTS_TIP_READ_ARTICLE": "Klik <a target=_blank href=\"%s\"> hier </a> om meer te weten te komen.",
 
         "FLB_STR_MENU_ADVANCED": "Gevorderd",
@@ -2037,7 +2070,7 @@ langs = {
         "FBL_STR_PRINT_GRADES_SUCCESS": "Een Google-document is gemaakt met alle cijfers van studenten. Klik op de naam van het bestand om het te openen. Dan af te drukken en geef elke student hun print-out.",
 
         "FLB_STR_MENU_SHARE_GRADES": "Delen de Beoordelingen",
-
+      
         "FLB_STR_MENU_PRINT_GRADES": "Printen de Beoordelingen",
 
         "FLB_STR_TIP_MSG_NUMBER_1": "<b> Flubaroo Tip # 1: </ b> Flubaroo kan meer dan één juist antwoord te aanvaarden.",
@@ -2054,10 +2087,10 @@ langs = {
 
         "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Tip # 7: </ b> U hebt nog vragen? We hebben de antwoorden in onze FAQ!",
     },
-    // END DUTCH //////////////////////////////////////////////////////////////////////////////
-
+    // END DUTCH //////////////////////////////////////////////////////////////////////////////  
+ 
     // START FRENCH (FRANCE) //////////////////////////////////////////////////////////////////
-    // Thanks to these contributors for the French translation: Sylvain de France
+    // Thanks to these contributors for the French translation: Sylvain de France, Stéphane Métral
    "fr-fr": {
        // Name to identify language in language selector
        "FLB_LANG_IDENTIFIER": "Français (French)",
@@ -2069,28 +2102,28 @@ langs = {
        "FLB_STR_GRADING_OPT_SKIP_GRADING" : "Non évalué",
 
        // Message shown when grading is complete (1 of 2).
-       "FLB_STR_RESULTS_MSG1" : "Notation terminée! Une nouvelle feuille de calcul appelée « Notation » a été créée. Cette feuille de calcul contient une note pour chaque formulaire reçuet résume l'ensemble des résultats.** Note: la fiche Notation n'est pas destinée à être modifiée en aucune façon, cela pourrait interférer sur le contenu des mails. Si vous avez besoin de modifier la fiche, la copier et modifier la copie.",
+       "FLB_STR_RESULTS_MSG1" : "Notation terminée! Une nouvelle feuille de calcul appelée « Notation » a été créée. Cette feuille de calcul contient une note pour chaque formulaire reçu et résume l'ensemble des résultats.** Note: la fiche Notations n'est pas destinée à être modifiée en aucune façon, cela pourrait interférer sur le contenu des mails. Si vous avez besoin de modifier la fiche : la copier et modifier la copie.",
 
        // Message shown when grading is complete (2 of 2).
-       "FLB_STR_RESULTS_MSG2" : "Information: La dernière ligne montre le pourcentage de bonnes réponses obtenu par chaque étudiant, les questions ayant obtenus un faible score sont en surbrillance orange. Aussi, les étudiants qui on en dessous de 70% apparaissent en rouge",
+       "FLB_STR_RESULTS_MSG2" : "Information: la dernière ligne montre le pourcentage de bonnes réponses obtenu par chaque étudiant, les questions ayant obtenu un faible score sont en surbrillance orange. Aussi, les étudiants qui obtiennent moins de 70% apparaissent en rouge",
 
        // Instructions shown on Step 1 of grading.
-       "FBL_STR_STEP1_INSTR" : "S'il vous plaît, sélectionner une option de classement pour chacune des question. Flubaroo à fait de son mieux pour deviner la meilleure option, mais vous devez vérifier vous-même ",
+       "FBL_STR_STEP1_INSTR" : "S'il vous plaît, sélectionner une option de classement pour chacune des questions. Flubaroo à fait de son mieux pour deviner la meilleure option, mais vous devez vérifier vous-même ",
 
        // Instructions shown on Step 2 of grading.
-       "FBL_STR_STEP2_INSTR" : "Merci de sélectionner le réponse qui sera utilisée comme corrigé. Généralement il s'agit d'un formulaire envoyé par vous même avec les réponses attendus. L'ensemble des réponses seront corrigées par rapport à celui-ci, assurez-vous de choisir celui qui convient.",
+       "FBL_STR_STEP2_INSTR" : "Merci de sélectionner la réponse qui sera utilisée comme corrigé. Généralement il s'agit d'un formulaire envoyé par vous-même avec les réponses attendues. L'ensemble des réponses seront corrigées par rapport à ce formulaire, assurez-vous de choisir celui qui convient.",
 
        // Message shown if not enough submissions to perform grading.
-       "FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "Important: il doit y avoir au moins 2 soumissions pour effectuer un classement. S'il vous plaît essayer de nouveau quand plus d'élèves  auront soumis leurs réponses.",
+       "FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "Important: il doit y avoir au moins 2 soumissions pour effectuer un classement. S'il-vous-plaît essayer de nouveau quand plus d'élèves  auront soumis leurs réponses.",
 
        // Please wait" message first shown when Flubaroo is first examining assignment.
        "FLB_STR_WAIT_INSTR1" : "Flubaroo examine votre soumission. Merci de patienter ...",
 
        // Please wait" message shown after Step 1 and Step 2, while grading is happening.
-       "FLB_STR_WAIT_INSTR2" :  "S'il vous plaît patienter pendant que votre soumission est noté. Cela peut prendre quelques minutes pour terminer.",
+       "FLB_STR_WAIT_INSTR2" :  "S'il vous plaît patienter pendant que votre soumission est notée. Cela peut prendre quelques minutes.",
 
        // Asks user if they are sure they want to re-grade, if Grades sheet exists.
-       "FLB_STR_REPLACE_GRADES_PROMPT" : "La notation existante va être remplacée. Etes-vous sûr vouloir continuer?",
+       "FLB_STR_REPLACE_GRADES_PROMPT" : "La notation existante va être remplacée. Etes-vous sûr de vouloir continuer?",
 
        // Window title for "Preparing to grade" window
        "FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - Préparation de la Notation",
@@ -2135,10 +2168,10 @@ langs = {
        "FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS" : "Moyenne",
 
        // Counted Submissions. Used for text shown at top of Grades sheet, and in report.
-       "FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Nombre de soumission",
+       "FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Nombre de soumissions",
 
        // Number of Low Scoring Questions. Used for text shown at top of Grades sheet, and in report.
-       "FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Question avec une notation infèrieure à 70%",
+       "FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Question avec une notation inférieure à 70%",
 
        // Name of column in Grades sheet that has total points scored.
        "FLB_STR_GRADES_SHEET_COLUMN_NAME_TOTAL_POINTS" : "Total Points",
@@ -2147,7 +2180,7 @@ langs = {
        "FLB_STR_GRADES_SHEET_COLUMN_NAME_PERCENT" : "Pourcentage",
 
        // Name of column in Grades sheet that has number of times student made a submission.
-       "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Nombre de soumission",
+       "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Nombre de soumissions",
 
        // Name of column in Grades sheet that indicates if grade was already emailed out.
        "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "Notations envoyées",
@@ -2159,21 +2192,21 @@ langs = {
        "FLB_STR_EMAIL_GRADES_WINDOW_TITLE" : "Flubaroo - Courriel de Notation",
 
        // Instructions on how to email grades
-       "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo peut envoye rà chaque élèves de la classe les réponses correctes. Utilisez le menu déroulant pour sélectionner la question à envoyer aux élèves par Courriel. Si les adresses n'ont pas été recueillis, alors vous ne serez pas en mesure d'envoyer correctement les courriels.",
+       "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo peut envoyer à chaque élève de la classe les réponses correctes. Utiliser le menu déroulant pour sélectionner la question qui portait sur l’adresse de courriel des étudiants. Si les adresses n'ont pas été recueillies, alors vous ne serez pas en mesure d'envoyer correctement les courriels.",
 
        // Notice that grades cannot be emailed because the user has exceeded their daily quota.
-       "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaro ne peut pas envoyer par courriell les scores en ce moment parce que vous avez dépassé votre quota quotidien de courriels par jour. Ce quota est fixé par Google  pour tous les Add -ons. Merci d’essayer ultérieurement.",
-
+       "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo ne peut pas envoyer par courriel les scores en ce moment parce que vous avez dépassé votre quota quotidien de courriels par jour. Ce quota est fixé par Google  pour tous les Add-ons. Merci d’essayer ultérieurement.",
+    
        // Message about how many grade emails *have* been sent. This message is preceeded by a number.
        // Example: "5 grades were successfully emailed"
-       "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "Les Notations ont été envoyées correctements",
+       "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : " notations ont été envoyées correctement",
 
        // Message about how many grade emails *have NOT* been sent. This message is preceeded by a number.
-       "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "Les Notations n'ont pas été envoyées en raison d'adresses courriel non valides ou inexistantes, ou parce qu'ils ont déjà été envoyées.",
+       "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : " notations n'ont pas été envoyées en raison d’adresses de courriels non valides ou inexistantes, ou parce qu'elles ont déjà été envoyées.",
 
        // Message about how many grade emails *have NOT* been sent.
-       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Aucune note ont été envoyés par courriel, car aucune des adresses courriels valides ont été trouvés, ou parce que tous les élèves ont déjà reçus leur résultat.",
-
+       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Aucune note n’a été envoyée par courriel, car aucune adresse valide n’a été trouvée ou parce que tous les élèves ont déjà reçus leur résultat.",    
+    
        // Subject of the email students receive. Followed by assignment name.
        // Example: Here is your grade for "Algebra Quiz #6"
        "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Résultats du devoir :",
@@ -2186,10 +2219,10 @@ langs = {
        "FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG" : "Ne pas répondre à ce message",
 
        // Message that preceedes the student's grade
-       "FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Notation",
+       "FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Votre notation",
 
        // Message that preceedes the instructor's (optional) message in the email
-       "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Message de professeur pour l'ensemble de la classe",
+       "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Message du professeur pour l'ensemble de la classe",
 
        // Message that preceedes the instructor's (optional) feedback for the student in the email
        "FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW" : "Commentaire personnel de votre professeur",
@@ -2231,10 +2264,10 @@ langs = {
        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT" : "Incorrect",
 
        // Footer for the email sent to students, advertising Flubaroo.
-       "FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Ce courrier à été envoyé par Flubaroo, c'est une application gratuite d'envoi de notation",
+       "FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Ce courrier à été envoyé par Flubaroo, c'est une application gratuite d'envoi de notation.",
 
        // Link at the end of the footer. Leads to www.flubaroo.com
-       "FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Visite flubaroo.com",
+       "FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Visiter flubaroo.com",
 
        // Subject of the record email sent to the instructor, when grades are emailed to the class.
        // Followed by the assignment name.
@@ -2247,11 +2280,11 @@ langs = {
 
        // Used in the record email sent to the instructor after she emails grades.
        // Labels the number of emails sent, in the summary table.
-       "FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT": "Quantité de courriels envoyés",
+       "FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT": "Nombre de courriels envoyés",
 
        // Used in the record email sent to the instructor after she emails grades.
        // Labels the number of graded submissions, in the summary table
-       "FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM": "Quantité d'envoi de Notation",
+       "FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM": "Nombre d'envois de Notation",
 
        // Used in the record email sent to the instructor after she emails grades.
        // Labels the average score in points (vs percent), in the summary table
@@ -2259,11 +2292,11 @@ langs = {
 
        // Used in the record email sent to the instructor after she emails grades.
        // Labels the points possible, in the summary table
-       "FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE": "Nbr de points possibles",
+       "FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE": "Nombre de points possibles",
 
        // Used in the record email sent to the instructor after she emails grades.
        // Indicated if an answer key was provided to the students, in the summary table
-       "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "liste des questions envoyées",
+       "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "Liste des questions envoyées",
 
        // Used in the record email sent to the instructor after she emails grades.
        // Value in summary table if answer key was NOT sent to students by instructor
@@ -2278,16 +2311,16 @@ langs = {
        "FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE": "Vous avez également inclus ce message",
 
        // About Flubaroo message (1 of 2)
-       "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo est un outil gratuit, qui permet au enseignants de gagné du temps. Il permet de corriger, noter des QCM de façon automatique et en permettant  une analyse des résultats",
+       "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo est un outil gratuit, qui permet aux enseignants de gagner du temps. Il permet de corriger, de noter des QCM de façon automatique et d’analyser les résultats.",
 
        // About Flubaroo message (2 of 2)
-       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Pour en savoir plus, visitez www.flubaroo.com. Vous pouvez aussi envoyez vos commentaires ou idées à feedback@flubaroo.com",
+       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Pour en savoir plus, visitez www.flubaroo.com. Vous pouvez aussi envoyer vos commentaires ou idées à feedback@flubaroo.com",
 
        // Message that appears when "Student Submissions" sheet cannot be located.
-       "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo n'a pas pu déterminer la feuille qui contient les soumissions. localiser cette fiche,et renommez-la:",
+       "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo n'a pas pu déterminer la feuille qui contient les soumissions. Localiser cette feuille et la renommer:",
 
        // Message that appears when "Grades" sheet cannot be located.
-       "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo n'a pas pu déterminer la feuille qui contient la notation. S'il vous plaît re-noter le devoir, ou localiser cette fiche,et renommez-la:",
+       "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo n'a pas pu déterminer la feuille qui contient la notation. S'il vous plaît re-noter le devoir, ou localiser cette fiche,et la renommer:",
 
        // Menu option to grade assignment.
        "FLB_STR_MENU_GRADE_ASSIGNMENT" : "Lancer la notation",
@@ -2335,7 +2368,7 @@ langs = {
        "FLB_STR_NEW_VERSION_NOTICE" : "Vous avez installé une nouvelle version Flubaroo! Visitez flubaroo.com blog pour voir ce qui est nouveau.",
 
        // Headline for notifications / alerts.
-       "FLB_STR_NOTIFICATION" : "Notification de Fubaroo",
+       "FLB_STR_NOTIFICATION" : "Notification de Flubaroo",
 
        // For emailing grades, question which asks user to identify email question.
        "FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Sujet du courriel :  ", // note the space after ":"
@@ -2345,7 +2378,7 @@ langs = {
 
        // For emailing grades, asks user if answer key should be sent...
        "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Inclure les réponses correctes: ", // note the space after ":"
-
+      
        // For emailing grades, appears before text box for optional instructor message.
        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Message à inclure dans Email (facultatif) :",
 
@@ -2366,10 +2399,10 @@ langs = {
 
        // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
        "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Le rapport à été envoyé à",
-
+     
        "FLB_STR_RESULTS_TIP_READ_ARTICLE": "Cliquez <a target=_blank href=\"%s\"> ici </a> pour en savoir plus.",
 
-        "FLB_STR_MENU_ADVANCED": "Avancée",
+        "FLB_STR_MENU_ADVANCED": "Avancé",
 
         "FLB_STR_MENU_ADV_OPTIONS": "Options avancées",
 
@@ -2377,97 +2410,97 @@ langs = {
 
         "FLB_STR_MENU_DISABLE_AUTO_GRADE": "Désactiver Autograde",
 
-        "FLB_STR_MENU_SHOW_EMAIL_QUOTA": "Vérifiez Email Quota",
+        "FLB_STR_MENU_SHOW_EMAIL_QUOTA": "Vérifiez le Quota Email",
 
-        "FLB_STR_MENU_ENABLE": "Activer Flubaroo dans cette fiche",
+        "FLB_STR_MENU_ENABLE": "Activer Flubaroo pour cette feuille",
 
-        "FLB_STR_FLUBAROO_NOW_ENABLED": "Flubaroo a été activé pour cette feuille. Vous pouvez maintenant accéder à partir du menu.",
+        "FLB_STR_FLUBAROO_NOW_ENABLED": "Flubaroo a été activé pour cette feuille. Vous pouvez maintenant y accéder à partir du menu.",
 
-        "FLB_STR_GRADING_CELL_MESSAGE": "Classement dernières communications ...",
+        "FLB_STR_GRADING_CELL_MESSAGE": "Evaluation des dernières soumissions...",
 
-        "FLB_STR_AUTOGRADE_IS_ON": "Autograde est activée. Flubaroo attend de nouvelles soumissions au grade. Ne pas apporter des changements à des feuilles jusqu'à ce autograde est éteint.",
+        "FLB_STR_AUTOGRADE_IS_ON": "Autograde est activé. Flubaroo attend de nouvelles soumissions à évaluer. N’apporter aucun changements à ces feuilles jusqu'à ce qu’Autograde soit désactivé.",
 
         "FLB_STR_AUTOGRADE_IS_OFF": "Autograde a été désactivé.",
 
-        "FLB_STR_AUTOGRADE_GRADE_RECENT": "Des demandes récentes ont encore à être classés. Aimeriez-vous Flubaroo leur qualité d'abord, avant autograde est activée?",
+        "FLB_STR_AUTOGRADE_GRADE_RECENT": "Des demandes récentes doivent encore être évaluées. Voulez-vous que Flubaroo les évalue avant d’activer Autograde?",
 
-        "FLB_STR_AUTOGRADE_SETUP": "Avant d'activer autograde vous devez d'abord configurer vos paramètres de calibrage et email. Cliquez sur 'OK' pour continuer.",
+        "FLB_STR_AUTOGRADE_SETUP": "Avant d'activer Autograde vous devez d'abord configurer vos paramètres d’évaluation et d’email. Cliquez sur 'OK' pour continuer.",
 
-        "FLB_STR_AUTOGRADE_UPDATE": "Avant d'activer autograde, aimeriez-vous mettre à jour vos paramètres de classement et de messagerie électronique?",
+        "FLB_STR_AUTOGRADE_UPDATE": "Avant d'activer Autograde, aimeriez-vous mettre à jour vos paramètres d’évaluation et d’email ?",
 
         "FLB_STR_ADV_OPTIONS_WINDOW_TITLE": "Options avancées",
 
-        "FLB_STR_ADV_OPTIONS_NOTICE": "Modifier ces paramètres que si vous avez lu les articles correponding d'aide",
+        "FLB_STR_ADV_OPTIONS_NOTICE": "Modifier ces paramètres uniquement si vous avez lu les rubriques correspondantes de l'aide",
 
-        "FLB_STR_ADV_OPTIONS_NO_NOREPLY": "Utilisez mon adresse courriel de retour lorsque les qualités, plutôt que l'adresse noreply de @.",
+        "FLB_STR_ADV_OPTIONS_NO_NOREPLY": "Lors de l’envoi de notations, utiliser mon adresse courriel de retour, plutôt que l'adresse noreply de @.",
 
-        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK": "Lors de la soumission, auto-email à l'étudiant un lien pour modifier rapidement leur réponse.",
+        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK": "Lors de la soumission, auto-email à l'étudiant un lien pour modifier rapidement ses réponses.",
 
-        "FLB_STR_ADV_OPTIONS_PASS_RATE": "Pourcentage en dessous duquel infos étudiant est surligné en rouge:",
+        "FLB_STR_ADV_OPTIONS_PASS_RATE": "Pourcentage en dessous duquel l’info étudiant est surlignée en rouge:",
 
-        "FLB_STR_EMAIL_QUOTA_MSG": "Vous avez cette nombreux courriels laissés dans votre quota quotidien:",
+        "FLB_STR_EMAIL_QUOTA_MSG": "Vous avez de nombreux courriels disponibles dans votre quota quotidien:",
 
         "FLB_STR_GRADE_STEP1_LABEL_POINTS": "Des points",
 
         "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR": "Vous devez sélectionner au moins une question qui identifie un étudiant avant de continuer.",
 
-        "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR": "Vous devez sélectionner au moins une question qui est gradeable.",
+        "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR": "Vous devez sélectionner au moins une question à évaluer.",
 
         "FBL_STR_GRADE_STEP2_NO_AK_SELECTED": "Vous devez sélectionner une clé de réponse avant de continuer.",
 
-        "FLB_STR_GRADING_OPT_NORMAL_GRADING": "Classement normale",
+        "FLB_STR_GRADING_OPT_NORMAL_GRADING": "Classement normal",
 
-        "FLB_STR_GRADING_OPT_MANUAL_GRADING": "Année par la main (Nouveau!)",
+        "FLB_STR_GRADING_OPT_MANUAL_GRADING": "Évaluation manuelle (Nouveau!)",
 
-        "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS": "Autograde ne peut pas être permis parce que vous avez une ou plusieurs questions qui sont réglés pour être la main graduée.",
+        "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS": "Autograde ne peut pas être activé parce que vous avez une ou plusieurs questions qui sont doivent être évaluées à la main.",
 
-        "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS": "Vous avez sélectionné un ou plusieurs questions à être classé à la main. Mais le classement ne peut pas continuer parce que certaines de ces questions ne sont pas distincts l'un de l'autre. Par exemple, vous pouvez avoir deux questions à la fois intitulé \"Question\". S'il vous plaît modifier le texte de ces questions dans la rangée 1 de sorte qu'ils sont uniques (ie \"Question 1\" et \"Question 2\"), puis essayez à nouveau classement.",
+        "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS": "Vous avez sélectionné une ou plusieurs questions à évaluer à la main. Mais l’évaluation ne peut pas être effectuée parce que certaines de ces questions ne sont pas distinctes l'une de l'autre. Par exemple, vous pouvez avoir deux questions toutes deux intitulées \"Question\". S'il vous plaît modifier le titre de ces questions dans la Rangée 1 de sorte qu'elles soient uniques (ie \"Question 1\" et \"Question 2\"), puis essayez à nouveau l’évaluation.",
 
-        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL": "Graded main",
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL": "Évaluation manuelle",
 
-        "FBL_STR_MANUAL_GRADING_INSTR": "Utilisez les commandes ci-dessous pour attribuer des notes à la main. Notez que cela ne fonctionne correctement sur les questions pour lesquelles vous avez sélectionné \"Année par la main\" à l'étape 1 du classement.",
+        "FBL_STR_MANUAL_GRADING_INSTR": "Utiliser les commandes ci-dessous pour attribuer des notes à la main. Noter que cela ne fonctionne correctement que sur les questions pour lesquelles vous avez sélectionné \"Évaluation manuelle\" à l'étape 1 du classement.",
 
-        "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS": "Etat Questions à la main",
+        "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS": "Etat des questions évaluées manuellement",
 
         "FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED": "Pas de points attribués",
 
-        "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER": "Observations faites par votre instructeur",
+        "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER": "Observations faites par votre professeur",
 
-        "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE": "Flubaroo - Etat Questions à la main",
+        "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE": "Flubaroo - Etat des questions évaluées manuellement",
 
         "FLB_STR_MANUAL_GRADING_STEP1": "1. Sélectionnez l'étudiant:",
 
         "FLB_STR_MANUAL_GRADING_STEP2": "2. Sélectionnez Question:",
 
-        "FLB_STR_MANUAL_GRADING_STEP3": "Mémoire de 3. Lire l'étudiant:",
+        "FLB_STR_MANUAL_GRADING_STEP3": "3. Lire la soumissiom de l'étudiant:",
 
         "FLB_STR_MANUAL_GRADING_STEP4": "4. Entrez les notes de l'étudiant (envoyé par courrier électronique):",
 
         "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY": "examen clé de réponse",
 
-        "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE": "Réglez année",
+        "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE": "Attribuer la note.",
 
-        "FLB_STR_MANUAL_GRADING_BUTTON_WORKING": "Travail",
+        "FLB_STR_MANUAL_GRADING_BUTTON_WORKING": "En cours d’éxécution.",
 
-        "FLB_STR_MANUAL_GRADING_GRADE_APPLIED": "Grade a été appliqué.",
+        "FLB_STR_MANUAL_GRADING_GRADE_APPLIED": "La note a été attribuée.",
 
-        "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE": "S'il vous plaît entrer une année valide.",
+        "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE": "S'il vous plaît entrer une note valide.",
 
         "FLB_STR_MANUAL_GRADING_ERROR_OCCURED": "Une erreur s'est produite.",
 
         "FLB_STR_MANUAL_GRADING_CLOSE_POPUP": "Fermer",
 
-        "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW": "Autograde est actuellement corrigeait une ou plusieurs nouvelles soumissions, ne peut donc pas être désactivée. Essayez à nouveau prochainement.",
+        "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW": "Autograde est actuellement en train de corriger une ou plusieurs nouvelles soumissions et ne peut donc pas être désactivé. Essayez à nouveau prochainement.",
 
-        "FLB_STR_NO_VALID_SUBMISSIONS": "Une feuille de qualités n'a pas été créé, car aucun argument valide n'a été trouvé.",
+        "FLB_STR_NO_VALID_SUBMISSIONS": "Aucune feuille d’évaluation n'a étée créé, car aucune soumission valide n’a été trouvée.",
 
-        "FLB_STR_INVALID_GRADE_SHEET_TITLE": "Grades corrompus Fiche - Vous ne pouvez pas Continuer",
+        "FLB_STR_INVALID_GRADE_SHEET_TITLE": "Feuille de Notation corrompue - Vous ne pouvez pas continuer",
 
-        "FLB_STR_INVALID_GRADES_SHEET": "<p> Flubaroo ne peut pas continuer parce que votre feuille de qualités a été corrompu. Avez-vous peut-être de supprimer des lignes, des colonnes ou d'autres données de la feuille de qualités après le classement, dernière terminée? </ P> <p> Voir <a href = \"http://www.flubaroo.com/hc/corrupted-grades-sheet\"> cet article </a> de l'aide. </ p>",
+        "FLB_STR_INVALID_GRADES_SHEET": "<p>Flubaroo ne peut pas continuer parce que votre feuille de Notation a été corrompue. Avez-vous peut-être supprimé des lignes, des colonnes ou d'autres données de la feuille de Notation après la dernière évaluation?</ P> <p> Voir <a href = \"http://www.flubaroo.com/hc/corrupted-grades-sheet\"> cet article </a> de l'aide. </ p>",
 
-        "FLB_STR_DO_NOT_DELETE_MSG": "Pour assurer des fonctions FLUBAROO correctement, ne pas supprimer des lignes ou des colonnes dans CETTE FICHE",
+        "FLB_STR_DO_NOT_DELETE_MSG": "Pour assurer le bon fonctionnement de FLUBAROO, ne pas supprimer des lignes ou des colonnes dans CETTE FICHE",
 
-        "FLB_STR_GRADES_SHARE_LABEL": "Partage année Méthode:",
+        "FLB_STR_GRADES_SHARE_LABEL": "Méthode de partage des Notations :",
 
         "FLB_STR_GRADES_SHARE_EMAIL": "Partager par email (typique)",
 
@@ -2475,21 +2508,21 @@ langs = {
 
         "FLB_STR_GRADES_SHARE_BOTH": "Partager par email et par Google Drive",
 
-        "FLB_STR_DRIVE_SHARE_FOLDER_NAME": "Flubaroo - Notations Partagés",
+        "FLB_STR_DRIVE_SHARE_FOLDER_NAME": "Flubaroo - Notations Partagées",
 
-        "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE": "Année pour",
+        "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE": "Notation pour",
 
-        "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG": "Cliquez ici pour voir ce rapport de grade dans Google Drive",
+        "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG": "Cliquez ici pour voir ce rapport de Notation dans Google Drive",
 
-        "FLB_STR_PRINT_GRADES_WINDOW_TITLE": "Flubaroo - Imprimer Grades",
+        "FLB_STR_PRINT_GRADES_WINDOW_TITLE": "Flubaroo - Imprimer les Notations",
 
-        "FLB_STR_PRINT_GRADES_INSTR": "Flubaroo va créer un document Google unique contenant les qualités pour tous les étudiants que vous pouvez ensuite imprimer et distribuer. Vous pouvez spécifier un message à inclure dans chaque document, ainsi que l'opportunité d'inclure la liste des questions et / ou les réponses correctes.",
+        "FLB_STR_PRINT_GRADES_INSTR": "Flubaroo va créer un document Google unique contenant les Notations pour tous les étudiants que vous pouvez ensuite imprimer et distribuer. Vous pouvez spécifier un message à inclure dans chaque document, et aussi inclure la liste des questions et / ou les réponses correctes.",
 
         "FLB_STR_SHARE_GRADES_WINDOW_TITLE": "Flubaroo - Partager Grades",
 
-        "FLB_STR_SHARE_GRADES_INSTR": "Flubaroo peut partager avec chaque élève leur grade par email, Google Drive, ou les deux. Utilisez le menu déroulant pour sélectionner la question qui demandait aux élèves pour leur adresse e-mail. Si les adresses e-mail ne sont pas recueillies, alors vous ne serez pas en mesure de partager les grades.",
+        "FLB_STR_SHARE_GRADES_INSTR": "Flubaroo peut partager avec chaque élève leur Notation par email, Google Drive, ou les deux. Utilisez le menu déroulant pour sélectionner la question qui demandait aux élèves leur adresse e-mail. Si les adresses e-mail ne sont pas recueillies, alors vous ne serez pas en mesure de partager les Notations.",
 
-        "FBL_STR_PRINT_GRADES_SUCCESS": "Un document Google a été créé contenant toutes les notes des étudiants. Cliquez sur le nom de fichier ci-dessous pour l'ouvrir. Puis imprimer et la remettre à chaque élève de leur impression.",
+        "FBL_STR_PRINT_GRADES_SUCCESS": "Un document Google a été créé contenant toutes les notes des étudiants. Cliquez sur le nom de fichier ci-dessous pour l'ouvrir. Puis imprimer et remettre à chaque élève son impression.",
 
         "FLB_STR_MENU_SHARE_GRADES": "Partager Grades",
 
@@ -2497,15 +2530,15 @@ langs = {
 
         "FLB_STR_TIP_MSG_NUMBER_1": "<b> Flubaroo Astuce n ° 1: </ b> Flubaroo peut accepter plus d'une réponse correcte.",
 
-        "FLB_STR_TIP_MSG_NUMBER_2": "<b> Flubaroo Astuce n ° 2: </ b> Flubaroo peut qualité plages numériques pour la science et mathématiques missions.",
+        "FLB_STR_TIP_MSG_NUMBER_2": "<b> Flubaroo Astuce n ° 2: </ b> Flubaroo peut évaluer des valeurs numériques pour les formulaires de  science et de mathématiques.",
 
-        "FLB_STR_TIP_MSG_NUMBER_3": "<b> Flubaroo Astuce n ° 3: </ b> Dog vs chien? Réponses année la casse.",
+        "FLB_STR_TIP_MSG_NUMBER_3": "<b> Flubaroo Astuce n ° 3: </ b> Chien ou chien? Réponses sensibles à la casse.",
 
         "FLB_STR_TIP_MSG_NUMBER_4": "<b> Flubaroo Astuce n ° 4: </ b> Vous voulez changer la valeur par défaut de 70% note de passage?",
 
-        "FLB_STR_TIP_MSG_NUMBER_5": "<b> Flubaroo Astuce n ° 5: </ b> Besoin de vérifier votre quota de courriel reste?",
+        "FLB_STR_TIP_MSG_NUMBER_5": "<b> Flubaroo Astuce n ° 5: </ b> Besoin de vérifier votre quota de courriel restant?",
 
-        "FLB_STR_TIP_MSG_NUMBER_6": "<b> Flubaroo Conseil n ° 6: </ b> Vous voulez que vos missions classés automatiquement?",
+        "FLB_STR_TIP_MSG_NUMBER_6": "<b> Flubaroo Conseil n ° 6: </ b> Vous voulez que vos formulaires soient évalués automatiquement?",
 
         "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Conseil n ° 7: </ b> Vous avez des questions? Nous avons les réponses dans notre FAQ!",
 
@@ -2513,11 +2546,11 @@ langs = {
    // END FRENCH //////////////////////////////////////////////////////////////////////////////////
 
    // START FRENCH CANADIAN //////////////////////////////////////////////////////////////////
-   // Vous pouvez traduire tout ce qui n'est pas en majuscule.
+   // Vous pouvez traduire tout ce qui n'est pas en majuscule. 
    // Tous les textes précédés par // sont des commentaires. Ils ne sont pas prioritaires.
-   // Merci de nous aidez à traduire ce script.
+   // Merci de nous aider à traduire ce script. 
    //
-   // Traducteurs : Pascal Lapalme, Jean Desjardins, Roxanne Roy, Guylaine Duranceau
+   // Traducteurs : Pascal Lapalme et Jean Desjardins. Guylaine Duranceau, Audrey-Anne Ross et Roxanne Roy ont contribué à adapter les versions plus récentes. 
    //
    // Version française (Canada)
    //
@@ -2572,7 +2605,7 @@ langs = {
         "FLB_STR_GRADE_STEP2_WINDOW_TITLE" : "Flubaroo - Classement Étape 2",
 
         // "Grading Option" label that appears over first column in Step 1 of grading.
-        "FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Option de classement",
+        "FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Options de classement",
 
         // "Question" label that appears over third column in Step 1 of grading.
         "FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Question",
@@ -2626,18 +2659,18 @@ langs = {
         "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo peut envoyer un courriel à chaque élève, de même que les réponses. Identifiez la question pour laquelle vous avez demandé les courriels. Si l’adresse est incomplète ou invalide, les envois ne fonctionneront pas.",
 
         // Notice that grades cannot be emailed because the user has exceeded their daily quota.
-        "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo ne peut envoyer les courriels parce que vous avez dépassé la limite de par jour que fixe Google aux modules externes comme Flubaroo. Merci de réessayer demain.",
-
+        "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo ne peut envoyer les courriels parce que vous avez dépassé la limite d’envoi quotidien que fixe Google aux modules externes comme Flubaroo. Merci de réessayer demain.",
+      
         // Message about how many grade emails *have* been sent. This message is preceeded by a number.
         // Example: "5 grades were successfully emailed"
         "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "Les notes et rétroactions ont été acheminées correctement",
 
         // Message about how many grade emails *have NOT* been sent. This message is preceeded by a number.
-        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "Les notes n’ont pas été envoyées car l’adresse de courriel est absente ou invalide, ou parce que les notes ont déjà été envoyées.",
+        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "Les notes n’ont pas été envoyées, car l’adresse de courriel est absente ou invalide, ou parce que les notes ont déjà été envoyées.",
 
         // Message about how many grade emails *have NOT* been sent.
-        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Aucun envoi effectué parce que Flubaroo n’a pas trouvé d’adresse courriel là où vous l’aviez indiqué ou parce que les élèves l’avaient déjà reçu. Si vous voulez les renvoyer, effacez le x dans la case de la feuille des résultats",
-
+        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Aucun envoi n’a été effectué, soit parce que Flubaroo n’a pas trouvé d’adresse courriel valide, parce que votre quota d’envoi quotidien a été atteint ou encore parce que les élèves les avaient déjà reçus. Si vous voulez les renvoyer, effacez le x dans la case de la feuille des résultats",     
+      
         // Subject of the email students receive. Followed by assignment name.
         // Example: Here is your grade for "Algebra Quiz #6"
         "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Voici votre résultat pour",
@@ -2665,7 +2698,7 @@ langs = {
         "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE" : "Vous trouverez ci-dessous, vos notes pour chaque question",
 
         // Message that preceedes the table of the students scores, and answer key
-        "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "En plus de la bonne réponse, vous trouverez votre résultat pour chacune des questions",
+        "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "En plus de la bonne réponse, vous trouverez votre résultat pour chacune des questions", 
 
         // Header for the  column in the table of scores in the email which lists the question asked.
         "FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER" : "Question",
@@ -2727,7 +2760,7 @@ langs = {
 
         // Used in the record email sent to the instructor after she emails grades.
         // Indicated if an answer key was provided to the students, in the summary table
-        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "Avez-vous  fourni les réponses?",
+        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "Avez-vous fourni les réponses?",
 
         // Used in the record email sent to the instructor after she emails grades.
         // Value in summary table if answer key was NOT sent to students by instructor
@@ -2748,7 +2781,7 @@ langs = {
         "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Pour en apprendre plus, il y a www.flubaroo.com.",
 
         // Message that appears when "Student Submissions" sheet cannot be located.
-        "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo ne peut déterminer quelle feuille contient les soumissions des élèves.  Veuillez trouvez cette feuille et la renommer: ",
+        "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo ne peut déterminer quelle feuille contient les soumissions des élèves.  Veuillez trouver cette feuille et la renommer: ",
 
         // Message that appears when "Grades" sheet cannot be located.
         "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo ne peut déterminer quelle feuille contient les notes.  Veuillez noter le travail, ou trouver cette feuille et la renommer: ",
@@ -2809,9 +2842,9 @@ langs = {
 
         // For emailing grades, asks user if answer key should be sent...
         "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Inclure la clé de correction: ", // note the space after ":"
-
+        
         // For emailing grades, appears before text box for optional instructor message.
-        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Rétroaction au groupe (optionel):",
+        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Rétroaction au groupe (optionnel):",
 
         // Window title for View Report window
         "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Résultats",
@@ -2835,144 +2868,144 @@ langs = {
 
         "FLB_STR_MENU_ADV_OPTIONS": "Options avancées",
 
-        "FLB_STR_MENU_ENABLE_AUTO_GRADE": "Activer Autograde",
+        "FLB_STR_MENU_ENABLE_AUTO_GRADE": "Activer la correction instantanée",
 
-        "FLB_STR_MENU_DISABLE_AUTO_GRADE": "Désactiver Autograde",
+        "FLB_STR_MENU_DISABLE_AUTO_GRADE": "Désactiver la correction instantanée",
 
-        "FLB_STR_MENU_SHOW_EMAIL_QUOTA": "Vérifiez Email Quota",
+        "FLB_STR_MENU_SHOW_EMAIL_QUOTA": "Vérifiez combien reste-t-il de courriels à votre quota Google",
 
-        "FLB_STR_MENU_ENABLE": "Activer Flubaroo dans cette fiche",
+        "FLB_STR_MENU_ENABLE": "Activer Flubaroo",
 
-        "FLB_STR_FLUBAROO_NOW_ENABLED": "Flubaroo a été activé pour cette feuille. Vous pouvez maintenant accéder à partir du menu.",
+        "FLB_STR_FLUBAROO_NOW_ENABLED": "Flubaroo a été activé pour ce formulaire. Vous pouvez maintenant y accéder à partir du menu.",
 
-        "FLB_STR_GRADING_CELL_MESSAGE": "Classement dernières communications ...",
+        "FLB_STR_GRADING_CELL_MESSAGE": "Correction des plus récents formulaires...",
 
-        "FLB_STR_AUTOGRADE_IS_ON": "Autograde est activée. Flubaroo attend de nouvelles soumissions au grade. Ne pas apporter des changements à des feuilles jusqu'à ce autograde est éteint.",
+        "FLB_STR_AUTOGRADE_IS_ON": "La correction instantanée est activée. Flubaroo attend les copies. N’apportez pas de changements aux feuilles jusqu'à ce que vous l’ayez désactivée.",
 
-        "FLB_STR_AUTOGRADE_IS_OFF": "Autograde a été désactivé.",
+        "FLB_STR_AUTOGRADE_IS_OFF": "La correction instantanée a été désactivée.",
 
-        "FLB_STR_AUTOGRADE_GRADE_RECENT": "Des demandes récentes ont encore à être classés. Aimeriez-vous Flubaroo leur qualité d'abord, avant autograde est activée?",
+        "FLB_STR_AUTOGRADE_GRADE_RECENT": "Des entrées récentes pourraient être évaluées. Aimeriez-vous le faire avant d’activer la correction instantanée?",
 
-        "FLB_STR_AUTOGRADE_SETUP": "Avant d'activer autograde vous devez d'abord configurer vos paramètres de calibrage et email. Cliquez sur 'OK' pour continuer.",
+        "FLB_STR_AUTOGRADE_SETUP": "Avant d'activer la correction instantanée, vous devez d'abord configurer vos paramètres de notation et de courriel. Cliquez 'OK' pour continuer.",
 
-        "FLB_STR_AUTOGRADE_UPDATE": "Avant d'activer autograde, aimeriez-vous mettre à jour vos paramètres de classement et de messagerie électronique?",
+        "FLB_STR_AUTOGRADE_UPDATE": "Avant d'activer la correction instantanée, aimeriez-vous mettre à jour votre clef de correction et votre adresse de messagerie électronique?",
 
         "FLB_STR_ADV_OPTIONS_WINDOW_TITLE": "Options avancées",
 
-        "FLB_STR_ADV_OPTIONS_NOTICE": "Modifier ces paramètres que si vous avez lu les articles correponding d'aide",
+        "FLB_STR_ADV_OPTIONS_NOTICE": "Il est conseilleé de ne modifier ces paramètres que si vous avez lu les articles d'aide correspondants",
 
-        "FLB_STR_ADV_OPTIONS_NO_NOREPLY": "Utilisez mon adresse courriel de retour lorsque les qualités, plutôt que l'adresse noreply de @.",
+        "FLB_STR_ADV_OPTIONS_NO_NOREPLY": "Pour permettre les échanges, utilisez mon adresse courriel à l’envoi des résultats, plutôt que l’adresse anonymisée standard.",
 
-        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK": "Lors de la soumission, auto-email à l'étudiant un lien pour modifier rapidement leur réponse.",
+        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK": "Lien de modification: Lorsqu’il soumet son formulaire, envoyer automatiquement un lien à l'élève par courriel pour le laisser rapidement modifier sa réponse.",
 
-        "FLB_STR_ADV_OPTIONS_PASS_RATE": "Pourcentage en dessous duquel infos étudiant est surligné en rouge:",
+        "FLB_STR_ADV_OPTIONS_PASS_RATE": "Pourcentage en dessous duquel les infos de l’élève sont en surbrillance rouge:",
 
-        "FLB_STR_EMAIL_QUOTA_MSG": "Vous avez cette nombreux courriels laissés dans votre quota quotidien:",
+        "FLB_STR_EMAIL_QUOTA_MSG": "Il vous reste de nombreux courriels inutilisés dans votre quota Google quotidien:",
 
         "FLB_STR_GRADE_STEP1_LABEL_POINTS": "Des points",
 
-        "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR": "Vous devez sélectionner au moins une question qui identifie un étudiant avant de continuer.",
+        "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR": "Vous devez sélectionner au moins une question qui identifie un élève avant de continuer.",
 
-        "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR": "Vous devez sélectionner au moins une question qui est gradeable.",
+        "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR": "Vous devez sélectionner au moins une question à évaluer.",
 
         "FBL_STR_GRADE_STEP2_NO_AK_SELECTED": "Vous devez sélectionner une clé de réponse avant de continuer.",
 
-        "FLB_STR_GRADING_OPT_NORMAL_GRADING": "Classement normale",
+        "FLB_STR_GRADING_OPT_NORMAL_GRADING": "Classement normal",
 
-        "FLB_STR_GRADING_OPT_MANUAL_GRADING": "Année par la main (Nouveau!)",
+        "FLB_STR_GRADING_OPT_MANUAL_GRADING": "Attribuer les résultats à la main (nouveau!)",
 
-        "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS": "Autograde ne peut pas être permis parce que vous avez une ou plusieurs questions qui sont réglés pour être la main graduée.",
+        "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS": "La correction instantanée ne peut pas être activée parce que vous avez choisi qu’une ou plusieurs questions à être «évaluées à la main».",
 
-        "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS": "Vous avez sélectionné un ou plusieurs questions à être classé à la main. Mais le classement ne peut pas continuer parce que certaines de ces questions ne sont pas distincts l'un de l'autre. Par exemple, vous pouvez avoir deux questions à la fois intitulé \"Question\". S'il vous plaît modifier le texte de ces questions dans la rangée 1 de sorte qu'ils sont uniques (ie \"Question 1\" et \"Question 2\"), puis essayez à nouveau classement.",
+        "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS": "Vous avez sélectionné une ou plusieurs questions à être corrigées à la main. Le classement ne peut par contre pas continuer parce que certaines de ces questions ne sont pas distinctes. Par exemple, vous ne pouvez pas avoir deux questions à la fois intitulées \"Question\". S'il vous plaît, modifier le texte de ces questions dans la rangée 1 de sorte qu'elles soient uniques (c-à-d \"Question 1\" et \"Question 2\"), puis essayez à nouveau.",
 
-        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL": "Graded main",
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL": "Évaluer à la main",
 
-        "FBL_STR_MANUAL_GRADING_INSTR": "Utilisez les commandes ci-dessous pour attribuer des notes à la main. Notez que cela ne fonctionne correctement sur les questions pour lesquelles vous avez sélectionné \"Année par la main\" à l'étape 1 du classement.",
+        "FBL_STR_MANUAL_GRADING_INSTR": "Utilisez les commandes ci-dessous pour attribuer des points manuellement. Notez que cela ne fonctionne correctement qu’aux questions pour lesquelles vous avez sélectionné \"Évaluer à la main\" à l'étape 1 du classement.",
 
-        "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS": "Etat Questions à la main",
+        "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS": "État de l’évaluation manuelle",
 
         "FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED": "Pas de points attribués",
 
-        "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER": "Observations faites par votre instructeur",
+        "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER": "Observations faites par votre enseignant.e",
 
-        "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE": "Flubaroo - Etat Questions à la main",
+        "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE": "Flubaroo - État de l’évaluation manuelle",
 
-        "FLB_STR_MANUAL_GRADING_STEP1": "1. Sélectionnez l'étudiant:",
+        "FLB_STR_MANUAL_GRADING_STEP1": "1. Sélectionnez l’élève:",
 
-        "FLB_STR_MANUAL_GRADING_STEP2": "2. Sélectionnez Question:",
+        "FLB_STR_MANUAL_GRADING_STEP2": "2. Sélectionnez la question:",
 
-        "FLB_STR_MANUAL_GRADING_STEP3": "Mémoire de 3. Lire l'étudiant:",
+        "FLB_STR_MANUAL_GRADING_STEP3": "3. Évaluer en lisant ou en regardant:",
 
-        "FLB_STR_MANUAL_GRADING_STEP4": "4. Entrez les notes de l'étudiant (envoyé par courrier électronique):",
+        "FLB_STR_MANUAL_GRADING_STEP4": "4. Entrez les notes de l’élève (envoyées par courriel):",
 
-        "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY": "examen clé de réponse",
+        "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY": "Consulter la clé de réponse",
 
-        "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE": "Réglez année",
+        "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE": "Déterminez la note",
 
-        "FLB_STR_MANUAL_GRADING_BUTTON_WORKING": "Travail",
+        "FLB_STR_MANUAL_GRADING_BUTTON_WORKING": "Flubaroo travaille...",
 
-        "FLB_STR_MANUAL_GRADING_GRADE_APPLIED": "Grade a été appliqué.",
+        "FLB_STR_MANUAL_GRADING_GRADE_APPLIED": "Les résultats ont été attribués.",
 
-        "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE": "S'il vous plaît entrer une année valide.",
+        "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE": "S'il-vous-plaît, entrez un résultat valide.",
 
         "FLB_STR_MANUAL_GRADING_ERROR_OCCURED": "Une erreur s'est produite.",
 
         "FLB_STR_MANUAL_GRADING_CLOSE_POPUP": "Fermer",
 
-        "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW": "Autograde est actuellement corrigeait une ou plusieurs nouvelles soumissions, ne peut donc pas être désactivée. Essayez à nouveau prochainement.",
+        "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW": "La correction instantanée corrige actuellement une ou plusieurs nouvelles copies et ne peut donc pas être désactivée. Essayez à nouveau.",
 
-        "FLB_STR_NO_VALID_SUBMISSIONS": "Une feuille de qualités n'a pas été créé, car aucun argument valide n'a été trouvé.",
+        "FLB_STR_NO_VALID_SUBMISSIONS": "Aucune feuille de correction n'a pas été créé, car aucune soumission d’élève n'a été trouvée.",
 
         "FLB_STR_INVALID_GRADE_SHEET_TITLE": "Grades corrompus Fiche - Vous ne pouvez pas Continuer",
 
-        "FLB_STR_INVALID_GRADES_SHEET": "<p> Flubaroo ne peut pas continuer parce que votre feuille de qualités a été corrompu. Avez-vous peut-être de supprimer des lignes, des colonnes ou d'autres données de la feuille de qualités après le classement, dernière terminée? </ P> <p> Voir <a href = \"http://www.flubaroo.com/hc/corrupted-grades-sheet\"> cet article </a> de l'aide. </ p>",
+        "FLB_STR_INVALID_GRADES_SHEET": "<p> Flubaroo ne peut pas continuer parce que votre feuille de résultats a été corrompue. Peut-être avez-vous supprimé des lignes, des colonnes ou d'autres données de la feuille de notes après avoir reçu le dernier classement?</ P> <p> Voir <a href = \"http://www.flubaroo.com/hc/corrupted-grades-sheet\"> cet article </a> de l'aide. </ p>",
 
         "FLB_STR_DO_NOT_DELETE_MSG": "Pour assurer des fonctions FLUBAROO correctement, ne pas supprimer des lignes ou des colonnes dans CETTE FICHE",
 
-        "FLB_STR_GRADES_SHARE_LABEL": "Partage année Méthode:",
+        "FLB_STR_GRADES_SHARE_LABEL": "Mode de partage des résultats:",
 
-        "FLB_STR_GRADES_SHARE_EMAIL": "Partager par email (typique)",
+        "FLB_STR_GRADES_SHARE_EMAIL": "Partager par courriel (comme avant)",
 
-        "FLB_STR_GRADES_SHARE_DRIVE": "Partager par Google Drive (aucun e-mail)",
+        "FLB_STR_GRADES_SHARE_DRIVE": "Partager par Google Drive",
 
-        "FLB_STR_GRADES_SHARE_BOTH": "Partager par email et par Google Drive",
+        "FLB_STR_GRADES_SHARE_BOTH": "Partager par courriel et par Google Drive",
 
-        "FLB_STR_DRIVE_SHARE_FOLDER_NAME": "Flubaroo - Notations Partagés",
+        "FLB_STR_DRIVE_SHARE_FOLDER_NAME": "Flubaroo - Résultats",
 
-        "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE": "Année pour",
+        "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE": "Notes imprimables pour:",
 
-        "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG": "Cliquez ici pour voir ce rapport de grade dans Google Drive",
+        "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG": "Cliquez ici pour voir ce rapport de notes dans Google Drive",
 
-        "FLB_STR_PRINT_GRADES_WINDOW_TITLE": "Flubaroo - Imprimer Grades",
+        "FLB_STR_PRINT_GRADES_WINDOW_TITLE": "Flubaroo - Imprimer les résultats",
 
-        "FLB_STR_PRINT_GRADES_INSTR": "Flubaroo va créer un document Google unique contenant les qualités pour tous les étudiants que vous pouvez ensuite imprimer et distribuer. Vous pouvez spécifier un message à inclure dans chaque document, ainsi que l'opportunité d'inclure la liste des questions et / ou les réponses correctes.",
+        "FLB_STR_PRINT_GRADES_INSTR": "Flubaroo va créer un document Google unique contenant les résultats pour tous les élèves que vous pourrez ensuite imprimer et distribuer. Vous pouvez spécifier un message à inclure dans chaque document. Vous avez aussi l'opportunité d'inclure la liste des questions et / ou les réponses correctes.",
 
         "FLB_STR_SHARE_GRADES_WINDOW_TITLE": "Flubaroo - Partager Grades",
 
-        "FLB_STR_SHARE_GRADES_INSTR": "Flubaroo peut partager avec chaque élève leur grade par email, Google Drive, ou les deux. Utilisez le menu déroulant pour sélectionner la question qui demandait aux élèves pour leur adresse e-mail. Si les adresses e-mail ne sont pas recueillies, alors vous ne serez pas en mesure de partager les grades.",
+        "FLB_STR_SHARE_GRADES_INSTR": "Flubaroo peut partager avec chaque élève leur résultats par courriel, Google Drive, ou les deux. Utilisez le menu déroulant pour sélectionner la question qui demandait aux élèves leurs adresses courriel. Si les adresses courriel ne sont pas recueillies, alors vous ne serez pas en mesure de partager les résultats.",
 
-        "FBL_STR_PRINT_GRADES_SUCCESS": "Un document Google a été créé contenant toutes les notes des étudiants. Cliquez sur le nom de fichier ci-dessous pour l'ouvrir. Puis imprimer et la remettre à chaque élève de leur impression.",
+        "FBL_STR_PRINT_GRADES_SUCCESS": "Un document Google a été créé contenant toutes les notes des étudiants. Cliquez sur le nom de fichier ci-dessous pour l'ouvrir. Puis imprimez et remettez ensuite leur impression à chaque élève.",
 
-        "FLB_STR_MENU_SHARE_GRADES": "Partager Grades",
+        "FLB_STR_MENU_SHARE_GRADES": "Partager les résultats",
 
-        "FLB_STR_MENU_PRINT_GRADES": "Imprimer Grades",
+        "FLB_STR_MENU_PRINT_GRADES": "Imprimer les résultats",
 
         "FLB_STR_TIP_MSG_NUMBER_1": "<b> Flubaroo Astuce n ° 1: </ b> Flubaroo peut accepter plus d'une réponse correcte.",
 
-        "FLB_STR_TIP_MSG_NUMBER_2": "<b> Flubaroo Astuce n ° 2: </ b> Flubaroo peut qualité plages numériques pour la science et mathématiques missions.",
+        "FLB_STR_TIP_MSG_NUMBER_2": "<b> Flubaroo Astuce n ° 2: </ b> En science et en mathématiques, Flubaroo peut traiter une intervalle numérique.",
 
-        "FLB_STR_TIP_MSG_NUMBER_3": "<b> Flubaroo Astuce n ° 3: </ b> Dog vs chien? Réponses année la casse.",
+        "FLB_STR_TIP_MSG_NUMBER_3": "<b> Flubaroo Astuce n ° 3: </ b> CHAT vs chat? Corriger les réponses majuscules.",
 
-        "FLB_STR_TIP_MSG_NUMBER_4": "<b> Flubaroo Astuce n ° 4: </ b> Vous voulez changer la valeur par défaut de 70% note de passage?",
+        "FLB_STR_TIP_MSG_NUMBER_4": "<b> Flubaroo Astuce n ° 4: </ b> Vous voulez changer la valeur de 70% des notes de passage Flubaroo?",
 
-        "FLB_STR_TIP_MSG_NUMBER_5": "<b> Flubaroo Astuce n ° 5: </ b> Besoin de vérifier votre quota de courriel reste?",
+        "FLB_STR_TIP_MSG_NUMBER_5": "<b> Flubaroo Astuce n ° 5: </ b> Besoin de vérifier votre quota de courriel restant?",
 
-        "FLB_STR_TIP_MSG_NUMBER_6": "<b> Flubaroo Conseil n ° 6: </ b> Vous voulez que vos missions classés automatiquement?",
+        "FLB_STR_TIP_MSG_NUMBER_6": "<b> Flubaroo Conseil n ° 6: </ b> Vous voulez corriger automatiquement?",
 
-        "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Conseil n ° 7: </ b> Vous avez des questions? Nous avons les réponses dans notre FAQ!",
+        "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Conseil n ° 7: </ b> Vous avez des questions? Nous avons les réponses dans notre FAQ!",      
     },
     // END FRENCH CANADIAN ////////////////////////////////////////////////////////////////////////////
-
+  
 
 	// START HEBREW////////////////////////////////////////////////////////////////////////////////
 	"he-il": {
@@ -3283,7 +3316,7 @@ langs = {
 
 	  // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
 	  "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "הדיווח נשלח בדואר לכתובת",
-
+      
         "FLB_STR_RESULTS_TIP_READ_ARTICLE": "לחץ <a target=_blank href=\"%s\"> כאן </a> כדי לברר פרטים נוספים.",
 
         "FLB_STR_MENU_ADVANCED": "מִתקַדֵם",
@@ -3428,7 +3461,7 @@ langs = {
 
     },
     // END HEBREW//////////////////////////////////////////////////////////////////////////////////
-
+  
    // START POLISH ////////////////////////////////////////////////////////////////////////////////
    "pl-pl": {
        // Name to identify language in language selector
@@ -3535,7 +3568,7 @@ langs = {
 
        // Notice that grades cannot be emailed because the user has exceeded their daily quota.
        "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo nie może wysłać w tej chwili maili z wynikami, ponieważ został przekroczony limit 100 maili dziennie. Limit ten jest ustalony przez Google dla wszystkich dodatków. Spróbuj ponownie później.",
-
+    
        // Message about how many grade emails *have* been sent. This message is preceeded by a number.
        // Example: "5 grades were successfully emailed"
        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "maili z wynikami pomyślnie wysłanych",
@@ -3544,8 +3577,8 @@ langs = {
        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "maili z wynikami nie wysłano z powodu nieprawidłowych lub brakujących adresów, albo dlatego, że zostały już wysłane wcześniej.",
 
        // Message about how many grade emails *have NOT* been sent.
-       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Nie wysłano żadnego maila z wynikami, ponieważ nie znaleziono żadnych poprawnych adresów e-mail, lub dlatego, że wszyscy uczniowie zostali już zawiadomieni.",
-
+       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Nie wysłano żadnego maila z wynikami, ponieważ nie znaleziono żadnych poprawnych adresów e-mail, lub dlatego, że wszyscy uczniowie zostali już zawiadomieni.",    
+    
        // Subject of the email students receive. Followed by assignment name.
        // Example: Here is your grade for "Algebra Quiz #6"
        "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Oto Twoje wyniki z",
@@ -3695,7 +3728,7 @@ langs = {
        "FLB_STR_BUTTON_CONTINUE" : "Kontynuuj",
 
        // Name of "Student Submissions" sheet
-       "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,
+       "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,    
 
        // Name of "Grades" sheet
        "FLB_STR_SHEETNAME_GRADES" : gbl_grades_sheet_name,
@@ -3717,7 +3750,7 @@ langs = {
 
        // For emailing grades, asks user if answer key should be sent...
        "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Dołącz klucz odpowiedzi: ", // note the space after ":"
-
+      
        // For emailing grades, appears before text box for optional instructor message.
        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Dołącz do maila wiadomość (opcjonalnie):",
 
@@ -3738,28 +3771,28 @@ langs = {
 
        // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
        "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Raport został wysłany do",
-
+          
        // Follows the Flubaroo tip, directing users to read the corresponding article.
        "FLB_STR_RESULTS_TIP_READ_ARTICLE" : "Kliknij <a target=_blank href=\"%s\">tu</a> , aby dowiedzieć się więcej.",
 
        // Menu title for "Advanced" sub-menu
        "FLB_STR_MENU_ADVANCED" : "Zaawansowane",
-
+         
        // Menu title for Advanced > Options
        "FLB_STR_MENU_ADV_OPTIONS" : "Opcje zaawansowane",
-
+       
        // Menu option to enable autograde.
        "FLB_STR_MENU_ENABLE_AUTO_GRADE" : "Włącz autoocenianie",
 
        // Menu option to disable autograde.
        "FLB_STR_MENU_DISABLE_AUTO_GRADE" : "Wyłącz autoocenianie",
-
+    
        // Menu option to see reamining daily email quota
        "FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Sprawdź przydział maili",
-
+    
        // Menu option shown to enable Flubaroo in a sheet where it's never been used before
        "FLB_STR_MENU_ENABLE" : "Włącz Flubaroo w tym arkuszu",
-
+    
        // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo zostało włączone dla tego arkusza. Możesz teraz uzyskać do niego dostęp z menu.",
 
@@ -3771,11 +3804,11 @@ langs = {
 
        // Message that pops up to notify the user that autograde is on.
        "FLB_STR_AUTOGRADE_IS_OFF" : "Autoocenianie zostało wyłączone.",
-
+    
        // Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
        "FLB_STR_AUTOGRADE_GRADE_RECENT" : "Niektóre ostatnie zgłoszenia nie zostały jeszcze sklasyfikowane. Czy chcesz, żeby Flubaroo je ocenił, przed włączeniem autooceniania?",
 
-       // Message to tell the user that autograde must gather grading and email settings before being turned on.
+       // Message to tell the user that autograde must gather grading and email settings before being turned on.     
        "FLB_STR_AUTOGRADE_SETUP" : "Przed włączeniem autooceniania należy najpierw skonfigurować ustawienia oceniania i maili. Kliknij przycisk \"OK\", aby kontynuować.",
 
        // Message asking user if they'd like to update their grading and email settings before turning on autograde.
@@ -3786,19 +3819,19 @@ langs = {
 
        // Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
        "FLB_STR_ADV_OPTIONS_NOTICE" : "Te ustawienia należy zmieniać tylko, jeśli przeczytano odpowiednie artykuły pomocy",
-
-       // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.
+    
+       // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.     
        "FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Użyj mojego adresu zwrotnego, przy wysyłaniu ocen, a nie adresu noreply@.",
-
+         
        // Text for Advanced Options, describing option to send each student a link to edit their response.
        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "Po złożeniu, automatycznie wyślij uczniowi link do szybkiego edytowania odpowiedzi.",
-
+    
        // Text for Advanced Options, describing option to change the 70% pass rate.
        "FLB_STR_ADV_OPTIONS_PASS_RATE" : "Procent, poniżej którego info ucznia jest podświetlone na czerwono:",
 
-       // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.
+       // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu. 
        "FLB_STR_EMAIL_QUOTA_MSG" : "Masz tyle maili pozostawionych w codziennym przydziale: ",
-
+    
        "FLB_STR_GRADE_STEP1_LABEL_POINTS": "Zwrotnica",
 
         "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR": "Musisz wybrać co najmniej jedno pytanie, który identyfikuje studenta przed kontynuowaniem.",
@@ -3886,7 +3919,7 @@ langs = {
         "FLB_STR_MENU_SHARE_GRADES": "Rozpowszechnianie Wyniki",
 
         "FLB_STR_MENU_PRINT_GRADES": "Wydrukować Wyniki",
-
+     
        // Flubaroo Tips, shown when grading completes.
        "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Rada #1:</b> Flubaroo może akceptować więcej niż jedną prawidłową odpowiedź.",
        "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Rada #2:</b> Flubaroo może oceniać zakresy liczbowe w zadaniach numerycznych.",
@@ -3938,10 +3971,10 @@ langs = {
 
        // Message shown when grading is complete (2 of 2).
        "FLB_STR_RESULTS_MSG2" : "<b>IMPORTANT</b>: A folha 'Classificações' não deve ser manualmente modificada, pois isso pode interferir com o processo de envio das classificações. Se precisar de modificar esta folha, copie-a e modifique a cópia.",
-
+      
        // Follows the Flubaroo tip, directing users to read the corresponding article.
        "FLB_STR_RESULTS_TIP_READ_ARTICLE" : "Clique <a target=_blank href=\"%s\">here</a> para saber mais.",
-
+      
        // Instructions shown on Step 1 of grading.
        "FBL_STR_STEP1_INSTR" : "Escolha uma opção de classificação para cada uma das questões. Flubaroo tenta adivinhar a opção mais adequada para cada caso, mas deve confirmar.",
 
@@ -4060,7 +4093,7 @@ langs = {
 
        // Notice that grades cannot be emailed because the user has exceeded their daily quota.
        "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo não pode, neste momento, enviar as classificações por ter sido atingida a quota diária de mensagens. Esta quota é definida pela Google para todos os Extras. Por favor, tente mais tarde.",
-
+    
        // Message about how many grade emails *have* been sent. This message is preceeded by a number.
        // Example: "5 grades were successfully emailed"
        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "classificações foram enviadas com sucesso",
@@ -4071,8 +4104,8 @@ langs = {
 
 
        // Message about how many grade emails *have NOT* been sent.
-       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Não foram enviadas classificações por não terem sido encontrados endereços válidos, por já terem sido previamente enviadas, ou porque a quota diária foi atingida.",
-
+       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Não foram enviadas classificações por não terem sido encontrados endereços válidos, por já terem sido previamente enviadas, ou porque a quota diária foi atingida.",    
+    
        // Subject of the email students receive. Followed by assignment name.
        // Example: Here is your grade for "Algebra Quiz #6"
        "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Eis a sua classificação de",
@@ -4246,10 +4279,10 @@ langs = {
 
        // Menu title for "Advanced" sub-menu
        "FLB_STR_MENU_ADVANCED" : "Avançado",
-
+    
        // Menu title for Advanced > Options
        "FLB_STR_MENU_ADV_OPTIONS" : "Opções avançadas",
-
+    
        // Menu option to choose the language.
        "FLB_STR_MENU_SET_LANGUAGE" : "Definir idioma",
 
@@ -4258,21 +4291,21 @@ langs = {
 
        // Menu option to disable autograde.
        "FLB_STR_MENU_DISABLE_AUTO_GRADE" : "Desativar classificação automática",
-
+    
        // Menu option to see reamining daily email quota
        "FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Verificar quota de e-mail",
-
+    
        // Menu option shown to enable Flubaroo in a sheet where it's never been used before
        "FLB_STR_MENU_ENABLE" : "Ativar Flubaroo nesta folha",
-
+    
        // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo foi ativado para esta folha. Pode aceder-lhe a partir do menu.",
-
+    
        // Word that appears on the "Continue" button in grading and emailing grades.
        "FLB_STR_BUTTON_CONTINUE" : "Continuar",
 
        // Name of "Student Submissions" sheet
-       "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,
+       "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,    
 
        // Name of "Grades" sheet
        "FLB_STR_SHEETNAME_GRADES" : gbl_grades_sheet_name,
@@ -4294,7 +4327,7 @@ langs = {
 
        // For emailing grades, asks user if answer key should be sent...
        "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Incluir chave de respostas: ", // note the space after ":"
-
+      
        // For emailing grades, appears before text box for optional instructor message.
        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Mensagem a incluir no e-mail (opcional):",
 
@@ -4315,41 +4348,41 @@ langs = {
 
        // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
        "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Este relatório foi enviado para",
-
+    
        // Message to show the user in the top-left cell of the Grading sheet when grading starts.
        "FLB_STR_GRADING_CELL_MESSAGE" : "Classificando as submissões mais recentes...",
-
+    
        // Message that pops up to notify the user that autograde is on.
        "FLB_STR_AUTOGRADE_IS_ON" : "Classificação automática ativada. Flubaroo aguarda novas submissões para classificar. Não faça qualquer alteração a qualquer folha até desativar a classificação automática.",
 
        // Message that pops up to notify the user that autograde is on.
        "FLB_STR_AUTOGRADE_IS_OFF" : "Classificação automática desativada.",
-
+    
        // Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
        "FLB_STR_AUTOGRADE_GRADE_RECENT" : "As submissões mais recentes ainda não foram classificadas. Deseja que Flubaroo as classifique antes de ativar a classificação automática?",
 
-       // Message to tell the user that autograde must gather grading and email settings before being turned on.
+       // Message to tell the user that autograde must gather grading and email settings before being turned on.     
        "FLB_STR_AUTOGRADE_SETUP" : "Antes de ativar a classificação automática deve configurar as definições relativas à classificação e ao e-mail. Clique em 'OK' para prosseguir.",
 
        // Message asking user if they'd like to update their grading and email settings before turning on autograde.
        "FLB_STR_AUTOGRADE_UPDATE" : "Antes de ativar a classificação automática, deseja atualizar as definições de classificação e e-mail?",
-
+    
        // Title of Advanced Options window
        "FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Opções avançadas",
 
        // Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
        "FLB_STR_ADV_OPTIONS_NOTICE" : "Antes de modificar estas opções leia os artigos da ajuda a elas referentes",
-
-       // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.
+    
+       // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.     
        "FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Usar o meu endereço de e-mail ao enviar as classificações, em vez de noreply@ .",
-
+   
        // Text for Advanced Options, describing option to send each student a link to edit their response.
        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "Após a submissão, enviar uma mensagem de e-mail automática ao aluno para poder editar as suas respostas.",
-
+    
        // Text for Advanced Options, describing option to change the 70% pass rate.
        "FLB_STR_ADV_OPTIONS_PASS_RATE" : "Percentagem abaixo da qual o aluno surge em letras vermelhas: ",
 
-       // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.
+       // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu. 
        "FLB_STR_EMAIL_QUOTA_MSG" : "Dispõe desta quantidade de mensagens na sua quota diária: ",
 
        "FLB_STR_GRADE_STEP1_LABEL_POINTS": "Pontos",
@@ -4447,10 +4480,10 @@ langs = {
        "FLB_STR_TIP_MSG_NUMBER_4" : "<b>Flubaroo Dica #4:</b> Deseja alterar a percentagem de 70% para positiva?",
        "FLB_STR_TIP_MSG_NUMBER_5" : "<b>Flubaroo Dica #5:</b> Precisa de verificar a utilização da sua quota diária de e-mail??",
        "FLB_STR_TIP_MSG_NUMBER_6" : "<b>Flubaroo Dica #6:</b> Deseja que as tarefas sejam classificadas automaticamente?",
-       "FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo Dica #7:</b> Tem perguntas? Nós temos respostas na secção de FAQs!",
+       "FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo Dica #7:</b> Tem perguntas? Nós temos respostas na secção de FAQs!", 
    },
    // END PT-PORTUGUESE ////////////////////////////////////////////////////////////////////////////////
-
+  
    // START BR-PORTUGUESE ////////////////////////////////////////////////////////////////////////////////
    "pt-br": {
     	"FLB_LANG_IDENTIFIER": "Português BR (Brazilian Portuguese)",
@@ -4472,7 +4505,7 @@ langs = {
     	"FLB_STR_RESULTS_MSG1" : "A avaliação foi finalizada! Uma nova planilha foi criada.	Esta planilha contém a avaliação para cada formulário submetido pelos alunos e um resumo na parte superior. **Observação: a planilha que contém a avaliação não deve ser modificada, pois isso pode interferir no envio das avaliações por E-mail. Se você precisar modificar esta planilha, sugerimos que faça uma cópia para as modificações",
 
         "FLB_STR_RESULTS_MSG2" : "Aviso: A última linha apresenta o percentual de estudantes que responderam corretamente cada questão. As perguntas com acertos inferiores a 70% são destacadas com fundo de cor alaranjada. Além disso, as identificações dos estudantes cujos acertos foram inferiores a 70% são destacadas com fonte de cor alaranjada",
-
+    
     	"FBL_STR_STEP1_INSTR" : "Por favor, selecione uma opção de avaliação para cada uma das questões. Flubaroo foi desenvolvido para identificar a opção adequada, mas é necessário confirmar se a opção escolhida para cada questão esta correta",
 
     	"FBL_STR_STEP2_INSTR" : "Por favor, selecione o formulário que será utilizado como padrão para avaliação das respostas. Normalmente, deve ser um formulário enviado por você com as respostas corretas. As respostas do formulário selecionado serão comparadas com as respostas de todos os demais formulários submetidos. Portanto, selecione o formulário padrão com atenção.",
@@ -4676,29 +4709,29 @@ langs = {
     	"FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "O E-mail foi enviado para",
 
         "FLB_STR_GRADING_CELL_MESSAGE" : "Avaliando as últimas submissões...",
-
+ 	 
     	"FLB_STR_AUTOGRADE_IS_ON" : "A autoavaliação está ativada. Flubaroo está aguardando por novas submissões para avaliar. Não modifique nenhuma planilha enquanto a opção autoavaliação estiver ativada.",
 
     	"FLB_STR_AUTOGRADE_IS_OFF" : "A autoavaliação foi desativada.",
-
+ 	 
         "FLB_STR_AUTOGRADE_GRADE_RECENT" : "Algumas submissões recentes podem ser avaliadas. Você gostaria que o Flubaroo avaliasse estas submissões antes que a autoavaliação seja ativada?",
 
     	"FLB_STR_AUTOGRADE_SETUP" : "Antes de ativar a autoavaliação você precisa configurar as opções de avaliação e E-mail. Clique 'OK' para prosseguir.",
-
+ 
     	"FLB_STR_AUTOGRADE_UPDATE" : "Antes de ativar a autoavaliação, você gostaria de atualizar a avaliação e as opções E-mail?",
-
+ 	 
     	"FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Opções avançadas",
 
     	"FLB_STR_ADV_OPTIONS_NOTICE" : "Apenas modifique estas opções se você tiver conhecimento sobre os artigos relacionados na seção de ajuda",
-
+ 	 
     	"FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Use o meu endereço de E-mail para o retorno de E-mails referentes a avaliação ao invés do endereço noreply@.",
-
+	 
     	"FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "No momento da submissão, envie um E-mail automático para o estudante com um link para edição rápida das suas respostas.",
-
+ 	 
     	"FLB_STR_ADV_OPTIONS_PASS_RATE" : "Percentual abaixo do qual a avaliação do estudante será evidenciada em vermelho: ",
 
     	"FLB_STR_EMAIL_QUOTA_MSG" : "A sua cota diária de E-mails restantes é: ",
-
+ 	 
         "FLB_STR_GRADE_STEP1_LABEL_POINTS": "Pontos",
 
         "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR": "Você deve selecionar pelo menos uma pergunta que identifica um estudante antes de continuar.",
@@ -4786,7 +4819,7 @@ langs = {
         "FLB_STR_MENU_SHARE_GRADES": "Compartilhar Avaliações",
 
         "FLB_STR_MENU_PRINT_GRADES": "Imprimir Avaliações",
-
+     
     	"FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo dica #1:</b> Flubaroo pode aceitar mais de uma resposta correta.",
 
     	"FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo dica #2:</b> Flubaroo pode avaliar séries numéricas para exercícios científicos e matemáticos.",
@@ -4844,10 +4877,10 @@ langs = {
 
        // Message shown when grading is complete (2 of 2).
        "FLB_STR_RESULTS_MSG2" : "<b>IMPORTANT</b>: 'Grades' arket må ikke ændres, da det kan betyde at der ikke kan sendes auto-svar ud til eleverne. Hvis du har brug for at ændre i dette ark, skal du lave en kopi af arket og lave ændringer i din kopi.",
-
+      
        // Follows the Flubaroo tip, directing users to read the corresponding article.
        "FLB_STR_RESULTS_TIP_READ_ARTICLE" : "Klik <a target=_blank href=\"%s\">her</a> for at læse mere.",
-
+      
        // Instructions shown on Step 1 of grading.
        "FBL_STR_STEP1_INSTR" : "Du skal vælge en rette mulighed til hvert enkelt spørgsmål i din quiz. Flubaroo har gjort sit bedste for at vælge den bedste mulighed for dig, men du bør tjekke hvert enkelt spørgsmål. Således at du sikrer dig, at den rigtige mulighed er valgt.",
 
@@ -4966,7 +4999,7 @@ langs = {
 
        // Notice that grades cannot be emailed because the user has exceeded their daily quota.
        "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo kan ikke sende email, du har overskredet din daglige email kvote, den er bestemt af Google. Prøv igen senere.",
-
+    
        // Message about how many grade emails *have* been sent. This message is preceeded by a number.
        // Example: "5 grades were successfully emailed"
        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "rettelser sendt med email .",
@@ -4977,8 +5010,8 @@ langs = {
 
 
        // Message about how many grade emails *have NOT* been sent.
-       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "rettelser blev ikke sendt, enten pga. mailadresse ikke angivet, eller forkert mailadresse angivet. Eller fordi email allerede er sendt til elev, eller fordi du har overskredet din daglige mail kvote.",
-
+       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "rettelser blev ikke sendt, enten pga. mailadresse ikke angivet, eller forkert mailadresse angivet. Eller fordi email allerede er sendt til elev, eller fordi du har overskredet din daglige mail kvote.",    
+    
        // Subject of the email students receive. Followed by assignment name.
        // Example: Here is your grade for "Algebra Quiz #6"
        "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Her er din rettelse til",
@@ -5166,10 +5199,10 @@ langs = {
 
        // Menu title for "Advanced" sub-menu
        "FLB_STR_MENU_ADVANCED" : "Avanceret",
-
+    
        // Menu title for Advanced > Options
        "FLB_STR_MENU_ADV_OPTIONS" : "Avancerede indstillinger",
-
+    
        // Menu option to choose the language.
        "FLB_STR_MENU_SET_LANGUAGE" : "Vælg sprog",
 
@@ -5180,22 +5213,22 @@ langs = {
 
        // Menu option to disable autograde.
        "FLB_STR_MENU_DISABLE_AUTO_GRADE" : "De-aktiver auto-rettelse",
-
+    
        // Menu option to see reamining daily email quota
        "FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Tjek email kvote",
-
+    
        // Menu option shown to enable Flubaroo in a sheet where it's never been used before
        "FLB_STR_MENU_ENABLE" : "Aktivér Flubaroo i dette ark",
-
+    
        // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo er aktiveret i dette ark. Du kan nu vælge det i menuen.",
-
+    
        // Word that appears on the "Continue" button in grading and emailing grades.
        "FLB_STR_BUTTON_CONTINUE" : "Fortsæt",
 
 
        // Name of "Student Submissions" sheet
-       "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,
+       "FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,    
 
 
        // Name of "Grades" sheet
@@ -5224,7 +5257,7 @@ langs = {
 
        // For emailing grades, asks user if answer key should be sent...
        "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Inkludér rettenøgle: ", // note the space after ":"
-
+      
        // For emailing grades, appears before text box for optional instructor message.
        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Besked der skal sendes med email (valgfri):",
 
@@ -5251,48 +5284,48 @@ langs = {
 
        // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
        "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Rapporten er blevet send med email til",
-
+    
        // Message to show the user in the top-left cell of the Grading sheet when grading starts.
        "FLB_STR_GRADING_CELL_MESSAGE" : "Retter de seneste svar...",
-
+    
        // Message that pops up to notify the user that autograde is on.
        "FLB_STR_AUTOGRADE_IS_ON" : "Auto-rettelse er aktiveret. Flubaroo venter på nye svar der skal rettes. Du må ikke lave ændringer i dit regneark, så længe auto-rettelse er aktiveret.",
 
 
        // Message that pops up to notify the user that autograde is on.
        "FLB_STR_AUTOGRADE_IS_OFF" : "Auto-rettelse er nu de-aktiveret.",
-
+    
        // Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
        "FLB_STR_AUTOGRADE_GRADE_RECENT" : "Der er svar der endnu ikke er rettet. Vil du have Flubaroo til at rette dem først, inden auto-rettelser bliver aktiveret?",
 
 
-       // Message to tell the user that autograde must gather grading and email settings before being turned on.
+       // Message to tell the user that autograde must gather grading and email settings before being turned on.     
        "FLB_STR_AUTOGRADE_SETUP" : "Inden du kan aktiverer auto-rettelse skal du gennemgå opsætning til dine rettelser og din email-indstillinger. Klik på ‘OK’ for at fortsætte.",
 
 
        // Message asking user if they'd like to update their grading and email settings before turning on autograde.
        "FLB_STR_AUTOGRADE_UPDATE" : "Inden du aktiverer auto-rettelse, kan du opdatere dine rette- og email-indstillinger.",
-
+    
        // Title of Advanced Options window
        "FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Avancerede indstillinger",
 
 
        // Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
        "FLB_STR_ADV_OPTIONS_NOTICE" : "Du bør kun ændre disse indstillinger, hvis du har læst den hertil hørende hjælpe artikel",
-
-       // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.
+    
+       // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.     
        "FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Brug min email som svar adresse, når rettelser bliver sendt med email, istedet for at bruge noreply@ addresse.",
-
+      
        // Text for Advanced Options, describing option to send each student a link to edit their response.
        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "Ved indsendelse af svar, auto-email et link til eleven for at han/hun kan hurtigt ændre sit svar.",
-
+    
        // Text for Advanced Options, describing option to change the 70% pass rate.
        "FLB_STR_ADV_OPTIONS_PASS_RATE" : "Den nedenstående procentsats er gældende for om en elev bliver markeret med rødt: ",
 
 
-       // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.
+       // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu. 
        "FLB_STR_EMAIL_QUOTA_MSG" : "Så mange emails har du tilbage i din daglige: ",
-
+    
        // Flubaroo Tips, shown when grading completes.
        "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Tip #1:</b> Flubaroo kan acceptere mere end et svar.",
        "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Tip #2:</b> Flubaroo kan rette numeriske rækkevidde til dine matematik og fysik opgaver.",
@@ -5302,7 +5335,7 @@ langs = {
        "FLB_STR_TIP_MSG_NUMBER_6" : "<b>Flubaroo Tip #6:</b> Vil du have de indsendte svar rettet automatisk?",
        "FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo Tip #7:</b> Har du spørgsmålene? Vi har svarene i vores FAQs!",
    },
-   // END Danish //////////////////////////////////////////////////////////////////////////////////
+   // END Danish //////////////////////////////////////////////////////////////////////////////////  
 
 // START CZECH ////////////////////////////////////////////////////////////////////////////////
 "cs-cs": {
@@ -5776,7 +5809,7 @@ langs = {
         "FLB_STR_MENU_SHARE_GRADES": "Sdílení stupně",
 
         "FLB_STR_MENU_PRINT_GRADES": "Tiskové stupně",
-
+  
 // Flubaroo Tips, shown when grading completes.
 "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Tip #1:</b> Flubaroo může vyhodnocovat odpovědi s více než jednou správnou odpovědí.",
 "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Tip #2:</b> Flubaroo může vyhodnocovat číselné odpovědi s daným rozpětím.",
@@ -5788,7 +5821,1449 @@ langs = {
 },
 // END CZECH //////////////////////////////////////////////////////////////////////////////////
 
+// START FINNISH ////////////////////////////////////////////////////////////////////////////////
+"fi": {
+// Name to identify language in language selector
+"FLB_LANG_IDENTIFIER": "Suomi (Finnish)",
+// Grading option which identifies a student
+"FLB_STR_GRADING_OPT_STUD_ID" : "Vastaajan tunnus",
+// Grading option which tells Flubaroo to skip grading on a question
+"FLB_STR_GRADING_OPT_SKIP_GRADING" : "Älä tarkista",
+// Message shown when grading is complete (1 of 2).
+"FLB_STR_RESULTS_MSG1" : "Luotiin uusi laskutaulukko “Tulokset”. Taulukko sisältää tuloksen jokaiselle lähetetylle vastaukselle, sekä yläreunassa kaikkien tulosten yhteenvedon. \
+Viimeisellä rivillä on kaikkiin kysymyksiin oikein vastanneiden prosentuaalinen määrä, sekä yleisimmin vähän pisteitä saaneet kysymykset oranssilla korostettuna. Hyväksytyn rajan alle jääneet yksittäiset vastaajat erottuvat punaisella kirjasimella.",
+// Message shown when grading is complete (2 of 2).
+"FLB_STR_RESULTS_MSG2" : "<b>TÄRKEÄTÄ</b>: Tulokset-taulukkoa ei ole tarkoitettu muokattavaksi, sillä taulukon muokkaaminen saattaa häiritä tulosten lähettämistä sähköpostilla. Jos taulukko on välttämätöntä muokata, tee siitä kopio muokattavaksesi.",
+// Follows the Flubaroo tip, directing users to read the corresponding article.
+"FLB_STR_RESULTS_TIP_READ_ARTICLE" : "Klikkaa <a target=_blank href=\"%s\">here</a> lisätietoja.",
+// Instructions shown on Step 1 of grading.
+"FBL_STR_STEP1_INSTR" : "Valitse tarkistusvaihtoehto jokaiselle kysymykselle. Flubaroo koettaa päätellä parhaan vaihtoehdon, mutta sinun kannattaa silti varmistaa jokainen kysymys itse.",
+// Instructions shown on Step 2 of grading.
+"FBL_STR_STEP2_INSTR" : "Valitse mallivastauksena käytettävä vastaus. Yleensä mallivastaus luodaan vastaamalla kysymyksiin itse. \
+Muita vastauksia verrataan mallivastaukseen, joten ole huolellinen mallivastausta valitessasi.",
+// Message shown if not enough submissions to perform grading.
+"FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "Vastauksia ei ole vielä tarpeeksi tarkistamista varten. Varmista, että olet lähettänyt ja valinnut mallivastauksen, ja/tai yritä uudelleen, kun vastauksia on lähetetty lisää.",
+// Please wait" message first shown when Flubaroo is first examining assignment.
+"FLB_STR_WAIT_INSTR1" : "Flubaroo tutkii kyselyä, ole hyvä ja odota...",
+// Please wait" message shown after Step 1 and Step 2, while grading is happening.
+"FLB_STR_WAIT_INSTR2" : "Odota kunnes kyselysi on tarkistettu. Tähän saattaa mennä hetki.",
+// Asks user if they are sure they want to re-grade, if Grades sheet exists.
+"FLB_STR_REPLACE_GRADES_PROMPT" : "Tämä korvaa aikaisemmat tulokset. Haluatko jatkaa?",
+// Window title for "Preparing to grade" window
+"FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - tarkistusta valmistellaan",
+// Window title for "Please wait" window while grading occurs
+"FLB_STR_GRADING_WINDOW_TITLE" : "Flubaroo - tarkistetaan vastauksia.",
+// Window title for "Grading Complete" window after grading occurs
+"FLB_STR_GRADING_COMPLETE_TITLE" : "Flubaroo - tarkistus on valmis",
+// Window title for grading Step 1
+"FLB_STR_GRADE_STEP1_WINDOW_TITLE" : "Flubaroo - tarkistusvaihe 1",
+// Window title for grading Step 2
+"FLB_STR_GRADE_STEP2_WINDOW_TITLE" : "Flubaroo - tarkistusvaihe 2",
+// "Grading Option" label that appears over first column in Step 1 of grading.
+"FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Tarkistusvaihtoehto",
+// "Question" label that appears over third column in Step 1 of grading.
+"FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Kysymys",
+// "Select" label that appears over radio button in first column of Step 2 of grading.
+"FLB_STR_GRADE_STEP2_LABEL_SELECT" : "Valitse",
+// "Submission Time" label that appears over second column in Step 2 of grading.
+"FLB_STR_GRADE_STEP2_LABEL_SUBMISSION_TIME" : "Vastausaika",
+// Label for "View Grades" button shown when grading completes.
+"FLB_STR_GRADE_BUTTON_VIEW_GRADES" : "Näytä tulokset",
+// Used for "summary" text shown at top of Grades sheet, and in report.
+"FLB_STR_GRADE_SUMMARY_TEXT_SUMMARY" : "Yhteenveto",
+// Used for report and report email. Ex: "Report for 'My Test'"
+"FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR" : "Raportti kohteelle",
+// Points Possible. Used for text shown at top of Grades sheet, and in report.
+"FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE" : "Enimmäispisteet",
+// Average Points. Used for text shown at top of Grades sheet, and in report.
+"FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS" : "Pisteitä keskimäärin",
+// Counted Submissions. Used for text shown at top of Grades sheet, and in report.
+"FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Vastausten määrä",
+// Number of Low Scoring Questions. Used for text shown at top of Grades sheet, and in report.
+"FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Pistemäärältään alhaisten kysymysten lukumäärä",
+// Name of column in Grades sheet that has total points scored.
+"FLB_STR_GRADES_SHEET_COLUMN_NAME_TOTAL_POINTS" : "Yhteispistemäärä",
+// Name of column in Grades sheet that has score as percent.
+"FLB_STR_GRADES_SHEET_COLUMN_NAME_PERCENT" : "Prosentti",
+// Name of column in Grades sheet that has number of times student made a submission.
+"FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Vastauskertojen määrä",
+// Name of column in Grades sheet that indicates if grade was already emailed out.
+"FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "Tulos on jo postitettu?",
+// Name of column in Grades sheet that allows teacher to enter optional student feedback
+"FLB_STR_GRADES_SHEET_COLUMN_NAME_STUDENT_FEEDBACK" : "Palautetta vastaajalle (valinnainen)",
+// Window title for emailing grades
+"FLB_STR_EMAIL_GRADES_WINDOW_TITLE" : "Flubaroo - tulosten lähettäminen",
+// Instructions on how to email grades
+"FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo voi lähettää jokaiselle vastanneelle heidän saamansa tuloksen ja oikeat vastaukset sähköpostitse. Valitse pudotusvalikosta se kysymys, johon vastaajat antoivat sähköpostiosoitteensa. Jos sähköpostiosoitteita ei kerätty, tuloksia ei voi lähettää.",
+// Notice that grades cannot be emailed because the user has exceeded their daily quota.
+"FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo ei tällä hetkellä voi lähettää tuloksia, koska päivittäinen sähköpostikiintiösi ylittyi. Google on asettanut kiintiön kaikille laajennuksille. Yritä myöhemmin uudelleen.",
+// Message about how many grade emails *have* been sent. This message is preceeded by a number.
+// Example: "5 grades were successfully emailed"
+"FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "tulosta lähetettiin onnistuneesti",
+// Message about how many grade emails *have NOT* been sent. This message is preceeded by a number.
+"FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "tulosta ei lähetetty johtuen joko epäkelvoista tai tyhjistä sähköpostiosoitteista, jo lähetetyistä vastauksista tai koska päivittäinen sähköpostikiintiösi ylittyi.",
+// Message about how many grade emails *have NOT* been sent.
+"FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Tuloksia ei lähetetty, koska sähköpostiosoitteita ei löytynyt, kaikki vastaajat olivat jo saaneet tuloksensa tai koska päivittäinen sähköpostikiintiösi ylittyi.",
+// Subject of the email students receive. Followed by assignment name.
+// Example: Here is your grade for "Algebra Quiz #6"
+"FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Tuloksesi kyselylle ",
+// First line of email sent to students
+// Example: This email contains your grade for "Algebra Quiz #6"
+"FLB_STR_EMAIL_GRADES_EMAIL_BODY_START" : "Sähköposti sisältää tuloksesi kyselylle",
+// Message telling students not to reply to the email with their grades
+"FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG" : "Älä vastaa tähän viestiin",
+// Message that preceedes the student's grade
+"FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Tuloksesi",
+// Message that preceedes the instructor's (optional) message in the email
+"FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Alla kaikille vastaajille lähetetty viesti kyselyn järjestäjältä",
+// Message that preceedes the instructor's (optional) feedback for the student in the email
+"FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW" : "Tämä on palautetta kyselyn järjestäjältä vain sinulle",
+// Message that preceedes the summary of the student's information (name, date, etc)
+"FLB_STR_EMAIL_GRADES_SUBMISSION_SUMMARY" : "Vastauksesi yhteenveto",
+// Message that preceedes the table of the students scores (no answer key sent)
+"FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE" : "Alla jokaisen kysymyksen pistemääräsi",
+// Message that preceedes the table of the students scores, and answer key
+"FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "Alla jokaisen kysymyksen pistemääräsi, sekä oikea vastaus",
+// Header for the column in the table of scores in the email which lists the question asked.
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER" : "Kysymys",
+// Header for the column in the table of scores in the email which lists the student's answer.
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER" : "Vastauksesi",
+// Header for the column in the table of scores in the email which lists the correct answer.
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER" : "Oikea vastaus",
+// Header for the column in the table of scores in the email which lists the student's score (0, 1, 2...)
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_SCORE_HEADER" : "Tuloksesi",
+// Header for the column in the table of scores in the email which lists the points possible (e.g. 5).
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS_POSSIBLE_HEADER" : "Enimmäispisteet",
+// Header for the column in the table of scores in the email which lists the Help Tip (if provided)
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER" : "Apua tähän kysymykseen",
+// Label for "points" used in the new style email summary of grades
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS" : "pisteitä",
+// Label for "Correct" questions in new style email summary of grades
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT" : "Oikein",
+// Label for "Incorrect" questions in new style email summary of grades
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT" : "Väärin",
+// Footer for the email sent to students, advertising Flubaroo.
+"FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Tämän viestin lähetti Flubaroo, maksuton apuväline kyselyvastausten tarkistamiseen.",
+// Link at the end of the footer. Leads to www.flubaroo.com
+"FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Lisätietoa flubaroo.com",
+// Subject of the record email sent to the instructor, when grades are emailed to the class.
+// Followed by the assignment name.
+// e.g. Record of grades emailed for Algebra Quiz #6
+"FLB_STR_EMAIL_RECORD_EMAIL_SUBJECT": "Lähetettyjen tulosten lukumäärä kyselylle",
+// Used in the record email sent to the instructor after she emails grades.
+// Labels the name of the assignment, in the summary table.
+"FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME": "Kyselyn nimi",
+// Used in the record email sent to the instructor after she emails grades.
+// Labels the number of emails sent, in the summary table.
+"FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT": "Lähetettyjen tulosten lukumäärä",
+// Used in the record email sent to the instructor after she emails grades.
+// Labels the number of graded submissions, in the summary table
+"FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM": "Tarkistettujen vastausten lukumäärä",
+// Used in the record email sent to the instructor after she emails grades.
+// Labels the average score in points (vs percent), in the summary table
+"FLB_STR_EMAIL_RECORD_AVERAGE_SCORE": "Pistekeskiarvo",
+// Used in the record email sent to the instructor after she emails grades.
+// Labels the points possible, in the summary table
+"FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE": "Enimmäispisteet",
+// Used in the record email sent to the instructor after she emails grades.
+// Indicated if an answer key was provided to the students, in the summary table
+"FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "Mallivastaus valittu?",
+// Used in the record email sent to the instructor after she emails grades.
+// Value in summary table if answer key was NOT sent to students by instructor
+"FLB_STR_EMAIL_RECORD_ANSWER_KEY_NO": "Ei",
+// Used in the record email sent to the instructor after she emails grades.
+// Value in summary table if answer key WAS sent to students by instructor
+"FLB_STR_EMAIL_RECORD_ANSWER_KEY_YES": "Kyllä",
+// Used in the record email sent to the instructor after she emails grades.
+// Message that preceeds what message the instructor email to her students.
+"FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE": "Sisällytit myös tämän viestin",
+// About Flubaroo message (1 of 2)
+"FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo on maksuton, aikaa säästävä apuväline, jonka avulla esimerkiksi kouluissa voidaan tarkistaa monivalintakyselyjä ja analysoida niiden tuloksia",
+// About Flubaroo message (2 of 2)
+"FLB_STR_ABOUT_FLUBAROO_MSG2" : "Lisätietoja www.flubaroo.com.",
+// Message that appears when "Student Submissions" sheet cannot be located.
+"FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo ei tunnistanut vastaukset sisältävää laskentataulukkoa. Paikanna taulukko, ja anna sille nimeksi: ",
+// Message that appears when "Grades" sheet cannot be located.
+"FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo ei tunnistanut tulokset sisältävää laskentataulukkoa. Tarkista kysely tai paikanna taulukko, ja anna sille nimeksi: ",
+// Menu option to grade assignment.
+"FLB_STR_MENU_GRADE_ASSIGNMENT" : "Tarkista kysely",
+// Menu option to re-grade assignment.
+"FLB_STR_MENU_REGRADE_ASSIGNMENT" : "Tarkista kysely uudelleen",
+// Menu option to email grades.
+"FLB_STR_MENU_EMAIL_GRADES" : "Lähetä tulokset",
+// Menu option to hide student feedback (hides the column)
+"FLB_STR_MENU_HIDE_FEEDBACK" : "Piilota vastaajan palaute",
+// Menu option to edit student feedback (unhides the column)
+"FLB_STR_MENU_EDIT_FEEDBACK" : "Muokkaa vastaajan palautetta",
+// Menu option to hide help tips
+"FLB_STR_MENU_HIDE_HELP_TIPS" : "Piilota vihjeet",
+// Menu option to edit help tips
+"FLB_STR_MENU_EDIT_HELP_TIPS" : "Muokkaa vihjeitä",
+// Menu option to view report.
+"FLB_STR_MENU_VIEW_REPORT" : "Katsele raporttia",
+// Menu option to learn About Flubaroo.
+"FLB_STR_MENU_ABOUT" : "Flubaroo",
+// Menu title for "Advanced" sub-menu
+"FLB_STR_MENU_ADVANCED" : "Lisävalinnat",
+// Menu title for Advanced > Options
+"FLB_STR_MENU_ADV_OPTIONS" : "Lisävalinnat",
+// Menu option to choose the language.
+"FLB_STR_MENU_SET_LANGUAGE" : "Valitse kieli",
+// Menu option to enable autograde.
+"FLB_STR_MENU_ENABLE_AUTO_GRADE" : "Tarkistaminen päälle",
+// Menu option to disable autograde.
+"FLB_STR_MENU_DISABLE_AUTO_GRADE" : "Tarkistaminen pois",
+// Menu option to see reamining daily email quota
+"FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Tarkista sähköpostikiintiö",
+// Menu option shown to enable Flubaroo in a sheet where it's never been used before
+"FLB_STR_MENU_ENABLE" : "Aktivoi Flubaroo tässä laskentataulukossa",
+// Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
+"FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo on aktivoitu tälle laskentataulukolle. Voit nyt käyttää sitä valikosta.",
+// Word that appears on the "Continue" button in grading and emailing grades.
+"FLB_STR_BUTTON_CONTINUE" : "Jatka",
+// Name of "Student Submissions" sheet
+"FLB_STR_SHEETNAME_STUD_SUBM" : gbl_subm_sheet_name,
+// Name of "Grades" sheet
+"FLB_STR_SHEETNAME_GRADES" : gbl_grades_sheet_name,
+// Text put in Grades sheet when a question isnt graded.
+"FLB_STR_NOT_GRADED" : "Ei tarkistettu",
+// Message that is displayed when a new version of Flubaroo is installed.
+"FLB_STR_NEW_VERSION_NOTICE" : "Asensit Flubaroon uuden version! Osoitteessa flubaroo.com/blog näet mikä on uutta.",
+// Headline for notifications / alerts.
+"FLB_STR_NOTIFICATION" : "Flubaroon ilmoitus",
+// For emailing grades, question which asks user to identify email question.
+"FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Sähköpostiosoitteen kysyminen: ", // note the space after ":"
+// For emailing grades, asks user if list of questions and scores should be sent.
+"FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Sisällytä kysymykset ja pistemäärät: ", // note the space after ":"
+// For emailing grades, asks user if answer key should be sent...
+"FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Sisällytä mallivastaus: ", // note the space after ":"
+// For emailing grades, appears before text box for optional instructor message.
+"FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Vapaavalintainen viesti:",
+// Window title for View Report window
+"FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - tulokset",
+// Title of historgram chart in report
+"FLB_STR_VIEW_REPORT_HISTOGRAM_CHART_TITLE" : "Tulokset histogrammina",
+// Y-Axis (vertical) title of historgram chart in report
+"FLB_STR_VIEW_REPORT_HISTOGRAM_Y-AXIS_TITLE" : "Vastaukset",
+// X-Axis (horizontal) title of historgram chart in report
+"FLB_STR_VIEW_REPORT_HISTOGRAM_X-AXIS_TITLE" : "Saadut pisteet",
+// Label of "Email Me Report" button in View Report window
+"FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Lähetä raportti minulle",
+// Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
+"FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Raportti lähetettiin osoitteeseen ",
+// Message to show the user in the top-left cell of the Grading sheet when grading starts.
+"FLB_STR_GRADING_CELL_MESSAGE" : "Tarkistaa uusimpia vastauksia...",
+// Message that pops up to notify the user that autograde is on.
+"FLB_STR_AUTOGRADE_IS_ON" : "Tarkistaminen on päällä. Flubaroo odottaa uusia vastauksia tarkistettavaksi. Älä muokkaa laskentataulukoita ennen kuin tarkistaminen on kytketty pois.",
+// Message that pops up to notify the user that autograde is on.
+"FLB_STR_AUTOGRADE_IS_OFF" : "Tarkistaminen on kytketty pois päältä.",
+// Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
+"FLB_STR_AUTOGRADE_GRADE_RECENT" : "Äskettäisiä vastauksia on vielä tarkistamatta. Haluatko että Flubaroo tarkistaa ne, ennen kuin tarkistaminen aktivoidaan uudelleen?",
+// Message to tell the user that autograde must gather grading and email settings before being turned on.
+"FLB_STR_AUTOGRADE_SETUP" : "Ennen tarkistamisen aktivointia sinun tulee ensin asettaa tarkistuksen ja sähköpostin asetukset. Klikkaa 'OK' jatkaaksesi.",
+// Message asking user if they'd like to update their grading and email settings before turning on autograde.
+"FLB_STR_AUTOGRADE_UPDATE" : "Haluatko päivittää tarkistamisen ja sähköpostin asetukset, ennen tarkistamisen aktivointia?",
+// Title of Advanced Options window
+"FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Lisävalinnat",
+// Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
+"FLB_STR_ADV_OPTIONS_NOTICE" : "Muokkaa näitä asetuksia luettuasi ensin vastaavat ohjeet",
+// Text for Advanced Options, describing option to not use noreply@ email address when sending grades.
+"FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Käytä @noreply-osoitteen sijaan vastausosoitettani tulosten lähettämiseen.",
+// Text for Advanced Options, describing option to send each student a link to edit their response.
+"FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "Vastausta lähetettäessä, lähetä vastaajalle linkki vastauksen pikamuokkausta varten.",
+// Text for Advanced Options, describing option to change the 70% pass rate.
+"FLB_STR_ADV_OPTIONS_PASS_RATE" : "Hyväksytyn raja (%), jonka perusteella vastaajan tiedot näytetään punaisella: ",
+// Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.
+"FLB_STR_EMAIL_QUOTA_MSG" : "Sinulla on päivittäisestä sähköpostikiintiöstäsi käyttämättä näin monta viestiä: ",
+// "Points" label that appears over second column in Step 1 of grading.
+"FLB_STR_GRADE_STEP1_LABEL_POINTS" : "Pisteet",
+// Error message shown in Step 1 of grading if no fields selected with "Vastaajan tunniste"
+"FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR" : "Ennen jatkamista sinun tulee valita ainakin yksi kysymys vastaajan tunnisteeksi.",
+// Error message shown in Step 1 of grading if no fields selected that are gradeable
+"FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR" : "Sinun tulee valita ainakin yksi automaattisesti tarkistettavissa oleva kysymys.",
+// Error message shown in Step 2 of grading if no answer key selected
+"FBL_STR_GRADE_STEP2_NO_AK_SELECTED" : "Sinun tulee valita mallivastaus ennen jatkamista.",
+// Grading option which indicates Normal Grading (for display only in Step 1)
+"FLB_STR_GRADING_OPT_NORMAL_GRADING" : "Tavallinen tarkistus",
+// Grading option which indicates Manual Grading (for display only in Step 1)
+"FLB_STR_GRADING_OPT_MANUAL_GRADING" : "Tarkista itse (Uusi!)",
+// Message shown if user tries to enable autograde when a question is set for Manual Grading.
+"FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS" : "Automaattista tarkistamista ei voi aktivoida, koska kyselyssäsi on yksi tai useampia itse tarkistettavia kysymyksiä.",
+// Message shown if some questions are identical. All questions must be unique for Flubaroo to grade properly.
+"FBL_STR_GRADE_NON_UNIQUE_QUESTIONS" : "Valitsit yhden tai useamman kysymyksen käsin tarkistettavaksi. Tarkistaminen ei kuitenkaan voi edetä, koska \
+jotkut valituista kysymyksistä ovat keskenään samankaltaisia. Kyselyssä voi olla Esimerkiksi voi olla kaksi kysymystä \
+joiden nimi on \"Kysymys\". Muuta tekstejä \
+näiden kysymysten kohdalta rivillä 1 siten, että ne ovat erilaiset (esim. \"Kysymys 1\" ja \"Kysymys 2\"), ja käynnistä tarkistaminen sitten uudelleen.",
+// Label for manually graded questions in new style email summary of grades
+"FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL" : "Itse tarkistettu",
+// Instructions that show-up in window when manual grading is selected.
+"FBL_STR_MANUAL_GRADING_INSTR" : "Käytä ao. painikkeita tarkistaaksesi kysymyksiä itse. Huomaa, että tämä toimii kunnollisesti ainoastaan \ kysymyksille, joille valitsit \
+\"Tarkista itse\" tarkistuksen vaiheessa 1.",
+// Menu option to open window for manual (by hand) grading of questions.
+"FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS" : "Tarkista kysymyksiä itse",
+// Message shown in email to students if manually graded question wasn't assigned any points.
+"FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED" : "Pisteitä ei ole määritelty",
+// Header for the column in the table of scores in the email which lists the Help Tip (if provided)
+"FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER" : "Kyselyn laatijan kommentit",
+// Title for the "Grade by Hand" window
+"FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE" : "Flubaroo - Tarkista kysymyksiä itse",
+// Label next to the first step in the "Grade by Hand" window, which allows the teacher to select the student.
+"FLB_STR_MANUAL_GRADING_STEP1" : "1. Valitse vastaaja:",
+// Label next to the second step in the "Grade by Hand" window, which allows the teacher to select which question.
+"FLB_STR_MANUAL_GRADING_STEP2" : "2. Valitse kysymys:",
+// Label next to the third step in the "Grade by Hand" window, which allows the teacher to read the submission.
+"FLB_STR_MANUAL_GRADING_STEP3" : "3. Lue vastaus:",
+// Label next to the fourth step in the "Grade by Hand" window, which allows the teacher to enter notes.
+"FLB_STR_MANUAL_GRADING_STEP4" : "4. Anna palautetta vastaajalle (lähetetään sähköpostilla):",
+// Text for the link that shows the teacher's answer key / rubric in the "Grade by Hand" window.
+"FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "katso mallivastaus",
+// Text for the button that is used to set the grade in the "Grade by Hand" window.
+"FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE" : "Syötä tulos",
+// Text that appears in the button while the grade is being applied in the "Grade by Hand" window.
+"FLB_STR_MANUAL_GRADING_BUTTON_WORKING" : "Hetkinen",
+// Message that appears at the top of the "Grade by Hand" window after the grade has been successfully applied.
+"FLB_STR_MANUAL_GRADING_GRADE_APPLIED" : "Tulos on määritetty.",
+// Message that appears at the top of the "Grade by Hand" window if the teacher doesn't enter a valid score in the box.
+"FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE" : "Anna kelvollinen tulos.",
+// Message that appears at the top of the "Grade by Hand" window if an error occurs while setting the grade.
+"FLB_STR_MANUAL_GRADING_ERROR_OCCURED" : "Tapahtui virhe.",
+// Text for "Close X" link that allows the teacher to close the pop-up window that contains the answer key in the "Grade by Hand" window.
+"FLB_STR_MANUAL_GRADING_CLOSE_POPUP" : "Sulje",
+// Message that appears if a teacher tries to disable autograde while grading is in process.
+"FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW" : "Automaattinen tarkistus käsittelee juuri yhtä tai useampaa uutta vastausta, joten sitä ei voi sulkea. Yritä uudelleen hetken päästä.",
+// Message that is shown to the user if grading cannot complete because no valid submissions were found in the submissions sheet (i.e. oinly blank rows).
+"FLB_STR_NO_VALID_SUBMISSIONS" : "Tulostaulukkoa ei luotu, sillä kelvollisia vastauksia ei löytynyt.",
+// Title of the window that informs the user that their Grades sheet is corrupted (badly formed).
+"FLB_STR_INVALID_GRADE_SHEET_TITLE": "Viallinen tulostaulukko - ei voida jatkaa",
+// Message shown in the "Corrupted Grades Sheet" window.
+"FLB_STR_INVALID_GRADES_SHEET" : "<p>Flubaroo ei voi jatkaa, sillä tulostaulukko on viallinen. Poistitkko kenties \
+rivejä, sarakkeita, tai muuta dataa tulostaulukosta edellisen tarkistamisen päätyttyä?</p>\
+<p>Tästä <a href=\"http://www.flubaroo.com/hc/corrupted-grades-sheet\">ohjeesta</a> voi olla apua.</p>",
+// Short message that is included at the top of the Grades sheet in bold, instructing users not to modify the Grades sheet.
+"FLB_STR_DO_NOT_DELETE_MSG" : "JOTTA FLUBAROO TOIMISI OIKEIN, ÄLÄ POISTA RIVEJÄ TAI SARAKKEITA TÄSTÄ TAULUKOSTA",
+// Label for the "Share Grades" window, which asks the user how they would like to share the grades (email, drive, or both).
+"FLB_STR_GRADES_SHARE_LABEL" : "Tulosten jakotapa:",
+// Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via email.
+"FLB_STR_GRADES_SHARE_EMAIL" : "Lähetä sähköpostitse (tavallinen)", // always at index 0
+// Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via Google Drive.
+"FLB_STR_GRADES_SHARE_DRIVE" : "Jaa Google Drivessa (ei sähköpostia)", // always at index 1
+// Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via both email and Drive.
+"FLB_STR_GRADES_SHARE_BOTH" : "Jaa sekä sähköpostitse, että Drivessa", // always at index 2
+// Name of the folder where shared and printed grades get put in the teacher's My Drive.
+"FLB_STR_DRIVE_SHARE_FOLDER_NAME" : "Flubaroo - Jaetut tulokset",
+// Text that begins the shared Google Document. Example: "Grade for dave@edcode.org - Exam #2"
+"FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE" : "Tulokset kyselylle",
+// Text/Link that is included in the emails to students if the "both" method of grade sharing was selected by the teacger.
+"FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG" : "Klikkaa katsoaksesi raportti Google Drivessa",
+// Title for window that allows teachers to print the grades.
+"FLB_STR_PRINT_GRADES_WINDOW_TITLE" : "Flubaroo - Tulosta tulokset",
+// Instructions for the "Print Grades" window
+"FLB_STR_PRINT_GRADES_INSTR" : "Flubaroo luo tulostettavaksi ja jaettavaksi Google Dokumentin, jossa on kaikkien vastaajien tulokset. \
+Voit sisällyttää dokumenttiin myös viestin, sekä kysymysluettelon ja/tai oikeat vastaukset.",
+// Title for the "Share Grades" window.
+"FLB_STR_SHARE_GRADES_WINDOW_TITLE" : "Flubaroo - jaa tulokset",
+// Instructions for the "Share Grades" window.
+"FLB_STR_SHARE_GRADES_INSTR" : "Flubaroo voi jakaa kyselyn tuloksen vastaajalle sähköpostitse, Google Drivessa tai käyttäen molempia. Valitse pudotusvalikosta se kysymys, johon vastaajat antoivat sähköpostiosoitteensa. Jos sähköpostiosoitetta ei annettu, tuloksia ei voi jakaa.",
+// Success message shown after grades have been printed. Followed by a link to the printable document.
+"FBL_STR_PRINT_GRADES_SUCCESS" : "Kaikki tulokset sisältävä Google dokumentti on luotu. Klikkaa ao. tiedostonimeä avataksesi dokumentin. Voit tulostaa dokumentin ja antaa kullekin vastaajalle heidän osansa tulosteesta.",
+// Text that begins the name of the Google Document containing the printable grades. Example: "Printable grades for: Exam #2"
+"FBL_STR_PRINT_GRADES_TITLE_PRE": "Tulostettavat tulokset kyselylle:",
+// Menu option to share grades.
+"FLB_STR_MENU_SHARE_GRADES" : "Jaa tulokset",
+// Menu option to print grades.
+"FLB_STR_MENU_PRINT_GRADES" : "Tulosta tulokset",
+// Grading option for "Extra Credit" on questions.
+"FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Lisäpisteet",
+// Text for Advanced Options, describing option to allow extra credit.
+"FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Salli lisäpisteet kysymysten pisteitä määrättäessä",
+// Flubaroo Tips, shown when grading completes.
+"FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo vinkki #1:</b> Flubaroo hyväksyy myös yhtä useampia oikeita vastauksia.",
+"FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo vinkki #2:</b> Flubaroo osaa tarkistaa lukualueita esim. luonnontieteiden ja matematiikan kyselyissä.",
+"FLB_STR_TIP_MSG_NUMBER_3" : "<b>Flubaroo vinkki #3:</b> KISSA vai kissa? Voit tarkistaa myös kirjainkoon.",
+"FLB_STR_TIP_MSG_NUMBER_4" : "<b>Flubaroo vinkki #4:</b> Haluatko muuttaa 70% hyväksymisrajan?",
+"FLB_STR_TIP_MSG_NUMBER_5" : "<b>Flubaroo vinkki #5:</b> Haluatko tarkistaa sähköpostikiintiösi?",
+"FLB_STR_TIP_MSG_NUMBER_6" : "<b>Flubaroo vinkki #6:</b> Haluatko tarkistaa kyselysi vastaukset automaattisesti?",
+"FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo vinkki #7:</b> Onko sinulla kysyttävää? Vastaus löytyy FAQ:sta",
+"FLB_STR_TIP_MSG_NUMBER_8" : "<b>Flubaroo vinkki #8:</b> Oletteko GAFE koulu? Kerää vastaajien sähköpostiosoitteet automaattisesti!",
+"FLB_STR_TIP_MSG_NUMBER_9" : "<b>Flubaroo vinkki #9:</b> Eikö tuloksia voi jakaa sähköpostitse? Jaa ne Google Drivessa!",
+"FLB_STR_TIP_MSG_NUMBER_10" : "<b>Flubaroo vinkki #10:</b> Haluatko vastaajille paperikopion tuloksista? Tulostamiseen löytyy keino!",
+},
+// END FINNISH //////////////////////////////////////////////////////////////////////////////////
 
+// START BULGARIAN ////////////////////////////////////////////////////////////////////////////////
+
+    "bg-BG": {
+        // Name to identify language in language selector
+        "FLB_LANG_IDENTIFIER": "Български (Bulgarian)",
+
+        // Grading option which identifies a student
+        "FLB_STR_GRADING_OPT_STUD_ID" : "Идентификатор на ученик",
+
+        // Grading option which tells Flubaroo to skip grading on a question
+        "FLB_STR_GRADING_OPT_SKIP_GRADING" : "Пропусни оценяване",
+
+        // Message shown when grading is complete (1 of 2).
+        "FLB_STR_RESULTS_MSG1" : "Създаден е нов работен лист Оценки. Той съдържа оценка за всеки изпратен тест, както и обобщение за всички тестирани в горната част.\
+                                  Последния ред показва процента на учениците, който са отговорили на въпроса правилно, като въпросите с най-много грешни отговори са оцветени в оранжево.\
+                                  Учениците, които са постигнали неудовлетворителни резултати, са оцветени в червено.",
+
+        // Message shown when grading is complete (2 of 2).
+        "FLB_STR_RESULTS_MSG2" : "<b>ВАЖНО!</b>: Листът Оценки не бива да бъде променян, защото това може да направи невъзможно изпращането на имейли с оценките. Ако искате да работите върху данните от листа, копирайте го и работете с копието.",
+
+        // Follows the Flubaroo tip, directing users to read the corresponding article.
+        "FLB_STR_RESULTS_TIP_READ_ARTICLE" : "За повече информация натуснете <a target=_blank href=\"%s\">тук</a>.",
+
+        // Instructions shown on Step 1 of grading.
+        "FBL_STR_STEP1_INSTR" : "Моля да изберете начин за използване за всеки въпрос от теста. Flubaroo се е опитал автоматично да отгатне настройките за Вас, но вие трябва да ги проверите и потвърдите.",
+
+        // Instructions shown on Step 2 of grading.
+        "FBL_STR_STEP2_INSTR" : "Изберете кой от отговорите на теста да бъде използван като ключ с верните отговори. Обикновено това е отговорът от името на учителя. Всички други отговори ще бъдат оценявани за съответствие с този ключ, затова се уверете, че избирате правилния.",
+
+        // Message shown if not enough submissions to perform grading.
+        "FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "Няма достатъчно отговори за изпълнение на оценяване. Уверете се, че има попълнен ключ за отговори и опитайте пак, когато са се събрали достатъчно отговори на ученици.",
+
+        // Please wait" message first shown when Flubaroo is first examining assignment.
+        "FLB_STR_WAIT_INSTR1" : "Flubaroo проверява вашия тест. Изчакайте...",
+
+        // Please wait" message shown after Step 1 and Step 2, while grading is happening.
+        "FLB_STR_WAIT_INSTR2" :  "Моля, изчакайте, вашият тест се оценява. Това може да продължи няколко минути.",
+
+        // Asks user if they are sure they want to re-grade, if Grades sheet exists.
+        "FLB_STR_REPLACE_GRADES_PROMPT" : "Това действие ще премахне съществуващите оценки. Сигурни ли сте, че искате да продължите?",
+
+        // Window title for "Preparing to grade" window
+        "FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - подготвя се за оценяване",
+
+        // Window title for "Please wait" window while grading occurs
+        "FLB_STR_GRADING_WINDOW_TITLE" : "Flubaroo - оценява теста",
+
+        // Window title for "Grading Complete" window after grading occurs
+        "FLB_STR_GRADING_COMPLETE_TITLE" : "Flubaroo - оценяването е завършено",
+
+        // Window title for grading Step 1
+        "FLB_STR_GRADE_STEP1_WINDOW_TITLE" : "Flubaroo - Оценяване - Стъпка 1",
+
+        // Window title for grading Step 2
+        "FLB_STR_GRADE_STEP2_WINDOW_TITLE" : "Flubaroo - Оценяване - Стъпка 2",
+
+        // "Grading Option" label that appears over first column in Step 1 of grading.
+        "FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Настройки за оценяване",
+
+        // "Question" label that appears over third column in Step 1 of grading.
+        "FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Въпрос",
+
+        // "Select" label that appears over radio button in first column of Step 2 of grading.
+        "FLB_STR_GRADE_STEP2_LABEL_SELECT" : "Избор",
+
+        // "Submission Time" label that appears over second column in Step 2 of grading.
+        "FLB_STR_GRADE_STEP2_LABEL_SUBMISSION_TIME" : "Час на предаване",
+
+        // Label for "View Grades" button shown when grading completes.
+        "FLB_STR_GRADE_BUTTON_VIEW_GRADES" : "Виж оценките",
+
+        // Used for "summary" text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_SUMMARY" : "Отчет",
+
+        // Used for report and report email. Ex: "Report for 'My Test'"
+        "FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR" : "Отчет за ",
+
+        // Points Possible. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE" : "Максимален брой точки",
+
+        // Average Points. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS" : "Среден брой точки",
+
+        // Counted Submissions. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Брой на отговорите",
+
+        // Number of Low Scoring Questions. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Брой на незадоволителните отговори",
+
+        // Name of column in Grades sheet that has total points scored.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_TOTAL_POINTS" : "Общи точки",
+
+        // Name of column in Grades sheet that has score as percent.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_PERCENT" : "Процент",
+
+        // Name of column in Grades sheet that has number of times student made a submission.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Брой опити",
+
+        // Name of column in Grades sheet that indicates if grade was already emailed out.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "Изпратени ли са оценките по имейл?",
+
+        // Name of column in Grades sheet that allows teacher to enter optional student feedback
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_STUDENT_FEEDBACK" : "Рецензия (по избор)",
+
+        // Window title for emailing grades
+        "FLB_STR_EMAIL_GRADES_WINDOW_TITLE" : "Flubaroo - изпращане на оценките по имейл",
+
+        // Instructions on how to email grades
+        "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo може да изпрати оценките  на имейлите на учениците, както и верните отогвори. Изберете от падащите менюта въпросът, в който учениците са попълнили своя имейл адрес. Ако имейлът не е включен като въпрос в теста, няма как да изпратите оценките по имейл.",
+
+        // Notice that grades cannot be emailed because the user has exceeded their daily quota.
+        "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo не може да изпрати по имейл оценките в този момент, защото сте надвишили квотите за изпращане на имейли от Google. Те са определени от Google за всеки Add-ons. Моля, опитайте по-късно.",
+
+        // Message about how many grade emails *have* been sent. This message is preceeded by a number.
+        // Example: "5 grades were successfully emailed"
+        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "оценки са успешно изпратени",
+
+        // Message about how many grade emails *have NOT* been sent. This message is preceeded by a number.
+        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "оценки не са изпратени поради непопълнен или невалиден имейл адрес, заради това, че оценките вече са изпратени веднъж или защото сте надвишили определените дневни квоти.",
+
+        // Message about how many grade emails *have NOT* been sent.
+        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Не са изпратени оценки поради непопълнен или невалиден имейл адрес, заради това, че всички оценки са вече изпратени веднъж или защото сте надвишили определените дневни квоти.",
+
+        // Subject of the email students receive. Followed by assignment name.
+        // Example: Here is your grade for "Algebra Quiz #6"
+        "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Ето ги оценките за ",
+
+        // First line of email sent to students
+        // Example: This email contains your grade for "Algebra Quiz #6"
+        "FLB_STR_EMAIL_GRADES_EMAIL_BODY_START" : "Имейлът съдържа резултатите Ви за ",
+
+        // Message telling students not to reply to the email with their grades
+        "FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG" : "Не отговаряйте на това писмо",
+
+        // Message that preceedes the student's grade
+        "FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Вашата оценка",
+
+        // Message that preceedes the instructor's (optional) message in the email
+        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Общи изводи от проведения тест",
+
+        // Message that preceedes the instructor's (optional) feedback for the student in the email
+        "FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW" : "Кратка рецензия от учителя",
+
+        // Message that preceedes the summary of the student's information (name, date, etc)
+        "FLB_STR_EMAIL_GRADES_SUBMISSION_SUMMARY" : "Резултати от теста",
+
+        // Message that preceedes the table of the students scores (no answer key sent)
+        "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE" : "Това са оценките ви за всеки въпрос",
+
+        // Message that preceedes the table of the students scores, and answer key
+        "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "Това са оценките ви за всеки въпрос, последвани от верния отговор",
+
+        // Header for the  column in the table of scores in the email which lists the question asked.
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER" : "Въпрос",
+
+        // Header for the  column in the table of scores in the email which lists the student's answer.
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER" : "Вашият отговор",
+
+        // Header for the  column in the table of scores in the email which lists the correct answer.
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER" : "Правилен отговор",
+
+        // Header for the column in the table of scores in the email which lists the student's score (0, 1, 2...)
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_SCORE_HEADER" : "Вашата оценка",
+
+        // Header for the  column in the table of scores in the email which lists the points possible (e.g. 5).
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS_POSSIBLE_HEADER" : "Максимално възможни точки",
+
+        // Header for the  column in the table of scores in the email which lists the Help Tip (if provided)
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER" : "Помощ за този въпрос",
+
+        // Label for "points" used in the new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS" : "точки",
+
+        // Label for "Correct" questions in new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT" : "Правилно",
+
+        // Label for "Incorrect" questions in new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT" : "Грешно",
+
+        // Footer for the email sent to students, advertising Flubaroo.
+        "FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Този имейл е генериран от Flubaroo, безплатен инструмент за оценяване на тестове",
+
+        // Link at the end of the footer. Leads to www.flubaroo.com
+        "FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Посетете flubaroo.com",
+
+        // Subject of the record email sent to the instructor, when grades are emailed to the class.
+        // Followed by the assignment name.
+        // e.g. Record of grades emailed for Algebra Quiz #6
+        "FLB_STR_EMAIL_RECORD_EMAIL_SUBJECT": "Оценки, изпратени по имейл за ",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the name of the assignment, in the summary table.
+        "FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME": "Име на теста",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the number of emails sent, in the summary table.
+        "FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT": "Брой на изпратени имейли с оценки",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the number of graded submissions, in the summary table
+        "FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM": "Брой на оценени отговори",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the average score in points (vs percent), in the summary table
+        "FLB_STR_EMAIL_RECORD_AVERAGE_SCORE": "Среден успех (точки)",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the points possible, in the summary table
+        "FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE": "Максимален брой точки",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Indicated if an answer key was provided to the students, in the summary table
+        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "Изпратен ли е ключ с верни отговори?",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Value in summary table if answer key was NOT sent to students by instructor
+        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_NO": "Не",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Value in summary table if answer key WAS sent to students by instructor
+        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_YES": "Да",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Message that preceeds what message the instructor email to her students.
+        "FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE": "Вие включихте и следното съобщение",
+
+        // About Flubaroo message (1 of 2)
+        "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo е безплатно, пестящо време приложение, което позволява на учителите бързо да оценяват тестове и анализират резултатите",
+
+        // About Flubaroo message (2 of 2)
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "За да научите повече, посетете www.flubaroo.com.",
+
+        // Message that appears when "Student Submissions" sheet cannot be located.
+        "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo не може да определи кой лист съдържа отговорите на учениците. Намерете листа и го преименувайте на: ",
+
+        // Message that appears when "Grades" sheet cannot be located.
+        "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo не може да определи кой лист съдържа оценките на учениците. Моля оценете отговорите, или намерете листа и го преименувайте на: ",
+
+        // Menu option to grade assignment.
+        "FLB_STR_MENU_GRADE_ASSIGNMENT" : "Оцени отговорите",
+
+        // Menu option to re-grade assignment.
+        "FLB_STR_MENU_REGRADE_ASSIGNMENT" : "Оцени отговорите",
+
+        // Menu option to email grades.
+        "FLB_STR_MENU_EMAIL_GRADES" : "Изпрати по имейл отговорите",
+
+        // Menu option to hide student feedback (hides the column)
+        "FLB_STR_MENU_HIDE_FEEDBACK" : "Скрий колоната за рецензия",
+
+        // Menu option to edit student feedback (unhides the column)
+        "FLB_STR_MENU_EDIT_FEEDBACK" : "Покажи колоната за рецензия",
+
+        // Menu option to hide help tips
+        "FLB_STR_MENU_HIDE_HELP_TIPS" : "Скрий съветите",
+
+        // Menu option to edit help tips
+        "FLB_STR_MENU_EDIT_HELP_TIPS" : "Покажи съветите",
+
+        // Menu option to view report.
+        "FLB_STR_MENU_VIEW_REPORT" : "Покажи отчет",
+
+        // Menu option to learn About Flubaroo.
+        "FLB_STR_MENU_ABOUT" : "За Flubaroo",
+
+        // Menu title for "Advanced" sub-menu
+        "FLB_STR_MENU_ADVANCED" : "Разширени",
+
+        // Menu title for Advanced > Options
+        "FLB_STR_MENU_ADV_OPTIONS" : "Разширени настройки",
+
+        // Menu option to choose the language.
+        "FLB_STR_MENU_SET_LANGUAGE" : "Задай език",
+
+        // Menu option to enable autograde.
+        "FLB_STR_MENU_ENABLE_AUTO_GRADE" : "Разреши Autograde",
+
+        // Menu option to disable autograde.
+        "FLB_STR_MENU_DISABLE_AUTO_GRADE" : "Забрани Autograde",
+
+        // Menu option to see reamining daily email quota
+        "FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Провери квотата за имейли",
+
+        // Menu option shown to enable Flubaroo in a sheet where it's never been used before
+        "FLB_STR_MENU_ENABLE" : "Разреши Flubaroo на този лист",
+
+        // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
+        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo е позволен на този лист. Достъпен е през менюто.",
+
+        // Word that appears on the "Continue" button in grading and emailing grades.
+        "FLB_STR_BUTTON_CONTINUE" : "Продължи",
+
+        // Name of "Student Submissions" sheet
+        "FLB_STR_SHEETNAME_STUD_SUBM" : "Отговори",
+
+        // Name of "Grades" sheet
+        "FLB_STR_SHEETNAME_GRADES" : "Оценки",
+
+        // Text put in Grades sheet when a question isnt graded.
+        "FLB_STR_NOT_GRADED" : "Неоценени",
+
+        // Message that is displayed when a new version of Flubaroo is installed.
+        "FLB_STR_NEW_VERSION_NOTICE" : "Вие сте инсталирали нова версия на Flubaroo! Посетете flubaroo.com/blog за да видите новостите.",
+
+        // Headline for notifications / alerts.
+        "FLB_STR_NOTIFICATION" : "Съобщение от Flubaroo",
+
+        // For emailing grades, question which asks user to identify email question.
+        "FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Въпрос, съдържащ имейл на ученик: ", // note the space after ":"
+
+        // For emailing grades, asks user if list of questions and scores should be sent.
+        "FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Включи списък на въпросите и резултатите: ", // note the space after ":"
+
+        // For emailing grades, asks user if answer key should be sent...
+        "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Включи ключа с верните отговори: ", // note the space after ":"
+
+        // For emailing grades, appears before text box for optional instructor message.
+        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Включи съобщението (по избор):",
+
+        // Window title for View Report window
+        "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Отчет с оценките",
+
+        // Title of historgram chart in report
+        "FLB_STR_VIEW_REPORT_HISTOGRAM_CHART_TITLE" : "Графика на оценките",
+
+        // Y-Axis (vertical) title of historgram chart in report
+        "FLB_STR_VIEW_REPORT_HISTOGRAM_Y-AXIS_TITLE" : "изпратени теста",
+
+        // X-Axis (horizontal) title of historgram chart in report
+        "FLB_STR_VIEW_REPORT_HISTOGRAM_X-AXIS_TITLE" : "точки",
+
+        // Label of "Email Me Report" button in View Report window
+        "FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Изпрати ми отчет",
+
+        // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
+        "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Отчетът е изпратен на",
+
+        // Message to show the user in the top-left cell of the Grading sheet when grading starts.
+        "FLB_STR_GRADING_CELL_MESSAGE" : "Оцени последните отговори...",
+
+        // Message that pops up to notify the user that autograde is on.
+        "FLB_STR_AUTOGRADE_IS_ON" : "Autograde е включен. Flubaroo изчаква нови отговори за оценяване. Не правете промени по листите, докато опцията не бъде изключена.",
+
+        // Message that pops up to notify the user that autograde is on.
+        "FLB_STR_AUTOGRADE_IS_OFF" : "Autograde е изключен.",
+
+        // Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
+        "FLB_STR_AUTOGRADE_GRADE_RECENT" : "Някои от последните отговори трябва да бъдат оценени. Желаете ли Flubaroo да ги оцени и след това да бъде включен autograde?",
+
+        // Message to tell the user that autograde must gather grading and email settings before being turned on.
+        "FLB_STR_AUTOGRADE_SETUP" : "Преди да разрешите autograde трябва да зададете настройки за оценяване и избор на поле за имейл. Натиснете 'Да' за да продължите.",
+
+        // Message asking user if they'd like to update their grading and email settings before turning on autograde.
+        "FLB_STR_AUTOGRADE_UPDATE" : "Преди да бъде включен autograde, желаете ли да обновите настройките ви за оценка и избор на поле за имейл?",
+
+        // Title of Advanced Options window
+        "FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Разширени настройки",
+
+        // Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
+        "FLB_STR_ADV_OPTIONS_NOTICE" : "Променете настройките само след като сте се запознали с помощната информация",
+
+        // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.
+        "FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Използвай моят адрес при изпращане на оценки, а не noreply@ адрес.",
+
+        // Text for Advanced Options, describing option to send each student a link to edit their response.
+        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "При изпращане, автоматично изпрати имейл за ученика с линк за бързо редактиране на отговора.",
+
+        // Text for Advanced Options, describing option to change the 70% pass rate.
+        "FLB_STR_ADV_OPTIONS_PASS_RATE" : "Резултат (в %) за определяне на отговора като незадоволителен: ",
+
+        // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.
+        "FLB_STR_EMAIL_QUOTA_MSG" : "Брой останали имейл съобщения в квотата ви: ",
+
+        // "Points" label that appears over second column in Step 1 of grading.
+        "FLB_STR_GRADE_STEP1_LABEL_POINTS" : "Точки",
+
+        // Error message shown in Step 1 of grading if no fields selected with "Identifies Student"
+        "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR" : "Трябва да изберете поне един въпрос, който идентифицира ученика, преди да продължите.",
+
+        // Error message shown in Step 1 of grading if no fields selected that are gradeable
+        "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR" : "Трябва да изберете поне един въпрос за оценяване.",
+
+        // Error message shown in Step 2 of grading if no answer key selected.
+        "FBL_STR_GRADE_STEP2_NO_AK_SELECTED" : "Трябва да изберете ключ с верни отговори, преди да продължите.",
+
+        // Grading option which indicates Normal Grading (for display only in Step 1)
+        "FLB_STR_GRADING_OPT_NORMAL_GRADING" : "Автоматично оценяване",
+
+        // Grading option which indicates Manual Grading (for display only in Step 1)
+        "FLB_STR_GRADING_OPT_MANUAL_GRADING" : "Оценяване на ръка",
+
+        // Message shown if user tries to enable autograde when a question is set for Manual Grading.
+        "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS" : "Autograde не може да бъде включено, защот имате въпроси, които се оценяват на ръка.",
+
+        // Message shown if some questions are identical. All questions must be unique for Flubaroo to grade properly.
+        "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS" : "Имате въпроси за ръчно оценяване. Оценяването не може да бъде изпълнено, защото \
+                                                някои от тия въпроси не могат да бъдат различени. Например, въпроси с еднакво име. \
+                                                Моля проверете текста на въпросите в първия ред, така че да бъдат уникални \
+                                                и опитайте да оцените теста отново.",
+
+        // Label for manually graded questions in new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL" : "Оценени на ръка",
+
+        // Instructions that show-up in window when manual grading is selected.
+        "FBL_STR_MANUAL_GRADING_INSTR" : "Използвайте настройките, за да оцените въпроса на ръка. \
+					  Това ще работи добре само за въпроси, отбелязани за оценяване на ръка \
+                                          на Стъпка 1.",
+
+        // Menu option to open window for manual (by hand) grading of questions.
+        "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS" : "Оценявай въпросите на ръка",
+
+        // Message shown in email to students if manually graded question wasn't assigned any points.
+        "FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED" : "Няма присъдени точки",
+
+        // Header for the column in the table of scores in the email which lists the Help Tip (if provided)
+        "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER" : "Рецензия от учителя",
+
+        // Title for the "Grade by Hand" window
+        "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE" : "Flubaroo - оцени въпросите на ръка",
+
+        // Label next to the first step in the "Grade by Hand" window, which allows the teacher to select the student.
+        "FLB_STR_MANUAL_GRADING_STEP1" : "1. Избери ученик:",
+
+        // Label next to the second step in the "Grade by Hand" window, which allows the teacher to select which question.
+        "FLB_STR_MANUAL_GRADING_STEP2" : "2. Избери въпрос:",
+
+        // Label next to the third step in the "Grade by Hand" window, which allows the teacher to read the submission.
+        "FLB_STR_MANUAL_GRADING_STEP3" : "3. Прочети отговора на ученика:",
+
+        // Label next to the fourth step in the "Grade by Hand" window, which allows the teacher to enter notes.
+        "FLB_STR_MANUAL_GRADING_STEP4" : "4. Напиши рецензия на ученика (включва се в имейл):",
+
+        // Text for the link that shows the teacher's answer key / rubric in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "прегледай ключа с отговори",
+
+        // Text for the button that is used to set the grade in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE" : "Присъди точки",
+
+        // Text that appears in the button while the grade is being applied in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_BUTTON_WORKING" : "Работя",
+
+        // Message that appears at the top of the "Grade by Hand" window after the grade has been successfully applied.
+        "FLB_STR_MANUAL_GRADING_GRADE_APPLIED" : "Оценката е записана.",
+
+        // Message that appears at the top of the "Grade by Hand" window if the teacher doesn't enter a valid score in the box.
+        "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE" : "Напишете валидна оценка.",
+
+        // Message that appears at the top of the "Grade by Hand" window if an error occurs while setting the grade.
+        "FLB_STR_MANUAL_GRADING_ERROR_OCCURED" : "Грешка.",
+
+        // Text for "Close X" link that allows the teacher to close the pop-up window that contains the answer key in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_CLOSE_POPUP" : "Затвори",
+
+        // Message that appears if a teacher tries to disable autograde while grading is in process.
+        "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW" : "Autograde в момента оценява тест, така че не можете да го спрете. Опитайте след малко.",
+
+        // Message that is shown to the user if grading cannot complete because no valid submissions were found in the submissions sheet (i.e. oinly blank rows).
+        "FLB_STR_NO_VALID_SUBMISSIONS" : "Листът Оценки не може да бъде създаден, защото няма валидни отговори на теста.",
+
+        // Title of the window that informs the user that their Grades sheet is corrupted (badly formed).
+        "FLB_STR_INVALID_GRADE_SHEET_TITLE": "Промяна в лист Оценки - не мога да продължа",
+
+        // Message shown in the "Corrupted Grades Sheet" window.
+        "FLB_STR_INVALID_GRADES_SHEET" : "<p>Flubaroo не може да продължи, защото листът с оценки е бил променен. Вероятно сте изтрили \
+                                          редове, колони, данни от листа след последното оценяване.</p>\
+                                          <p>Вижте <a href=\"http://www.flubaroo.com/hc/corrupted-grades-sheet\">статията</a> за повече информация.</p>",
+
+        // Short message that is included at the top of the Grades sheet in bold, instructing users not to modify the Grades sheet.
+        "FLB_STR_DO_NOT_DELETE_MSG" : "ЗА ДА СТЕ СИГУРНИ, ЧЕ FLUBAROO РАБОТИ ПРАВИЛНО, НЕ ИЗТРИВАЙТЕ РЕДОВЕ И КОЛОНИ ОТ ЛИСТА",
+
+        // Label for the "Share Grades" window, which asks the user how they would like to share the grades (email, drive, or both).
+        "FLB_STR_GRADES_SHARE_LABEL" : "Метод за изпращане на оценките:",
+
+        // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via email.
+        "FLB_STR_GRADES_SHARE_EMAIL" :  "Изпрати по имейл", // always at index 0
+
+        // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via Google Drive.
+        "FLB_STR_GRADES_SHARE_DRIVE" :  "Изпрати чрез Google Drive (без имейл)",  // always at index 1
+
+        // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via both email and Drive.
+        "FLB_STR_GRADES_SHARE_BOTH" :   "Изпрати по имейл и чрез Google Drive", // always at index 2
+
+        // Name of the folder where shared and printed grades get put in the teacher's My Drive.
+        "FLB_STR_DRIVE_SHARE_FOLDER_NAME" : "Flubaroo - изпрати оценки",
+
+        // Text that begins the shared Google Document. Example: "Grade for dave@edcode.org - Exam #2"
+        "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE" : "Оценки за",
+
+        // Text/Link that is included in the emails to students if the "both" method of grade sharing was selected by the teacger.
+        "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG" : "Натисни, за да видиш отчет за оценките в Google Drive",
+
+        // Title for window that allows teachers to print the grades.
+        "FLB_STR_PRINT_GRADES_WINDOW_TITLE" : "Flubaroo - отпечатай оценки",
+
+        // Instructions for the "Print Grades" window
+        "FLB_STR_PRINT_GRADES_INSTR" : "Flubaroo ще създаде Google Document с оценките на всички ученици, който може да се принтира. \
+                                        Можете да зададете съобщение с всеки документ и дали да включвате въпросите и верните отговори.",
+
+        // Title for the "Share Grades" window.
+        "FLB_STR_SHARE_GRADES_WINDOW_TITLE" : "Flubaroo - изпрати оценките",
+
+        // Instructions for the "Share Grades" window.
+        "FLB_STR_SHARE_GRADES_INSTR" : "Flubaroo може да изпрато иценките по имейл, чрез Google Drive, или и по двата начина. Използвайте падащото меню да изберете въпросът, който съдържа имейл адресите на учениците. Ако нямате имейлите на учениците, няма как да изпратите оценките.",
+
+        // Success message shown after grades have been printed. Followed by a link to the printable document.
+        "FBL_STR_PRINT_GRADES_SUCCESS" : "Създаден е Google document с всички оценки на учениците. Натиснете името на файла отдолу, за да го отворите. Отпечатайте го и раздайте на учениците.",
+
+        // Text that begins the name of the Google Document containing the printable grades. Example: "Printable grades for: Exam #2"
+        "FBL_STR_PRINT_GRADES_TITLE_PRE": "Оценки за:",
+
+        // Menu option to share grades.
+        "FLB_STR_MENU_SHARE_GRADES" : "Изпрати оценките",
+
+        // Menu option to print grades.
+        "FLB_STR_MENU_PRINT_GRADES" : "Отпечатай оценките",
+
+        // Grading option for "Extra Credit" on questions.
+        "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Допълнителен бонус",
+
+         // Text for Advanced Options, describing option to allow extra credit.
+        "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Позволява допълнителен бонус при оценяване на учениците",
+
+        // Flubaroo Tips, shown when grading completes.
+        "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo съвет 1:</b> Flubaroo може да приема повече от еди верен отговор.",
+        "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo съвет 2:</b> Flubaroo може да оценява числови интервали при математически и научни въпроси.",
+        "FLB_STR_TIP_MSG_NUMBER_3" : "<b>Flubaroo съвет 3:</b> ОТГОВОР или отговор? Оценяване на чуствителни към главни и малки букви въпроси.",
+        "FLB_STR_TIP_MSG_NUMBER_4" : "<b>Flubaroo съвет 4:</b> Искате ли да промените изисквания 70% минимум?",
+        "FLB_STR_TIP_MSG_NUMBER_5" : "<b>Flubaroo съвет 5:</b> Искате ли да проверите оставащата ви дневна квота?",
+        "FLB_STR_TIP_MSG_NUMBER_6" : "<b>Flubaroo съвет 6:</b> Искате ли отговорите да се оценяват автоматично?",
+        "FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo съвет 7:</b> Имате въпроси? Ще намерите отговори в нашите ЧЗВ!",
+        "FLB_STR_TIP_MSG_NUMBER_8" : "<b>Flubaroo съвет 8:</b> Вашето училище участва в ли в GAFE? Тогава можете да получавате имейлите автоматично!",
+        "FLB_STR_TIP_MSG_NUMBER_9" : "<b>Flubaroo съвет 9:</b> Не можете да изпращате оценките по имейл? Изпращайте ги чрез Google Drive!",
+        "FLB_STR_TIP_MSG_NUMBER_10" : "<b>Flubaroo съвет 10:</b> Искате разпечатка на оценките на учениците? Научете как да я направите!",
+
+    },
+// END BULGARIAN //////////////////////////////////////////////////////////////////////////////////  
+
+////////////////////////////////////////////////////////////////////////////////
+// START ITALIAN ////////////////////////////////////////////////////////////////////////////////
+  
+    "it": {
+        // Name to identify language in language selector
+        "FLB_LANG_IDENTIFIER": "Italiano (Italian)",
+
+        // Grading option which identifies a student
+        "FLB_STR_GRADING_OPT_STUD_ID" : "Identifica lo studente",
+
+        // Grading option which tells Flubaroo to skip grading on a question
+        "FLB_STR_GRADING_OPT_SKIP_GRADING" : "Non valutare",
+      
+        // Message shown when grading is complete (1 of 2).
+        "FLB_STR_RESULTS_MSG1" : "È stato creato un nuovo foglio elettronico chiamato 'Valutazioni'. Contiene una valutazione per ogni test completato e un sommario iniziale di tutte le valutazioni. Le ultime righe mostrano le percentuali di studenti che hanno fornito una risposta corretta a ciascuna domanda e le domande con una bassa percentuale di risposte corrette sono evidenziate in arancio. Gli studenti che hanno ottenuto un punteggio inferiore al minimo per superare il test appaiono in rosso.",
+
+        // Message shown when grading is complete (2 of 2).
+        "FLB_STR_RESULTS_MSG2" : "<b>IMPORTANTE</b>: Il foglio elettronico 'Valutazioni' non deve essere modificato in alcun modo, poiché questo può interferire con l’assegnazione dei voti. Se hai bisogno di modificare questo foglio, fanne prima una copia e modifica la copia.",
+        
+        // Follows the Flubaroo tip, directing users to read the corresponding article.
+        "FLB_STR_RESULTS_TIP_READ_ARTICLE" : "Clicca <a target=_blank href=\"%s\">qui</a> per maggiori informazioni.",
+        
+        // Instructions shown on Step 1 of grading.
+        "FBL_STR_STEP1_INSTR" : "Seleziona un’opzione di punteggio per ogni domanda del test. Flubaroo ha cercato di individuare l’opzione migliore, ma dovresti ricontrollare tutto tu stesso.",
+
+        // Instructions shown on Step 2 of grading.
+        "FBL_STR_STEP2_INSTR" : "Seleziona la riga che deve essere utilizzata come Risposta Chiave. Generalmente si tratta della riga corrispondente alle tue risposte. Tutte le altre risposte saranno valutate confrontando la risposta chiave, quindi presta attenzione a selezionare la riga giusta.",
+
+        // Message shown if not enough submissions to perform grading.
+        "FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "Non ci sono abbastanza test completati per assegnare voti. Controlla di aver inserito una risposta chiave e prova di nuovo quando più studenti avranno completato il test.",
+
+        // Please wait" message first shown when Flubaroo is first examining assignment.
+        "FLB_STR_WAIT_INSTR1" : "Flubaroo sta controllando il tuo test.  Aspetta, per favore...",
+
+        // Please wait" message shown after Step 1 and Step 2, while grading is happening.
+        "FLB_STR_WAIT_INSTR2" :  "Aspetta che il tuo test sia valutato.  Questa operazione può richiedere uno o due minuti.",
+
+        // Asks user if they are sure they want to re-grade, if Grades sheet exists.
+        "FLB_STR_REPLACE_GRADES_PROMPT" : "In questo modo verranno sostituite le valutazioni attuali.  Sei sicuro di voler continuare?",
+
+        // Window title for "Preparing to grade" window
+        "FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - Preparazione della valutazione",
+
+        // Window title for "Please wait" window while grading occurs
+        "FLB_STR_GRADING_WINDOW_TITLE" : "Flubaroo - Assegnazione delle valutazioni",
+
+        // Window title for "Grading Complete" window after grading occurs
+        "FLB_STR_GRADING_COMPLETE_TITLE" : "Flubaroo - Valutazione completata",
+
+        // Window title for grading Step 1
+        "FLB_STR_GRADE_STEP1_WINDOW_TITLE" : "Flubaroo - Valutazione passo 1",
+
+        // Window title for grading Step 2
+        "FLB_STR_GRADE_STEP2_WINDOW_TITLE" : "Flubaroo - Valutazione passo 2",
+
+        // "Grading Option" label that appears over first column in Step 1 of grading.
+        "FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Opzione di punteggio",
+
+        // "Question" label that appears over third column in Step 1 of grading.
+        "FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Domanda",
+     
+        // "Select" label that appears over radio button in first column of Step 2 of grading.
+        "FLB_STR_GRADE_STEP2_LABEL_SELECT" : "Seleziona",
+
+        // "Submission Time" label that appears over second column in Step 2 of grading.
+        "FLB_STR_GRADE_STEP2_LABEL_SUBMISSION_TIME" : "Orario di invio",
+
+        // Label for "View Grades" button shown when grading completes.
+        "FLB_STR_GRADE_BUTTON_VIEW_GRADES" : "Mostra le valutazioni",
+
+        // Used for "summary" text shown at top of Grades sheet, and in report. 
+        "FLB_STR_GRADE_SUMMARY_TEXT_SUMMARY" : "Sommario",
+
+        // Used for report and report email. Ex: "Report for 'My Test'" 
+        "FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR" : "Risultati per",
+
+        // Points Possible. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE" : "Punti Possibili",
+
+        // Average Points. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS" : "Punteggio medio",
+
+        // Counted Submissions. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Numero di test",
+
+        // Number of Low Scoring Questions. Used for text shown at top of Grades sheet, and in report.
+        "FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Numero di domande con voti bassi",
+
+        // Name of column in Grades sheet that has total points scored.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_TOTAL_POINTS" : "Punti totali",
+
+        // Name of column in Grades sheet that has score as percent.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_PERCENT" : "Percentuale",
+
+        // Name of column in Grades sheet that has number of times student made a submission.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Numero di tentativi",
+
+        // Name of column in Grades sheet that indicates if grade was already emailed out.
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "Risultato inviato?",
+
+        // Name of column in Grades sheet that allows teacher to enter optional student feedback
+        "FLB_STR_GRADES_SHEET_COLUMN_NAME_STUDENT_FEEDBACK" : "Feedback per lo studente (Opzionale)",
+
+        // Window title for emailing grades
+        "FLB_STR_EMAIL_GRADES_WINDOW_TITLE" : "Flubaroo - Invio risultati",
+
+        // Instructions on how to email grades
+        "FLB_STR_EMAIL_GRADES_INSTR" : "Flubaroo può spedire via email a ciascuno studente il suo risultato, così come le risposte corrette. Utilizza il menù a tendina per selezionare la domanda contenente il loro indirizzo email. Se gli indirizzi email non sono stati richiesti, non sarai in grado di spedire i voti.",
+
+        // Notice that grades cannot be emailed because the user has exceeded their daily quota.
+        "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubaroo non può inviare i risultati ora perché hai superato la quota giornaliera di invio email.  Questa quota è fissata da Goggle per tutti gli Add-ons.  Prova più tardi.",
+      
+        // Message about how many grade emails *have* been sent. This message is preceeded by a number.
+        // Example: "5 grades were successfully emailed"
+        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "risultati sono stati inviati con successo",
+
+        // Message about how many grade emails *have NOT* been sent. This message is preceeded by a number.
+        "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "risultati non sono stati inviati a causa di indirizzi email nulli o non validi, perché sono stati già inviati in passato, o perché hai superato la tua quota giornaliera di email.",
+
+        // Message about how many grade emails *have NOT* been sent.
+        "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Non è stato inviato nessun risultato, a causa di indirizzi email nulli o non validi, perché sono stati già inviati in passato, o perché hai superato la tua quota giornaliera di email.",     
+      
+        // Subject of the email students receive. Followed by assignment name. 
+        // Example: Here is your grade for "Algebra Quiz #6"
+        "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Questo è il tuo risultato per",
+
+        // First line of email sent to students
+        // Example: This email contains your grade for "Algebra Quiz #6"
+        "FLB_STR_EMAIL_GRADES_EMAIL_BODY_START" : "Questo messaggio contiene il tuo risultato per",
+
+        // Message telling students not to reply to the email with their grades
+        "FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG" : "Non rispondere a questo messaggio",
+
+        // Message that preceedes the student's grade
+        "FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Il tuo risultato",
+
+        // Message that preceedes the instructor's (optional) message in the email
+        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Qui sotto è riportato un messaggio dal tuo docente, inviato a tutti gli studenti",
+
+        // Message that preceedes the instructor's (optional) feedback for the student in the email
+        "FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW" : "Il tuo docente ha un messaggio specifico per te",
+
+        // Message that preceedes the summary of the student's information (name, date, etc)
+        "FLB_STR_EMAIL_GRADES_SUBMISSION_SUMMARY" : "Sommario del tuo test",
+
+        // Message that preceedes the table of the students scores (no answer key sent)
+        "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE" : "Qui sotto è riportato il punteggio per ciascuna risposta",
+
+        // Message that preceedes the table of the students scores, and answer key
+        "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "Qui sotto è riportato il punteggio per ciascuna risposta, insieme alla risposta corretta",
+
+        // Header for the  column in the table of scores in the email which lists the question asked.
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER" : "Domanda",
+
+        // Header for the  column in the table of scores in the email which lists the student's answer.
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER" : "La tua risposta",
+
+        // Header for the  column in the table of scores in the email which lists the correct answer.
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER" : "Risposta corretta",
+
+        // Header for the column in the table of scores in the email which lists the student's score (0, 1, 2...)
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_SCORE_HEADER" : "Il tuo punteggio",
+
+        // Header for the  column in the table of scores in the email which lists the points possible (e.g. 5).
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS_POSSIBLE_HEADER" : "Punti possibili",
+
+        // Header for the  column in the table of scores in the email which lists the Help Tip (if provided)
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER" : "Aiuto per questa domanda",
+
+        // Label for "points" used in the new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS" : "punti",
+
+        // Label for "Correct" questions in new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT" : "Corretta",
+
+        // Label for "Incorrect" questions in new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT" : "Sbagliata",
+
+        // Footer for the email sent to students, advertising Flubaroo.
+        "FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Questo messaggio è stato generato da Flubaroo, un software libero per valutare test",
+
+        // Link at the end of the footer. Leads to www.flubaroo.com
+        "FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Visita flubaroo.com",
+
+        // Subject of the record email sent to the instructor, when grades are emailed to the class.
+        // Followed by the assignment name.
+        // e.g. Record of grades emailed for Algebra Quiz #6
+        "FLB_STR_EMAIL_RECORD_EMAIL_SUBJECT": "Risultato inviato per",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the name of the assignment, in the summary table.
+        "FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME": "Nome del test",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the number of emails sent, in the summary table.
+        "FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT": "Numero di risultati inviati",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the number of graded submissions, in the summary table
+        "FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM": "Numero di test valutati",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the average score in points (vs percent), in the summary table
+        "FLB_STR_EMAIL_RECORD_AVERAGE_SCORE": "Punteggio medio",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Labels the points possible, in the summary table
+        "FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE": "Punti possibili",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Indicated if an answer key was provided to the students, in the summary table
+        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "Risposta corretta fornita?",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Value in summary table if answer key was NOT sent to students by instructor
+        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_NO": "No",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Value in summary table if answer key WAS sent to students by instructor
+        "FLB_STR_EMAIL_RECORD_ANSWER_KEY_YES": "Sì",
+
+        // Used in the record email sent to the instructor after she emails grades.
+        // Message that preceeds what message the instructor email to her students.
+        "FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE": "Hai anche inviato il seguente messaggio",
+
+        // About Flubaroo message (1 of 2)
+        "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo è un software libero che consente a docenti di valutare velocemente test a risposta multipla e di analizzarne i risultati.",
+
+        // About Flubaroo message (2 of 2)
+        "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Per saperne di più, visita www.flubaroo.com.",
+
+        // Message that appears when "Student Submissions" sheet cannot be located.
+        "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubaroo non ha potuto capire quale foglio contenga le risposte degli studenti.  Trova il foglio giusto e rinominalo come: ",
+
+        // Message that appears when "Grades" sheet cannot be located.
+        "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubaroo non ha potuto capire quale foglio contenga i risultati.  Valuta il test, o trova il foglio con i voti e rinominalo come: ",
+
+        // Menu option to grade assignment.
+        "FLB_STR_MENU_GRADE_ASSIGNMENT" : "Valuta il test",
+
+        // Menu option to re-grade assignment.
+        "FLB_STR_MENU_REGRADE_ASSIGNMENT" : "Rivaluta il test",
+
+        // Menu option to email grades.
+        "FLB_STR_MENU_EMAIL_GRADES" : "Invia i risultati",
+
+        // Menu option to hide student feedback (hides the column)
+        "FLB_STR_MENU_HIDE_FEEDBACK" : "Nascondi il feedback per gli studenti",
+
+        // Menu option to edit student feedback (unhides the column)
+        "FLB_STR_MENU_EDIT_FEEDBACK" : "Modifica il feedback per gli studenti",
+
+        // Menu option to hide help tips
+        "FLB_STR_MENU_HIDE_HELP_TIPS" : "Nascondi i suggerimenti di aiuto",
+
+        // Menu option to edit help tips
+        "FLB_STR_MENU_EDIT_HELP_TIPS" : "Modifica i suggerimenti di aiuto",
+
+        // Menu option to view report.
+        "FLB_STR_MENU_VIEW_REPORT" : "Vedi il report",
+
+        // Menu option to learn About Flubaroo.
+        "FLB_STR_MENU_ABOUT" : "A proposito di Flubaroo",
+
+        // Menu title for "Advanced" sub-menu
+        "FLB_STR_MENU_ADVANCED" : "Avanzate",
+      
+        // Menu title for Advanced > Options
+        "FLB_STR_MENU_ADV_OPTIONS" : "Opzioni avanzate",
+      
+        // Menu option to choose the language.
+        "FLB_STR_MENU_SET_LANGUAGE" : "Scegli la lingua",
+
+        // Menu option to enable autograde.
+        "FLB_STR_MENU_ENABLE_AUTO_GRADE" : "Attiva la valutazione automatica",
+  
+        // Menu option to disable autograde.
+        "FLB_STR_MENU_DISABLE_AUTO_GRADE" : "Disattiva la valutazione automatica",
+      
+        // Menu option to see reamining daily email quota
+        "FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Controlla la quota email",
+      
+        // Menu option shown to enable Flubaroo in a sheet where it's never been used before
+        "FLB_STR_MENU_ENABLE" : "Attiva Flubaroo su questo foglio",
+      
+        // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
+        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo è stato attivato per questo foglio elettronico. Puoi ora accedere al menù relativo.",
+      
+        // Word that appears on the "Continue" button in grading and emailing grades.
+        "FLB_STR_BUTTON_CONTINUE" : "Continua",
+
+        // Name of "Student Submissions" sheet
+        "FLB_STR_SHEETNAME_STUD_SUBM" : "Risposte Degli Studenti",     
+
+        // Name of "Grades" sheet
+        "FLB_STR_SHEETNAME_GRADES" : "Valutazioni",
+
+        // Text put in Grades sheet when a question isnt graded.
+        "FLB_STR_NOT_GRADED" : "Non valutata",
+
+        // Message that is displayed when a new version of Flubaroo is installed.
+        "FLB_STR_NEW_VERSION_NOTICE" : "Hai installato una nuova versione di Flubaroo! Visita flubaroo.com/blog per vedere cosa c’è di nuovo.",
+
+        // Headline for notifications / alerts.
+        "FLB_STR_NOTIFICATION" : "Notifiche di Flubaroo",
+
+        // For emailing grades, question which asks user to identify email question.
+        "FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Domanda relativa all’indirizzo email: ", // note the space after ":"
+
+        // For emailing grades, asks user if list of questions and scores should be sent.
+        "FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Includi la lista di domande ed i punteggi: ", // note the space after ":"
+
+        // For emailing grades, asks user if answer key should be sent...
+        "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Includi la risposta chiave: ", // note the space after ":"
+        
+        // For emailing grades, appears before text box for optional instructor message.
+        "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Messaggio da includere (opzionale):",
+
+        // Window title for View Report window
+        "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Rapporto della valutazione",
+
+        // Title of historgram chart in report
+        "FLB_STR_VIEW_REPORT_HISTOGRAM_CHART_TITLE" : "Istogramma dei punteggi",
+
+        // Y-Axis (vertical) title of historgram chart in report
+        "FLB_STR_VIEW_REPORT_HISTOGRAM_Y-AXIS_TITLE" : "Invii",
+
+        // X-Axis (horizontal) title of historgram chart in report
+        "FLB_STR_VIEW_REPORT_HISTOGRAM_X-AXIS_TITLE" : "Punti ottenuti",
+
+        // Label of "Email Me Report" button in View Report window
+        "FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Inviami il rapporto",
+
+        // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
+        "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Il rapporto è stato spedito a",
+      
+        // Message to show the user in the top-left cell of the Grading sheet when grading starts. 
+        "FLB_STR_GRADING_CELL_MESSAGE" : "Valuto gli invii più recenti...",
+      
+        // Message that pops up to notify the user that autograde is on.
+        "FLB_STR_AUTOGRADE_IS_ON" : "La valutazione automatica è attivata. Non modificare alcun foglio finché la valutazione automatica è attiva.",
+
+        // Message that pops up to notify the user that autograde is on.
+        "FLB_STR_AUTOGRADE_IS_OFF" : "La valutazione automatica è ora disabilitata.",
+      
+        // Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
+        "FLB_STR_AUTOGRADE_GRADE_RECENT" : "Alcuni test più recenti non sono stati valutati. Vuoi che Flubaroo li valuti prima di attivare la valutazione automatica?",
+
+        // Message to tell the user that autograde must gather grading and email settings before being turned on.      
+        "FLB_STR_AUTOGRADE_SETUP" : "Prima di attivare la valutazione automatica devi selezionare alcune opzioni relative al sistema di valutazione ed all’invio di messaggi. Premi 'OK' per proseguire.",
+ 
+        // Message asking user if they'd like to update their grading and email settings before turning on autograde.
+        "FLB_STR_AUTOGRADE_UPDATE" : "Prima di attivare la valutazione automatica vuoi aggiornare le tue opzioni di valutazione e di invio messaggi?",
+      
+        // Title of Advanced Options window
+        "FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Opzioni avanzate",
+
+        // Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
+        "FLB_STR_ADV_OPTIONS_NOTICE" : "Modifica queste opzioni solo se hai letto gli articoli corrispondenti",
+      
+        // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.      
+        "FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Utilizza il mio indirizzo come indirizzo di risposta, invece di noreply@.",
+     
+        // Text for Advanced Options, describing option to send each student a link to edit their response.
+        "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "Dopo l’invio di un test, spedisci allo studente un link per modificare facilmente la sua risposta.",
+      
+        // Text for Advanced Options, describing option to change the 70% pass rate.
+        "FLB_STR_ADV_OPTIONS_PASS_RATE" : "Percentuale sotto la quale lo studente è evidenziato in rosso: ",
+
+        // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu.  
+        "FLB_STR_EMAIL_QUOTA_MSG" : "Nella tua quota giornaliera ti rimangono questi messaggi da inviare: ",
+     
+        // "Points" label that appears over second column in Step 1 of grading.
+        "FLB_STR_GRADE_STEP1_LABEL_POINTS" : "Punti",
+      
+        // Error message shown in Step 1 of grading if no fields selected with "Identifies Student"
+        "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR" : "Devi selezionare almeno una domanda che identifichi lo studente prima di continuare.",
+       
+        // Error message shown in Step 1 of grading if no fields selected that are gradeable
+        "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR" : "Devi selezionare almeno una domanda che sia valutabile.",
+            
+        // Error message shown in Step 2 of grading if no answer key selected.
+        "FBL_STR_GRADE_STEP2_NO_AK_SELECTED" : "Devi selezionare una risposta chiave prima di proseguire.",
+      
+        // Grading option which indicates Normal Grading (for display only in Step 1)
+        "FLB_STR_GRADING_OPT_NORMAL_GRADING" : "Valutazione normale",
+
+        // Grading option which indicates Manual Grading (for display only in Step 1)
+        "FLB_STR_GRADING_OPT_MANUAL_GRADING" : "Valutazione manuale (Nuovo!)",
+      
+        // Message shown if user tries to enable autograde when a question is set for Manual Grading.
+        "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS" : "La valutazione automatica non può essere abilitata perché hai una o più domande valutate manualmente.",
+        
+        // Message shown if some questions are identical. All questions must be unique for Flubaroo to grade properly.
+        "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS" : "Hai richiesto che una o più domande siano valutate manualmente.  Tuttavia la valutazione non \
+                                                può proseguire poiché alcune domande sono identiche ad altre. Ad esempio, puoi avere due domande \
+                                                chiamate entrambe \"Domanda\". Modifica il testo di queste domande nella Riga 1 in modo tale che \
+                                                siano differenti (ad esempio, \"Domanda 1\" e \"Domanda 2\") e prova ancora.",
+            
+        // Label for manually graded questions in new style email summary of grades
+        "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL" : "Valutata manualmente",
+
+        // Instructions that show-up in window when manual grading is selected.      
+        "FBL_STR_MANUAL_GRADING_INSTR" : "Utilizza i controlli qui sotto per assegnare voti manualmente. La funzione è attiva solo per domande per le quali hai selezionato \"Valutazione manuale\" al Passo 1 della valutazione.",
+      
+        // Menu option to open window for manual (by hand) grading of questions.
+        "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS" : "Valuta le risposte manualmente",
+      
+        // Message shown in email to students if manually graded question wasn't assigned any points.
+        "FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED" : "Nessun punteggio assegnato",
+      
+        // Header for the column in the table of scores in the email which lists the Help Tip (if provided)
+        "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER" : "Commenti del tuo docente",
+
+        // Title for the "Grade by Hand" window      
+        "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE" : "Flubaroo - Valuta le risposte manualmente",
+      
+        // Label next to the first step in the "Grade by Hand" window, which allows the teacher to select the student.
+        "FLB_STR_MANUAL_GRADING_STEP1" : "1. Seleziona lo studente:",
+      
+        // Label next to the second step in the "Grade by Hand" window, which allows the teacher to select which question.
+        "FLB_STR_MANUAL_GRADING_STEP2" : "2. Seleziona la domanda:",
+      
+        // Label next to the third step in the "Grade by Hand" window, which allows the teacher to read the submission.
+        "FLB_STR_MANUAL_GRADING_STEP3" : "3. Vedi la risposta dello studente:", 
+      
+        // Label next to the fourth step in the "Grade by Hand" window, which allows the teacher to enter notes.
+        "FLB_STR_MANUAL_GRADING_STEP4" : "4. Inserisci le note per lo studente (verranno inviate via mail):", 
+      
+        // Text for the link that shows the teacher's answer key / rubric in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "controlla la risposta chiave", 
+      
+        // Text for the button that is used to set the grade in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE" : "Inserisci il punteggio",
+      
+        // Text that appears in the button while the grade is being applied in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_BUTTON_WORKING" : "Attendere",
+      
+        // Message that appears at the top of the "Grade by Hand" window after the grade has been successfully applied.
+        "FLB_STR_MANUAL_GRADING_GRADE_APPLIED" : "Il punteggio è stato inserito.",
+      
+        // Message that appears at the top of the "Grade by Hand" window if the teacher doesn't enter a valid score in the box.
+        "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE" : "Inserisci un valore valido.",
+      
+        // Message that appears at the top of the "Grade by Hand" window if an error occurs while setting the grade.
+        "FLB_STR_MANUAL_GRADING_ERROR_OCCURED" : "Si è verificato un errore.",
+      
+        // Text for "Close X" link that allows the teacher to close the pop-up window that contains the answer key in the "Grade by Hand" window.
+        "FLB_STR_MANUAL_GRADING_CLOSE_POPUP" : "Chiudi",
+      
+        // Message that appears if a teacher tries to disable autograde while grading is in process.
+        "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW" : "La valutazione automatica sta attualmente valutando uno o più test, pertanto non può essere disabilitata.  Prova di nuovo tra breve.",
+      
+        // Message that is shown to the user if grading cannot complete because no valid submissions were found in the submissions sheet (i.e. oinly blank rows).
+        "FLB_STR_NO_VALID_SUBMISSIONS" : "Il foglio di valutazioni non è stato creato perché non è stato trovato nessun test valido.",
+      
+        // Title of the window that informs the user that their Grades sheet is corrupted (badly formed).
+        "FLB_STR_INVALID_GRADE_SHEET_TITLE": "Foglio di valutazioni corrotto - Non posso continuare",
+      
+        // Message shown in the "Corrupted Grades Sheet" window.
+        "FLB_STR_INVALID_GRADES_SHEET" : "<p>Flubaroo non può continuare perché il tuo foglio di valutazioni è corrotto. Hai per caso cancellato righe, colonne \
+o altri dati dal foglio Valutazioni recentemente?</p>\
+                                          <p>Vedi <a href=\"http://www.flubaroo.com/hc/corrupted-grades-sheet\">questo articolo</a> per aiuto.</p>",
+      
+        // Short message that is included at the top of the Grades sheet in bold, instructing users not to modify the Grades sheet.
+        "FLB_STR_DO_NOT_DELETE_MSG" : "PER FARE IN MODO CHE FLUBAROO FUNZIONI CORRETTAMENTE NON CANCELLARE RIGHE O COLONNE IN QUESTO FOGLIO", 
+      
+        // Label for the "Share Grades" window, which asks the user how they would like to share the grades (email, drive, or both).
+        "FLB_STR_GRADES_SHARE_LABEL" : "Metodo di invio dei risultati:",
+      
+        // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via email.
+        "FLB_STR_GRADES_SHARE_EMAIL" :  "Tramite email (tipico)", // always at index 0
+      
+        // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via Google Drive.
+        "FLB_STR_GRADES_SHARE_DRIVE" :  "Tramite Google Drive (nessuna email)",  // always at index 1
+        
+        // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via both email and Drive.
+        "FLB_STR_GRADES_SHARE_BOTH" :   "Tramite entrambi, email e Drive", // always at index 2
+      
+        // Name of the folder where shared and printed grades get put in the teacher's My Drive.
+        "FLB_STR_DRIVE_SHARE_FOLDER_NAME" : "Flubaroo - Risultati inviati",
+      
+        // Text that begins the shared Google Document. Example: "Grade for dave@edcode.org - Exam #2"
+        "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE" : "Risultato per",
+      
+        // Text/Link that is included in the emails to students if the "both" method of grade sharing was selected by the teacher.
+        "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG" : "Clicca per vedere il report dei risultati su Google Drive",
+      
+        // Title for window that allows teachers to print the grades.
+        "FLB_STR_PRINT_GRADES_WINDOW_TITLE" : "Flubaroo - Stampa i Voti",
+      
+        // Instructions for the "Print Grades" window
+        "FLB_STR_PRINT_GRADES_INSTR" : "Flubaroo creerà un singolo documento Google che conterrà i risultati di tutti gli studenti che puoi stampare e distribuire. \
+                                        Puoi specificare un messaggio specifico da includere in ogni documento, così come decidere di includere una lista di domande e/o delle risposte corrette.",
+      
+        // Title for the "Share Grades" window.
+        "FLB_STR_SHARE_GRADES_WINDOW_TITLE" : "Flubaroo - Invia risultati",
+      
+        // Instructions for the "Share Grades" window.
+        "FLB_STR_SHARE_GRADES_INSTR" : "Flubaroo può inviare a ciascun studente i risultati via mail, Google Drive, o entrambi. Utilizza il menù a tendina per selezionare la domanda contenente il loro indirizzo email. Se gli indirizzi email non sono stati richiesti, non sarai in grado di spedire i voti.",
+      
+        // Success message shown after grades have been printed. Followed by a link to the printable document.
+        "FBL_STR_PRINT_GRADES_SUCCESS" : "È stato creato un documento Google contenente tutti i risultati degli studenti. Clicca sul file qui sotto per aprirlo, quindi stampalo e consegna a ciascuno studente la sua stampa.",
+      
+        // Text that begins the name of the Google Document containing the printable grades. Example: "Printable grades for: Exam #2"
+        "FBL_STR_PRINT_GRADES_TITLE_PRE": "Risultati stampabili per:",
+      
+        // Menu option to share grades.
+        "FLB_STR_MENU_SHARE_GRADES" : "Invia i risultati",
+      
+        // Menu option to print grades.
+        "FLB_STR_MENU_PRINT_GRADES" : "Stampa i risultati",
+      
+        // Grading option for "Extra Credit" on questions.
+        "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Credito extra",
+     
+         // Text for Advanced Options, describing option to allow extra credit.      
+        "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Permetti credito extra quando si assegnano punti alle domande",
+ 
+        // Flubaroo Tips, shown when grading completes.
+        "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Suggerimento #1:</b> Flubaroo può accettare più di una risposta corretta.",
+        "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Suggerimento #2:</b> Flubaroo può valutare intervalli numerici per test scientifici e matematici.",
+        "FLB_STR_TIP_MSG_NUMBER_3" : "<b>Flubaroo Suggerimento #3:</b> CANE vs cane? Valuta risposte senza ignorare il maiuscolo.",
+        "FLB_STR_TIP_MSG_NUMBER_4" : "<b>Flubaroo Suggerimento #4:</b> Vuoi cambiare il limite soglia del 70%?",
+        "FLB_STR_TIP_MSG_NUMBER_5" : "<b>Flubaroo Suggerimento #5:</b> Hai bisogno di controllare la quota email che ti resta?",
+        "FLB_STR_TIP_MSG_NUMBER_6" : "<b>Flubaroo Suggerimento #6:</b> Vuoi valutare i test automaticamente?",
+        "FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo Suggerimento #7:</b> Hai domande? Abbiamo risposte nelle nostre FAQ!",
+        "FLB_STR_TIP_MSG_NUMBER_8" : "<b>Flubaroo Suggerimento #8:</b> Sei in una scuola che usa Google Apps For Education? Ottieni gli indirizzi email automaticamente!",
+        "FLB_STR_TIP_MSG_NUMBER_9" : "<b>Flubaroo Suggerimento #9:</b> Non puoi inviare i risultati via email? Utilizza Google Drive!",
+        "FLB_STR_TIP_MSG_NUMBER_10" : "<b>Flubaroo Suggerimento #10:</b> Vuoi una stampa dei risultati dei tuoi studenti? Impara come farla!",
+      
+    },
+    // END ITALIAN   //////////////////////////////////////////////////////////////////////////////////
+  
+  
 } // end langs
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+

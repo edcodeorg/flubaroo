@@ -1,8 +1,8 @@
-// File: email.gs
-// Description:
+// File: email.gas.gs
+// Description: 
 // This file contains all relevant functions for sending email.
 
-// TODO_AJR - There is a flag in the grades sheet about whether a student has
+// TODO_AJR - There is a flag in the grades sheet about whether a student has 
 // been emailed yet. So could use this rather than shortening the email loop.
 
 // TODO_AJR - Look for other menu handlers that can be nested.
@@ -19,64 +19,64 @@
 function doShareGrades()
 {
   Debug.info("doShareGrades()");
-
+  
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var dp = PropertiesService.getDocumentProperties();
-
+    
   // The object representing the grades sheet.
-
+  
   // The send emails ui.
   var app = UiApp.getActiveApplication();
-
+    
   // The zero-offset index of the email question in the submissions.
   var question_index = 0;
-
+    
   // The text of the email address question.
-  var question = dp.getProperty(DOC_PROP_EMAIL_ADDRESS_QUESTION);
-
+  var question = dp.getProperty(DOC_PROP_EMAIL_ADDRESS_QUESTION);  
+    
   var share_option_index = dp.getProperty(DOC_PROP_EMAIL_SHARE_OPTION);
-
-  // Whether to show answers in the student's
+    
+  // Whether to show answers in the student's 
   var show_answers = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY);
-
-  // The message from the instructor in the student's
+    
+  // The message from the instructor in the student's 
   var instructor_message = dp.getProperty(DOC_PROP_EMAIL_INSTRUCTOR_MESSAGE);
-
-  // Include question scores in the
+    
+  // Include question scores in the 
   var show_questions = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_SCORES);
-
+    
   // The email address of the instructor.
   var user_email_addr = dp.getProperty(DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS);
   Debug.assert(user_email_addr !== null, "doShareGrades() - DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS not set")
 
   var assignment_name = SpreadsheetApp.getActiveSpreadsheet().getName();
-
+  
   // For English, remove "(Responses)" from the title, which is added by Google when
   // a new spreadsheet is created as the destination for form responses.
   assignment_name = assignment_name.replace(" (Responses)", "");
-
+    
   // Also remove any single-quotes from it, as this causes problems with the Drive API
   assignment_name = assignment_name.replace(/'/g, "");
-
+  
   var num_email_send_attempts = 0;
-
+  
   var num_emails_sent = 0;
-
+    
   var num_emails_unsent = 0;
-
+  
   var got_grades_sheet = gotSheetWithGrades(ss);
-
+    
   var gws;
-
+  
   // checkout the drive sharing options and create a drive folder for this assignment if needed
   var drive_share_assignment_folder_name = assignment_name;
   var assignment_folder = null;
   var mydrive_folder = null;
-
+  
   var grade_share_option = GRADE_SHARE_METHOD_EMAIL;
-
+  
   Debug.info("share_option_index: '" + share_option_index + "'");
-
+  
   if (share_option_index == "1")
     {
       grade_share_option = GRADE_SHARE_METHOD_DRIVE;
@@ -85,7 +85,7 @@ function doShareGrades()
     {
       grade_share_option = GRADE_SHARE_METHOD_BOTH;
     }
-
+  
   if ((grade_share_option == GRADE_SHARE_METHOD_DRIVE)
        || (grade_share_option == GRADE_SHARE_METHOD_BOTH))
     {
@@ -96,7 +96,7 @@ function doShareGrades()
 
       Debug.info("created assignment folder for this assignment");
     }
-
+    
   // Initialize a gws object from the Grades sheet
   if (Autograde.isOn() && autograded_gws_g)
     {
@@ -110,61 +110,61 @@ function doShareGrades()
       Debug.info("doShareGrades(): generating new gws object from Grades sheet.");
       gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_FULL);
     }
-
+  
   var points_possible =  gws.getPointsPossible();
   var has_manually_graded_question = gws.hasManuallyGradedQuestion();
-
+  
   // Remove any HTML formatting from the instructor's message.
   // TODO_AJR - Could probably do something clever here with regex.
   Debug.info("instructor_message: " + instructor_message);
   var instructor_message_email = instructor_message.replace("<", "&lt;");
   instructor_message_email = instructor_message_email.replace(">", "&gt;");
   instructor_message_email = instructor_message_email.replace("\n", "<br>");
-
+  
   var instructor_message_doc = instructor_message.replace(/\n/g, "\r");
-
+  
   // Find out which question contains the email address.
-
+  
   var first_graded_subm = gws.getFirstGradedSubmission();
   var q;
-
-  for (q = first_graded_subm.getFirstQuestion();
-       q !== null;
+  
+  for (q = first_graded_subm.getFirstQuestion(); 
+       q !== null; 
        q = first_graded_subm.getNextQuestion(q))
-    {
+    { 
       // Guaranteed to find it.
-      if (q.getGradingOption() === GRADING_OPT_STUD_ID &&
+      if (q.getGradingOption() === GRADING_OPT_STUD_ID && 
           q.getFullQuestionText() === question)
         {
-          // Note: we have to iterate to find it, as this list could
-          // be initiated from either the Student Submissions or
-          // Grades sheet, which may have different orders for
+          // Note: we have to iterate to find it, as this list could 
+          // be initiated from either the Student Submissions or 
+          // Grades sheet, which may have different orders for 
           // the questions.
           break;
         }
-
+    
       question_index++;
     }
-
-  Debug.info("doShareGrades() - " +
+  
+  Debug.info("doShareGrades() - " + 
              "found email address at: " + question_index + " " +
              "with value: " + question);
-
-  // TODO_AJR -
+  
+  // TODO_AJR - 
   // 1) In autograed add the option to not send out an email, just grade it.
   // 2) to let the instructor decide if they get an email every time.
-
+  
   // Send all of the student result emails.
   sendAllStudentsGrades();
-
+  
   // TODO_AJR - This shouldn't even be coming up for autograde.
   app.close();
-
+  
   if ((num_emails_sent > 0) && !Autograde.isOn())
     {
       sendInstructorEmail();
     }
-
+  
   // log (anonymously) that emails were sent for an assignment.
   // do only for manually graded assignments. this ensures consistency
   // with existing analytics, and also avoids pollution due to high use
@@ -180,11 +180,11 @@ function doShareGrades()
           logSharedGradesViaDrive();
         }
     }
-
+  
   Debug.writeToFieldLogSheet();
-
+  
   notifyNumberEmailsSent();
-
+  
   return app;
 
   // Private functions.
@@ -197,19 +197,19 @@ function doShareGrades()
     var pdf_certificate = null;
     var date = new Date();
     var html_body;
-    var msg_title = langstr("FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT") +
-                    ' "' +
+    var msg_title = langstr("FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT") + 
+                    ' "' + 
                     assignment_name + '"';
-
+    
     var up = PropertiesService.getUserProperties();
-
+    
     Debug.info("sendAllStudentsGrades()");
 
     var send_email_fingerprints = gws.getNotAlreadyEmailedFingerprintsList();
-
+    
     Debug.info("list of fingerprints that need emailing:");
     Debug.info(send_email_fingerprints);
-
+       
     for (var i=0; i < send_email_fingerprints.length; i++)
       {
         Debug.info("getting graded submission by fingerprint: " + send_email_fingerprints[i]);
@@ -223,12 +223,12 @@ function doShareGrades()
           {
             Debug.info("gs.getSubmFingerprint() == null");
           }
-
-        // Pull email address from grade sheet rather than the submissions sheet in case the
+        
+        // Pull email address from grade sheet rather than the submissions sheet in case the 
         // instructor has edited the values inline.
         email_address = gs.getQuestionByIndex(question_index)
                           .getGradedVal();
-
+        
         Debug.info("examining email: " + email_address);
         if (typeof email_address == 'string')
           {
@@ -245,36 +245,36 @@ function doShareGrades()
 
         num_email_send_attempts += 1;
         var grdoc_url = null;
-
-        try
+        
+        try 
           {
             if ((grade_share_option == GRADE_SHARE_METHOD_DRIVE)
                  || (grade_share_option == GRADE_SHARE_METHOD_BOTH))
-              {
+              {        
                 Debug.info("creating and sharing document with student grades");
-
-                // Create a document with a summary of this student's grades, and
+                
+                // Create a document with a summary of this student's grades, and 
                 // share it with the student. The teacher will remain the owner, but the student
-                // will have Comment rights.
-                var grdoc = createGradeDocument(mydrive_folder, assignment_name, assignment_folder,
+                // will have Comment rights. 
+                var grdoc = createGradeDocument(mydrive_folder, assignment_name, assignment_folder, 
                                                 instructor_message_doc, show_questions, show_answers,
-                                                points_possible, email_address,
+                                                points_possible, email_address, 
                                                 has_manually_graded_question, gs);
                 grdoc_url = grdoc.getUrl();
               }
-
+                                               
             Debug.info("sendAllStudentEmail() - sent email to " + email_address);
           }
         catch (exception)
           {
-            Debug.error("sendAllStudentsGrades() - failed to create and share grades document for " +
+            Debug.error("sendAllStudentsGrades() - failed to create and share grades document for " + 
                         email_address + " " +
                         "Error: " + exception);
           }
-
-
+        
+        
         try
-          {
+          {      
             if ((grade_share_option == GRADE_SHARE_METHOD_EMAIL)
                  || (grade_share_option == GRADE_SHARE_METHOD_BOTH))
               {
@@ -282,81 +282,81 @@ function doShareGrades()
                 var no_noreply = up.getProperty(USER_PROP_ADV_OPTION_NO_NOREPLY);
                 no_noreply = no_noreply ? true : false;
 
-                MailApp.sendEmail(email_address,
-                                  msg_title,
+                MailApp.sendEmail(email_address, 
+                                  msg_title, 
                                   "",
-                                  {htmlBody: html_body,
-                                   noReply: !no_noreply,
+                                  {htmlBody: html_body, 
+                                   noReply: !no_noreply, 
                                    name: "Flubaroo Grader",
                                    attachments: pdf_certificate});
               }
-
+            
             num_emails_sent++;
-
+              
             gs.recordEmailSentInGradesSheet();
           }
         catch (exception)
           {
             // Just ignore malformed emails or email errors.
             num_emails_unsent++;
-
-            Debug.error("sendAllStudentsGrades() - failed to send email to " +
+          
+            Debug.error("sendAllStudentsGrades() - failed to send email to " + 
                         email_address + " " +
                         "Error: " + exception);
           }
-
+        
       }
-
+      
   } // sendAllStudentsGrades()
 
-  function sendInstructorEmail()
+  function sendInstructorEmail() 
   {
     var up = PropertiesService.getUserProperties();
     var no_noreply = up.getProperty(USER_PROP_ADV_OPTION_NO_NOREPLY);
-    no_noreply = no_noreply ? true : false;
-
+    no_noreply = no_noreply ? true : false;        
+    
     var msg_title = langstr("FLB_STR_EMAIL_RECORD_EMAIL_SUBJECT") + ": " + assignment_name;
     var msg_body = "<html><body><p>Below is a summary of the grades you just shared:<b>";
     var email_notification;
-
+    
     msg_body += "<table border=0 cellspacing=12>";
-
-    msg_body += '<tr><td>' +
-                langstr("FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME") +
-                ':</td><td><b><a href="' +
-                ss.getUrl() +
-                '">' +
-                assignment_name +
+    
+    msg_body += '<tr><td>' + 
+                langstr("FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME") + 
+                ':</td><td><b><a href="' + 
+                ss.getUrl() + 
+                '">' + 
+                assignment_name + 
                 "</a></b></td></tr>";
-
-    msg_body += "<tr><td>" +
-                langstr("FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT") +
-                ":</td><td><b>" +
-                num_emails_sent +
+    
+    msg_body += "<tr><td>" + 
+                langstr("FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT") + 
+                ":</td><td><b>" + 
+                num_emails_sent + 
                 "</b></td></tr>";
-
-    msg_body += "<tr><td>" +
-                langstr("FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM") +
-                ":</td><td><b>" +
-                gws.getNumGradedSubmissions() +
+    
+    msg_body += "<tr><td>" + 
+                langstr("FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM") + 
+                ":</td><td><b>" + 
+                gws.getNumGradedSubmissions() + 
                 "</b></td></tr>";
-
-    msg_body += "<tr><td>" +
-                langstr("FLB_STR_EMAIL_RECORD_AVERAGE_SCORE") +
-                ":</td><td><b>" +
-                gws.getAverageScore().toFixed(2) +
+    
+    msg_body += "<tr><td>" + 
+                langstr("FLB_STR_EMAIL_RECORD_AVERAGE_SCORE") + 
+                ":</td><td><b>" + 
+                gws.getAverageScore().toFixed(2) + 
                 "</b></td></tr>";
-
-    msg_body += "<tr><td>" +
-                langstr("FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE") +
-                ":</td></td><b>" +
-                gws.getPointsPossible() +
+    
+    msg_body += "<tr><td>" + 
+                langstr("FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE") + 
+                ":</td></td><b>" + 
+                gws.getPointsPossible() + 
                 "</b></td></tr>";
-
-    msg_body += "<tr><td>" +
-                langstr("FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED") +
+    
+    msg_body += "<tr><td>" + 
+                langstr("FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED") + 
                 "</td><td><b>";
-
+    
     if (show_answers === 'true')
     {
       msg_body += langstr("FLB_STR_EMAIL_RECORD_ANSWER_KEY_YES");
@@ -365,44 +365,44 @@ function doShareGrades()
     {
       msg_body += langstr("FLB_STR_EMAIL_RECORD_ANSWER_KEY_NO");
     }
-
+    
     msg_body += "</b></td></tr></table>";
-
+    
     if (instructor_message)
     {
-      msg_body += "<p>" +
-                  langstr("FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE") +
+      msg_body += "<p>" + 
+                  langstr("FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE") + 
                   ":<br><br>";
-
-      msg_body += '<div style="padding-left:10px;padding-right:10px;' +
-                  'padding-top:10px;padding-bottom:10px;width:60%;' +
-                  'border:1px solid gray;">';
-
+      
+      msg_body += '<div style="padding-left:10px;padding-right:10px;' + 
+                  'padding-top:10px;padding-bottom:10px;width:60%;' + 
+                  'border:1px solid gray;">'; 
+      
       msg_body += instructor_message_email + "</p></div>";
     }
-
+    
     msg_body += "</body></html>";
-
+    
     try
-    {
-      MailApp.sendEmail(user_email_addr,
-                msg_title,
+    {  
+      MailApp.sendEmail(user_email_addr, 
+                msg_title, 
                 "",
-                {htmlBody: msg_body,
-                 noReply: !no_noreply,
+                {htmlBody: msg_body, 
+                 noReply: !no_noreply, 
                  name: "Flubaroo Grader"});
-
-       Debug.info("sendInstructorEmail() - sent email to " + user_email_addr);
+                 
+       Debug.info("sendInstructorEmail() - sent email to " + user_email_addr);                 
     }
     catch (exception)
     {
-      Debug.info("sendInstructorEmail() - failed to send email to instructor: " +
+      Debug.info("sendInstructorEmail() - failed to send email to instructor: " + 
              user_email_addr +
-             " Error: " +
+             " Error: " + 
              exception);
-    }
+    }    
   } // sendInstructorEmail()
-
+    
   function isValidEmailAddress(email_address)
   {
     if (!email_address)
@@ -410,35 +410,35 @@ function doShareGrades()
         Debug.info("isValidEmailAddress() - no email address");
         return false;
       }
-
+    
     if (typeof email_address !== 'string')
       {
         Debug.warning("isValidEmailAddress() - parameter not a string");
         return false;
       }
-
+    
     if (email_address.indexOf(' ') !== -1)
       {
-        Debug.warning("isValidEmailAddress() - email contains spaces");
+        Debug.warning("isValidEmailAddress() - email contains spaces");      
         return false;
       }
-
+    
     if (email_address.indexOf('@') === -1)
       {
-        Debug.warning("isValidEmailAddress() - no @");
+        Debug.warning("isValidEmailAddress() - no @");          
         return false;
       }
-
+    
     return true;
-
+    
   } // isValidEmailAddress()
-
+  
   // TODO_AJR - This isn't working yet.
-
+  
   function sendEmail(recipient, subject, body, options)
   {
     var up = PropertiesService.getDocumentProperties();
-
+    
     if (Debug.on())
       {
         if (up.getProperty(USER_PROP_SKIP_EMAIL))
@@ -451,21 +451,21 @@ function doShareGrades()
       {
         MailApp.sendEmail(recipient, subject, body, options);
       }
-
+    
   } // sendEmail()
-
+  
   function constructGradesEmailBody(graded_subm, grdoc_url)
-  {
+  {   
     // Find out if any help tips were provided. if so, we'll want to include a column for them in the email.
     var help_tips_provided = graded_subm.getHelpTipsPresent();
-
+    
     var msg_body = '<html><body bgcolor="white">';
-
+     
     msg_body += '<p>' + langstr("FLB_STR_EMAIL_GRADES_EMAIL_BODY_START") + ' <b>' + assignment_name + '</b>. '
                       + langstr("FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG") + '.</p>';
-
-    msg_body += '<div style="padding-left:10px;display:inline-block;border:1px solid black;">';
-
+     
+    msg_body += '<div style="padding-left:10px;display:inline-block;border:1px solid black;">'; 
+    
     var score_str = "";
     if (isInt(graded_subm.getScorePoints()))
       {
@@ -475,15 +475,15 @@ function doShareGrades()
       {
         score_str = floatToPrettyText(graded_subm.getScorePoints());
       }
-
-    msg_body += "<h2>" +
-                 langstr("FLB_STR_EMAIL_GRADES_YOUR_GRADE") +
-                 ": <b>" +
-                 score_str +
-                 " / " +
-                 gws.getPointsPossible() +
+    
+    msg_body += "<h2>" + 
+                 langstr("FLB_STR_EMAIL_GRADES_YOUR_GRADE") + 
+                 ": <b>" + 
+                 score_str + 
+                 " / " + 
+                 gws.getPointsPossible() + 
                  "&nbsp;(" + floatToPrettyText(graded_subm.getScorePercent() * 100) + "%)&nbsp;</h2></b></div>";
-
+      
     if (instructor_message !== "")
        {
          msg_body += '<br><br>';
@@ -492,7 +492,7 @@ function doShareGrades()
          msg_body +=  instructor_message_email;
          msg_body += "</div>";
        }
-
+    
     if (graded_subm.getStudentFeedback() !== "")
       {
          var student_feedback = graded_subm.getStudentFeedback();
@@ -500,85 +500,87 @@ function doShareGrades()
          student_feedback = student_feedback.replace("<", "&lt;");
          student_feedback = student_feedback.replace(">", "&gt;");
          student_feedback = student_feedback.replace("\n", "<br>");
-
+        
          msg_body += '<br><br>';
          msg_body += langstr("FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW") + ':<br><br>';
          msg_body += '<div style="padding-left:10px;padding-right:10px;padding-top:10px;padding-bottom:10px;width:60%;border:1px solid gray;">';
          msg_body +=  student_feedback;
          msg_body += "</div>";
       }
-
+    
     if (grdoc_url)
       {
         msg_body += '<br><p><a href="' + grdoc_url + '">' + langstr("FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG") + '</a><br>';
       }
-
+     
     msg_body += "<br><p>" + langstr("FLB_STR_EMAIL_GRADES_SUBMISSION_SUMMARY") + ": ";
-
+    
     msg_body += "<table border=0 cellspacing=12 width=80%>";
-
+    
     for (var q = graded_subm.getFirstQuestion(); q != null; q = graded_subm.getNextQuestion(q))
       {
         if (q.getGradingOption() === GRADING_OPT_STUD_ID)
           {
-            msg_body += "<tr><td>" +
-                        q.getFullQuestionText() +
-                        "</td><td>" +
-                        "<b>" +
-                        q.getFullSubmissionText() +
+            msg_body += "<tr><td>" + 
+                        q.getFullQuestionText() + 
+                        "</td><td>" + 
+                        "<b>" + 
+                        q.getFullSubmissionText() + 
                         "</b></td></tr>";
           }
       }
-
+    
     msg_body += "<tr><td>" +
                 langstr("FLB_STR_GRADE_STEP2_LABEL_SUBMISSION_TIME") + "</td><td>" +
-                "<b>" +
-                graded_subm.getTimestamp() +
+                "<b>" + 
+                graded_subm.getTimestamp() + 
                 "</b></td></tr>";
-
-    msg_body += "</table>";
-    msg_body += "</p>";
-
+    
+    msg_body += "</table>";  
+    msg_body += "</p>"; 
+    
     if (show_questions === 'true')
       {
         var gopt;
         var grade_points_str = "";
         var grade_status = "";
         var q;
-
-        for (q = graded_subm.getFirstQuestion();
-             q != null;
+  
+        for (q = graded_subm.getFirstQuestion(); 
+             q != null; 
              q = graded_subm.getNextQuestion(q))
           {
             if (q.isTimestamp())
               {
                 continue;
               }
-
-            gopt = q.getGradingOption();
-
-            if (gopt === GRADING_OPT_STUD_ID)
+            
+            gopt = q.getGradingOption()
+            
+            if (gopt === GRADING_OPT_STUD_ID 
+                || gopt === GRADING_OPT_COPY_FOR_REFERENCE
+                || gopt === GRADING_OPT_IGNORE)
               {
                 continue;
               }
-
+        
             grade_points_str = "";
             grade_status = "";
-
+        
             if (gopt === GRADING_OPT_SKIP)
               {
                 grade_status = langstr("FLB_STR_NOT_GRADED");
                 grade_points_str = "";
               }
-            else
+            else 
               {
                 if (q.getGradedVal() > 0)
                   {
                     grade_points_str = "+";
                   }
-
+                
                 var ques_pts_worth = getPointsWorth(q.getGradingOption());
-
+                
                 if (isNormallyGraded(gopt))
                   {
                     if (q.getGradedVal() == ques_pts_worth)
@@ -594,7 +596,7 @@ function doShareGrades()
                   {
                     grade_status = langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL");
                   }
-
+                
                 var is_num = (q.getGradedVal() !== "") && !isNaN(q.getGradedVal().toString());
                 if (is_num)
                   {
@@ -607,7 +609,7 @@ function doShareGrades()
                       {
                         score_str = floatToPrettyText(q.getGradedVal());
                       }
-
+                    
                     grade_points_str += score_str + " / " +ques_pts_worth + " ";
                     grade_points_str += langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS");
                   }
@@ -616,28 +618,28 @@ function doShareGrades()
                     grade_points_str = langstr("FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED");
                   }
 
-              }
-
+              } 
+            
             msg_body += constructQuestionDiv(q, grade_status, grade_points_str, show_answers, makePrettyAnswerKeyValue(q.getAnswerKeyText()));
-
+            
           } // for each question.
-
+          
       } // if show_questions is true.
-
+  
     msg_body += '<p><b>' + langstr("FLB_STR_EMAIL_GRADES_EMAIL_FOOTER") + '. ';
-
-    msg_body += '<a href="http://www.flubaroo.com">' +
-                 langstr("FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO") +
-                 '</a>.</b></p>';
-
+    
+    msg_body += '<a href="http://www.flubaroo.com">' + 
+                 langstr("FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO") + 
+                 '</a>.</b></p>'; 
+    
     msg_body += "</body></html>";
-
+    
     return msg_body;
-
+    
     // Construct the html "div" for the question in the email.
-    function constructQuestionDiv(graded_ques,
-                                  grade_status,
-                                  grade_points_str,
+    function constructQuestionDiv(graded_ques, 
+                                  grade_status, 
+                                  grade_points_str, 
                                   show_answers,
                                   ak_value)
     {
@@ -646,9 +648,9 @@ function doShareGrades()
       var bgcolor_gray = "#c0c0c0";
       var bgcolor_yellow = "#FFF77D";
       var bgcolor;
-
+      
       var gopt = graded_ques.getGradingOption();
-
+      
       if (gopt === GRADING_OPT_SKIP)
         {
           bgcolor = bgcolor_gray;
@@ -664,37 +666,37 @@ function doShareGrades()
           else
             {
               bgcolor = bgcolor_red;
-            }
+            }            
         }
       else // manually graded
         {
-          bgcolor = bgcolor_yellow;
+          bgcolor = bgcolor_yellow; 
         }
-
+      
       div_body = '<div style="width:610px;margin-left:10px;padding-left:15px;padding-right:15px;padding-top:10px;padding-bottom:20px;\
                   -webkit-border-radius: 20px;-moz-border-radius: 20px;border-radius: 20px;\
                   -webkit-box-shadow: #B3B3B3 10px 10px 10px;-moz-box-shadow: #B3B3B3 10px 10px 10px; box-shadow: #B3B3B3 10px 10px 10px;'
       div_body += 'background-color:' + bgcolor + ';">';
-
+      
       div_body += '<span style="width:180px;float:right;padding-right:20px;">';
       div_body += '<div style="width:100%;font-size:xx-large;text-align:right;">' + grade_status + '</div>';
       div_body += '<div style="width:100%;padding-left:5px;text-align:right;">' + grade_points_str + '</div>';
       div_body += '</span>';
-
+    
       div_body += '<p style="width:400px;font-size:large;">';
       div_body += '<b>' + graded_ques.getFullQuestionText() + '</b>';
       div_body += '</p>';
-
+      
       div_body += '<p style="width:400px;font-size:medium;">';
-      div_body += '<b>' + langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER") + ': </b>' + graded_ques.getFullSubmissionText() + '</p>';
-
-      if (isNormallyGraded(gopt) && (grade_status === langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT")) &&
+      div_body += '<b>' + langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER") + ': </b>' + graded_ques.getFullSubmissionText() + '</p>'; 
+     
+      if (isNormallyGraded(gopt) && (grade_status === langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT")) && 
           show_answers === 'true')
         {
           div_body += '<p style="width:400px;font-size:medium;">'
           div_body += '<b>' + langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER") + ': </b>' + ak_value;
         }
-
+    
       if (!isManuallyGraded(gopt) && graded_ques.getHelpTip() !== "")
         {
           div_body += '<br><hr><b>' + langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER")  + ':</b>';
@@ -711,39 +713,39 @@ function doShareGrades()
           div_body += '<i>' + comment_html + '</i>';
           div_body += '</p>';
         }
-
+      
       div_body += "</div><br><br>";
-
+      
       return div_body;
-
+      
     } // constructQuestionDiv()
-
+        
   } // constructGradesEmailBody()
-
+  
   function notifyNumberEmailsSent ()
-  {
+  {  
     // No emails sent at all? Notify instructor.
     if (num_emails_sent == 0)
     {
       UI.msgBox(langstr("FLB_STR_NOTIFICATION"),
                 langstr("FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT"),
                 Browser.Buttons.OK);
-
+      
       return;
     }
 
     // Else, some emails sent. Notify instructor of how many.
-    email_notification = num_emails_sent + " " + langstr("FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT") + ". ";
-
-    if (num_emails_unsent > 0)
-    {
-      email_notification += num_emails_unsent + " " +
-                           langstr("FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT");
-    }
-
-    UI.msgBox(langstr("FLB_STR_NOTIFICATION"),
-              email_notification,
-              Browser.Buttons.OK);
+    email_notification = num_emails_sent + " " + langstr("FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT") + ". "; 
+        
+    if (num_emails_unsent > 0) 
+    { 
+      email_notification += num_emails_unsent + " " + 
+                           langstr("FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT"); 
+    } 
+  
+    UI.msgBox(langstr("FLB_STR_NOTIFICATION"), 
+              email_notification, 
+              Browser.Buttons.OK);  
   }
 
 } // doShareGrades()
@@ -758,22 +760,22 @@ function doShareGrades()
 function menuShareGrades()
 {
   Debug.info("menuShareGrades()");
-
+  
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // Housecleaning. Set this to false anytime a user explicitly chooses to grade
   // the assignment. It could be left set if a user quit prematurely while
-  // setting autograde options, which could in turn mess up the UI flow for
+  // setting autograde options, which could in turn mess up the UI flow for 
   // normal grading.
   Autograde.clearGatheringOptions();
-
-  // Check there is a grades sheet.
+  
+  // Check there is a grades sheet.  
   var grades_sheet = getSheetWithGrades(ss);
-
+  
   if (!grades_sheet)
     {
       UI.msgBox(langstr("FLB_STR_NOTIFICATION"),
-                langstr("FLB_STR_CANNOT_FIND_GRADES_MSG") +
+                langstr("FLB_STR_CANNOT_FIND_GRADES_MSG") + 
                   langstr("FLB_STR_SHEETNAME_GRADES"),
                 Browser.Buttons.OK);
 
@@ -783,7 +785,7 @@ function menuShareGrades()
     }
 
   var grades_sheet_is_valid = gwsGradesSheetIsValid(grades_sheet);
-
+  
   // Check if the existing Grades sheet is valid.
   if (!grades_sheet_is_valid)
     {
@@ -791,9 +793,9 @@ function menuShareGrades()
       UI.showMessageBox(langstr("FLB_STR_INVALID_GRADE_SHEET_TITLE"), langstr("FLB_STR_INVALID_GRADES_SHEET"));
       return;
     }
-
+  
   var quota_remaining = MailApp.getRemainingDailyQuota();
-
+	
   Debug.info("email quota remaining: " + quota_remaining);
   if (quota_remaining <= 0)
     {
@@ -802,18 +804,18 @@ function menuShareGrades()
                 Browser.Buttons.OK);
       return;
     }
-
+  
   if (UI.isOff())
     {
       // UI is off. Just skip straight to emailing the grades.
       doShareGrades();
       return;
     }
-
+  
   // Display the email grades UI.
   var app = UI.emailGrades(ss, false);
   ss.show(app);
-
+  
 } // menuShareGrades()
 
 
@@ -824,16 +826,16 @@ function menuShareGrades()
 function menuPrintGrades()
 {
   Debug.info("menuPrintGrades()");
-
+  
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-
-  // Check there is a grades sheet.
+  
+  // Check there is a grades sheet.  
   var grades_sheet = getSheetWithGrades(ss);
-
+  
   if (!grades_sheet)
     {
       UI.msgBox(langstr("FLB_STR_NOTIFICATION"),
-                langstr("FLB_STR_CANNOT_FIND_GRADES_MSG") +
+                langstr("FLB_STR_CANNOT_FIND_GRADES_MSG") + 
                   langstr("FLB_STR_SHEETNAME_GRADES"),
                 Browser.Buttons.OK);
 
@@ -843,7 +845,7 @@ function menuPrintGrades()
     }
 
   var grades_sheet_is_valid = gwsGradesSheetIsValid(grades_sheet);
-
+  
   // Check if the existing Grades sheet is valid.
   if (!grades_sheet_is_valid)
     {
@@ -851,48 +853,48 @@ function menuPrintGrades()
       UI.showMessageBox(langstr("FLB_STR_INVALID_GRADE_SHEET_TITLE"), langstr("FLB_STR_INVALID_GRADES_SHEET"));
       return;
     }
-
+  
   // Display the print grades UI.
   var app = UI.emailGrades(ss, true);
   ss.show(app);
-
+  
 } // menuPrintGrades()
 
 
 function doPrintGrades()
 {
   Debug.info("doPrintGrades()");
-
+  
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var dp = PropertiesService.getDocumentProperties();
-
+    
   // The object representing the grades sheet.
-
+  
   // The send emails ui.
   var app = UiApp.getActiveApplication();
-
-  // Whether to show answers in the student's
+        
+  // Whether to show answers in the student's 
   var show_answers = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY);
-
-  // The message from the instructor in the student's
+    
+  // The message from the instructor in the student's 
   var instructor_message = dp.getProperty(DOC_PROP_EMAIL_INSTRUCTOR_MESSAGE);
-
-  // Include question scores in the
+    
+  // Include question scores in the 
   var show_questions = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_SCORES);
-
+    
   // The email address of the instructor.
   var user_email_addr = dp.getProperty(DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS);
   Debug.assert(user_email_addr !== null, "doPrintGrades() - DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS not set")
 
   var assignment_name = SpreadsheetApp.getActiveSpreadsheet().getName();
-
+  
   // For English, remove "(Responses)" from the title, which is added by Google when
   // a new spreadsheet is created as the destination for form responses.
-  assignment_name = assignment_name.replace(" (Responses)", "");
-
+  assignment_name = assignment_name.replace(" (Responses)", "");  
+  
   // Also remove any single-quotes from it, as this causes problems with the Drive API
   assignment_name = assignment_name.replace(/'/g, "");
-
+  
   // create a folder for this assignment, and return a reference to that folder.
   var mydrive_folder = DriveApp.getRootFolder();
 
@@ -903,17 +905,17 @@ function doPrintGrades()
   var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_FULL);
   var points_possible =  gws.getPointsPossible();
   var has_manually_graded_question = gws.hasManuallyGradedQuestion();
-
-  var instructor_message_doc = instructor_message.replace(/\n/g, "\r");
-
-  var failed = false;
+  
+  var instructor_message_doc = instructor_message.replace(/\n/g, "\r"); 
+  
+  var failed = false;    
   var exc_msg = "";
   var pr_doc = null;
   var pr_doc_id = null;
   var count = 0;
-
-  for (var gs = gws.getFirstGradedSubmission(), count = 0;
-       gs != null;
+  
+  for (var gs = gws.getFirstGradedSubmission(), count = 0; 
+       gs != null; 
        gs = gws.getNextGradedSubmission(), count++)
     {
       if (count == 0)
@@ -926,19 +928,19 @@ function doPrintGrades()
         {
           // close and repoen the doc after each tenth append. this is to help
           // flush out writes quicker, and also avoid having too much to flush.
-          pr_doc.saveAndClose();
-
-          // re-open doc
+          pr_doc.saveAndClose();     
+      
+          // re-open doc 
           pr_doc = DocumentApp.openById(pr_doc_id);
         }
 
       Debug.info("doPrintGrades(): appending next student's grades to printable document");
-      try
-        {
+      try 
+        {             
           writeContentsOfGradeDocument(pr_doc,
                                        assignment_name, instructor_message, show_questions, show_answers,
                                        points_possible, has_manually_graded_question, gs, true);
-
+               
         }
       catch (exception)
         {
@@ -948,30 +950,30 @@ function doPrintGrades()
           break;
         }
     }
-
+  
   app.close();
-
+  
   if (!failed)
     {
-      pr_doc.saveAndClose();
+      pr_doc.saveAndClose();  
 
       var msg = langstr("FBL_STR_PRINT_GRADES_SUCCESS") + "<br><br>";
-      msg += '<a href="' + pr_doc.getUrl() + '">' + pr_doc.getName() + '</a>';
+      msg += '<a target="_blank" href="' + pr_doc.getUrl() + '">' + pr_doc.getName() + '</a>';
     }
   else
     {
       var msg = "Sorry. An error occurred during printing: " + exc_msg;
     }
-
+  
   Debug.writeToFieldLogSheet();
 
   logPrintedGrades();
-
-  UI.showMessageBox(langstr("FLB_STR_NOTIFICATION"), msg);
+  
+  UI.showMessageBox(langstr("FLB_STR_NOTIFICATION"), msg);  
 }
 
 // makePrettyAnswerKeyValue:
-// Takes an answer key value for a question and replaces any special '%' operators to make it
+// Takes an answer key value for a question and replaces any special '%' operators to make it 
 // "pretty" for sending out to students.
 // This is done in a symbolic fashion to avoid the need to localize. Examples:
 //
@@ -990,27 +992,27 @@ function makePrettyAnswerKeyValue(ak_val)
 {
   var pattern = "";
   var re;
-
+  
   if (typeof ak_val !== "string")
     {
       return ak_val;
     }
-
+  
   pattern = ANSKEY_OPERATOR_OR;
   re = new RegExp(pattern, "g");
   ak_val = ak_val.replace(re, " || ");
-
+  
   pattern = ANSKEY_OPERATOR_CASE_SENSITIVE + " ";
   re = new RegExp(pattern, "g");
   ak_val = ak_val.replace(re, "");
-
+  
   pattern = ANSKEY_OPERATOR_NUMERIC_RANGE;
   re = new RegExp(pattern, "g");
   ak_val = ak_val.replace(re, " → ");
-
+  
   pattern = ANSKEY_OPERATOR_CHECKBOX + " ";
   re = new RegExp(pattern, "g");
   ak_val = ak_val.replace(re, "");
-
+  
   return ak_val;
 }

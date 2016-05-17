@@ -1,5 +1,5 @@
-// File: definitions.gs
-// Description:
+// File: definitions.gas
+// Description: 
 // This file contains all constants and global variable definitions.
 
 // TODO_AJR - These could all go in a global Flubaroo object (although
@@ -21,9 +21,9 @@ FIELD_LOG_DEFAULT_RATE = 25;
 FIELD_LOG_WRAP_AROUND = 50000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 47";
-
-// NOTE: Update version in README.gas
+gbl_version_str = "Version 51";
+                  
+// NOTE: Update version in README.gas                  
 
 // Version update notice. Set this to true when a new version is made
 // available (gbl_version_str is updated). A message will then be popped up during
@@ -46,15 +46,15 @@ gbl_grades_sheet_name = 'Grades';
 
 // Global variables that relate to row and column numbers or lengths.
 gbl_grades_start_row_num = 8;
-gbl_num_metrics_cols = 6; // score, percent,
-                          // times submitted,
+gbl_num_metrics_cols = 6; // score, percent, 
+                          // times submitted, 
                           // already emailed, student feedback,
                           // subm copy row index
 
 PALE_YELLOW = "#ffffcc";
 PALE_RED = "#e05252";
 
-// ID's of the metrics columns, starting from 0. These are written out in
+// ID's of the metrics columns, starting from 0. These are written out in 
 // 'Grades' after the student identifiers.
 METRIC_TOTAL_POINTS = 0;
 METRIC_PERCENT = 1;
@@ -77,23 +77,32 @@ FLUBAROO_WORKING_IMG_URL =
 FLUBAROO_TIP_IMG_URL =
   'https://flubaroo2.appspot.com/tips.png';
 
+FLB_AUTOGRADE_SELECT_MODE_URL = "http://www.flubaroo.com/hc/selecting-an-autograde-mode";
+
 // Grading option identifiers
 GRADING_OPT_STUD_ID = "Identifies Student";
 GRADING_OPT_SKIP = "Skip Grading";
 GRADING_OPT_NORMAL = "Normal Grading";
-GRADING_OPT_MANUAL = "Manual Grading";
+GRADING_OPT_MANUAL = "Manual Grading"; // aka Grade By Hand
 GRADING_OPT_EXTRA_CREDIT = "+Extra Credit"; // appended onto NORMAL or MANUAL grading options (i.e. "Normal Grading+Extra Credit").
 GRADING_OPT_NORMAL_EC = GRADING_OPT_NORMAL + GRADING_OPT_EXTRA_CREDIT;
 GRADING_OPT_MANUAL_EC = GRADING_OPT_MANUAL + GRADING_OPT_EXTRA_CREDIT;
+GRADING_OPT_IGNORE = "Ignore";
+GRADING_OPT_COPY_FOR_REFERENCE = "Copy for Reference";
 
 // Used to initialize GradesWorksheet
 // TODO_AJR- Add else/default on type testing to catch illegal type throughout code.
-INIT_TYPE_SUBM = 0;           // initialies from the Student Submissions worksheet.
-INIT_TYPE_GRADED_FULL = 1;    // initializes from the Grades worksheet. Reads in everything.
-INIT_TYPE_GRADED_META = 2;    // same as INIT_TYPE_GRADED_FULL, but only reads in meta info (headers, grading_opt), and
-                              // doesn't read-in all of the actual graded submissions, or original submisions.
-INIT_TYPE_GRADED_PARTIAL = 3; // same as INIT_TYPE_GRADED_FULL, but only skips reading in all of the original submissions
-                              // in the hidden rows. Used when reading in an existing Grades sheet when re-grading.
+INIT_TYPE_SUBM = 0;             // initialies from the Student Submissions worksheet.
+INIT_TYPE_GRADED_FULL = 1;      // initializes from the Grades worksheet. Reads in everything.
+INIT_TYPE_GRADED_META = 2;      // same as INIT_TYPE_GRADED_FULL, but only reads in meta info (headers, grading_opt), and 
+                                // doesn't read-in all of the actual graded submissions, or original submisions.
+INIT_TYPE_GRADED_PARTIAL = 3;   // same as INIT_TYPE_GRADED_FULL, but only skips reading in all of the original submissions
+                                // in the hidden rows. Used when reading in an existing Grades sheet when re-grading.
+INIT_TYPE_SUBM_ONLY_LATEST = 4; // same as INIT_TYPE_SUBM, but only pulls in latest submissions that haven't been graded yet
+                                // (for use with autograde).
+
+GRADES_SHEET_UPDATE_TYPE_REGEN = 1;  // Typical case of regenerating entire Grades sheet
+GRADES_SHEET_UPDATE_TYPE_INSERT = 2; // Case sometimes used by Autograde that just inserts new graded rows into existing Grades sheet.
 
 // Used for function createRowForGradesSheet (member of GradedSubmission)
 GRADES_OUTPUT_ROW_TYPE_GRADED_VALS = 0;
@@ -107,7 +116,6 @@ GRADES_OUTPUT_ROW_TYPE_MANUALLY_GRADED_COMMENTS = 7;
 
 gbl_num_hidden_rows = 4;       // number of hidden rows at the bottom of the Grades sheet,
                                 // not including the copies of the original submissions or manually graded question comments.
-// gbl_num_space_before_hidden = (Debug.debugOn) ? 5 : 10;  // number of rows to add before hidden rows
 gbl_num_space_before_hidden = 5;
 
 // Indices into hidden rows in grades sheet
@@ -122,6 +130,14 @@ GRADES_HIDDEN_ROW_TYPE_MANUALLY_GRADED_COMMENTS = 5;
 GRADES_POINTS_POSSIBLE_CELL = "$B$2";
 GRADES_COUNTED_SUBMISSIONS_CELL = "$B$4";
 
+// The constants below define the max submissions (in Stud Subm sheet) Flubaroo will process.
+// The actual value used depends on the mode Flubaroo is running in.
+/*
+MAX_SUBMISSIONS_MENU_GRADING = 500;          // grading just from menu. so no sharing of grades.
+MAX_SUBMISSIONS_AUTOGRADE_REGEN_MODE = 150;  // autograde recreating entire grades sheet.
+MAX_SUBMISSIONS_AUTOGRADE_INSERT_MODE = 1E9; //autograde just inserting most recently graded submissions. no practical limit
+*/
+
 // Status codes for function return values
 STATUS_OK = 0
 STATUS_NOT_FOUND = 1
@@ -129,8 +145,8 @@ STATUS_NO_EFFECT = 2
 STATUS_CANNOT_CONTINUE = 3
 
 // ENOUGH_SUBM_SOURCE definitions
-ENOUGH_SUBM_SOURCE_USER_FROM_MENU         = 0   // user selects "Grade Assignment" from menu
-ENOUGH_SUBM_SOURCE_USER_AG_SETUP_OPTIONS  = 1   // user setting up or updating autograde options
+ENOUGH_SUBM_SOURCE_USER_FROM_MENU         = 0   // user selects "Grade Assignment" from menu 
+ENOUGH_SUBM_SOURCE_USER_AG_SETUP_OPTIONS  = 1   // user setting up or updating autograde options 
 ENOUGH_SUBM_SOURCE_USER_AG_GRADE_RECENT   = 2   // user chooses to grade recent submissions at end of autograde setup
 ENOUGH_SUBM_SOURCE_AG_SUBMISSION   = 3   // a student submission triggers grading (when autograde turned on)
 
@@ -164,11 +180,19 @@ DOC_PROP_AUTOGRADE_SUBMIT_TRIGGER_ID = "flubaroo_auto_grade_submit_trigger_id";
 DOC_PROP_AUTOGRADE_ENABLED = "flubaroo_auto_grade_enabled";
 DOC_PROP_AUTOGRADE_GATHERING_OPTIONS = "flubaroo_auto_grade_gathering_options";
 DOC_PROP_AUTOGRADE_RUNNING = "flubaroo_auto_grade_running";
+DOC_PROP_AUTOGRADE_DO_FULL_REGRADE = "flubaroo_auto_grade_do_full_regrade";
+DOC_PROP_AUTOGRADE_ANSWER_VALUES = "flubaroo_auto_grade_anskey_values";
 
 DOC_PROP_NEXT_TIP_NUMBER = "flubaroo_next_tip_number";
 
+DOC_PROP_MGR_STORED_METADATA = "flubaroo_mgr_stored_metadata";
+
 DOC_PROP_UI_OFF = "flubaroo_ui_off"; // Default - if not set - is on.
 DOC_PROP_UI_WAS_OFF = "flubaroo_ui_was_off"; // The UI state before the last autograde transition.
+
+// FLB_AUTOGRADE_AK_DELIMITER: Used to delimit answers to questions when we store the 
+// entire answer key row as a property for autograding.
+FLB_AUTOGRADE_AK_DELIMITER = "%%FLB_AG_AK_DELIMITER%%";
 
 /* Properties to store Advanced Options.
    For the true/false properties, they exist if true, and don't exist if false.
@@ -177,6 +201,8 @@ DOC_PROP_ADV_OPTION_EMAIL_EDIT_LINK = "flubaroo_adv_option_email_edit_link";
 DOC_PROP_ADV_OPTION_PASS_RATE = "flubaroo_adv_option_pass_rate";
 USER_PROP_ADV_OPTION_NO_NOREPLY = "flubaroo_adv_option_no_noreply";
 USER_PROP_ADV_OPTION_EXTRA_CREDIT = "flubaroo_adv_option_extra_credit";
+USER_PROP_ADV_OPTION_SHOW_ADDITIONAL_GOPTS = "flubaroo_adv_option_show_additonal_gopts";
+USER_PROP_ADV_OPTION_MGR_ADVANCE_BY_QUESTION = "flubaroo_adv_option_mgr_advance_by_question";
 
 DOC_PROP_FORM_SUBMIT_TRIGGER_ID = "flubaroo_form_submit_trigger_id";
 
@@ -204,18 +230,24 @@ UI_MGR_HEIGHT = 600;
 ANSKEY_OPERATOR_OR = " %or ";
 ANSKEY_OPERATOR_NUMERIC_RANGE = " %to ";
 ANSKEY_OPERATOR_CASE_SENSITIVE = "%cs";
-ANSKEY_OPERATOR_CHECKBOX = "%cb";
+ANSKEY_OPERATOR_CHECKBOX = "%cb"; // also hard-coded in a regex in gradedSubmssion.js
 
 // TODO_AJR - Make this optional.
-// The certificate template.
+// The certificate template. 
 // Set to "" to disable feature.
 DOC_TEMPLATE = "";
 DOC_NAME = ""
-
+  
 // Default pass rates
 LOWSCORE_QUESTION_PERCENTAGE = 0.60;
 LOWSCORE_STUDENT_PERCENTAGE = 0.70;
 CERTIFICATE_PASS_PERCENTAGE = 50.0;
+
+// Used for specially formatting columns when writing Grades sheet
+FLB_COLFORMAT_GREY_ITALIC_TEXT = "<<FLB_COLFORMAT_GREY_ITALIC_TEXT>>";
+FLB_COLFORMAT_HIDDEN = "<<FLB_COLFORMAT_HIDDEN>>";
+FLB_COLFORMAT_WRAP_TEXT = "<<FLB_COLFORMAT_WRAP_TEXT>>";
+
 
 // Flubaroo Updates:
 // The next 3 lines control when an update message is shown to the user in Flubaroo.
@@ -223,9 +255,11 @@ CERTIFICATE_PASS_PERCENTAGE = 50.0;
 // is installed. Be sure to update the notice date when you want to show a new message,
 // as Flubaroo will only show a message for that same date one time.
 // TODO: How do we localize this for other languages? For now, we don't.
-gbl_update_notice_date  = '12/10/15';
-gbl_update_notice_title = 'Important Flubaroo Announcements!';
-gbl_update_notice_msg   = '<p><b>Flubaroo Needs Your Help!</b>\
-                           <br><p>Help me advocate for more time to spend on Flubaroo and similar tools by filling out this short, anonymous survey.</p>\
-                           <p><a href="http://goo.gl/forms/8NPZrbKU1v" target="_blank">http://goo.gl/forms/8NPZrbKU1v</a></p>\
-                           <br><p><b>Afterwards, <a href="https://goo.gl/4DIfpl" target=_blank>read about</a> these<br>brand new grading updates:</b><ol><li>You can now assign questions for Extra Credit.<br><br></li><li>Flubaroo now supports partial credit scoring for Checkbox Questions!</li></ol></p>';
+gbl_update_notice_date  = '5/17/16';
+gbl_update_notice_title = 'Important Flubaroo Announcement!';
+gbl_update_notice_msg   = '<p><b>Six Things New With Flubaroo!</b>\
+                           <br><p>Stay up-to-date! Read the latest <a href="https://goo.gl/TYLkl6" target="_blank">post</a> to learn about awesome new additions to Flubaroo that just launched today!</p>\
+                           <p>And be sure to tell your school\'s edtech coordinator that Flubaroo just launched in the \
+                              <a href="https://apps.google.co.uk/marketplace/app/mjkbmijfpphoabkogbdmdkolcnaenaia" target="_blank">Google Apps Marketplace</a>. It can now be \
+                              whitelisted and installed school-wide with just a few clicks!</p>\
+                           <p>Thank You!<br>The Flubaroo Team</p>';

@@ -15,15 +15,15 @@
         </tr>
         </table>
     </div>
-
+    
     <div id="s1_mw_alert" class="error" style="display:none;"></div>
 
     <div class="vspacer"></div>
-
+        
     <div id="s1_mw_sel">
     Loading...
     </div>
-
+    
     <div style="float:right;margin-top:20px;">
     <table border="0" id="s1_mw_continue"><tr>
     <td><img id="s1_mw_working" src="<?= FLUBAROO_WORKING_IMG_URL ?>" style="display:none;"></td>
@@ -31,7 +31,7 @@
     <td><input type="button" class="action" value="Continue" onclick="step1Continue()" /></td>
     </tr></table>
     </div>
-
+    
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
@@ -49,19 +49,19 @@ function populateQuestionData(qdata)
 {
   var h = '<table id="s1_mw_sel_table">';
   h += '<tr><td><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION") ?></b></td>';
-
+  
   var show_ec_arg = "false";
-
+  
   if (qdata.show_extra_credit)
     {
       h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADING_OPT_EXTRA_CREDIT") ?></b></td>';
       show_ec_arg = "true";
     }
-
+  
   h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_POINTS") ?></b></td>';
   h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_QUESTION") ?></b></td>';
   h += '</tr>'
-
+  
   // iterate through each question
   for (var i=0; i < qdata.ques_vals.length; i++)
     {
@@ -70,7 +70,7 @@ function populateQuestionData(qdata)
       var default_gopt_val = qdata.possible_gopts[default_gopt_index];
       var default_point_index = qdata.default_pts[i];
       var default_extra_credit_checked = qdata.default_extra_credit[i];
-
+            
       // for each question, list possible grading options
       h += '<tr><td><div class="block form-group">';
       h += '<select name="g_opts" id="g_opt_id_' + i + '" onchange="selectChange(\'' + i + '\',' + show_ec_arg + ')">';
@@ -88,36 +88,36 @@ function populateQuestionData(qdata)
         }
       h += '</select></div>';
       h += '</td>';
-
+      
       // show "extra credit" checkbox if allowed in advanced options, but only enable it if question is gradeable.
       var d = "";
       var c = "";
-
+      
       if (qdata.show_extra_credit)
         {
-          if ((default_gopt_val.indexOf('<?=GRADING_OPT_NORMAL?>') == -1)
+          if ((default_gopt_val.indexOf('<?=GRADING_OPT_NORMAL?>') == -1) 
                && (default_gopt_val.indexOf('<?=GRADING_OPT_MANUAL?>') == -1))
             {
               d = " disabled ";
-            }
+            }   
           else if (default_extra_credit_checked)
             {
               c = " checked ";
             }
-
+            
           h += '<td class="s1_mw_sel_table_hspacer"><input type="checkbox" name="g_extra_credit" id="g_ec_id_' + i + '" ' + d + c + '></td>';
         }
-
+      
       // for each question, list possible points worth
-      h += '<td class="s1_mw_sel_table_hspacer"><div class="block form-group">';
+      h += '<td class="s1_mw_sel_table_hspacer"><div class="block form-group">';     
 
       // initially disable points selector if question is not gradeable (i.e. Identifies Student)
       if ((default_gopt_val.indexOf('<?=GRADING_OPT_NORMAL?>') == -1)
            && (default_gopt_val.indexOf('<?=GRADING_OPT_MANUAL?>') == -1))
         {
           d = " disabled ";
-        }
-
+        }       
+      
       h += '<select class="s1_mw_sel_pts" name="g_pts" id="g_pts_id_' + i + '" ' + d + '>'
       for (var j=0; j < qdata.possible_pts.length; j++)
         {
@@ -127,17 +127,17 @@ function populateQuestionData(qdata)
             {
               h += 'selected';
             }
-
+          
           h += '>' + pt + '</option>';
         }
       h += '</select></div>';
-
+      
       // for each question, list the question itself
       h += '<td class="s1_mw_sel_table_hspacer">';
       h += q;
       h += '</td></tr>';
     }
-
+  
   h  += '</table>';
 
   $('#s1_mw_sel').html(h);
@@ -148,14 +148,14 @@ function selectChange(id_num, show_extra_credit)
   var gopt_elem_id = "#g_opt_id_" + id_num;
   var pts_elem_id = "#g_pts_id_" + id_num;
   var pts_extra_credit_id = "#g_ec_id_" + id_num;
-
+  
   var gopt_val = $(gopt_elem_id).val();
-
-  if ((gopt_val.indexOf('<?=GRADING_OPT_NORMAL?>') == -1)
+  
+  if ((gopt_val.indexOf('<?=GRADING_OPT_NORMAL?>') == -1) 
        && (gopt_val.indexOf('<?=GRADING_OPT_MANUAL?>') == -1))
     {
       $(pts_elem_id).prop('disabled', true);
-
+      
       if (show_extra_credit)
         {
           $(pts_extra_credit_id).prop('disabled', true);
@@ -164,13 +164,13 @@ function selectChange(id_num, show_extra_credit)
   else
     {
       $(pts_elem_id).prop('disabled', false);
-
+      
       if (show_extra_credit)
         {
           $(pts_extra_credit_id).prop('disabled', false);
         }
     }
-
+    
 }
 
 // The code in this function runs when the page is loaded.
@@ -179,12 +179,12 @@ function step1Continue()
   var server_gopts = [];
   var iden_student = false; // at least one student identifier?
   var gradeable_ques = false;
-
+  
   clearAlert();
-
+  
   // always add a first option of "skip" for the timestamp question
   server_gopts.push("<?=GRADING_OPT_SKIP?>");
-
+  
   // Parse all HTML form data into an array of grading options
   // that can be passed to the server.
   var g_opts = document.getElementsByName('g_opts');
@@ -199,27 +199,27 @@ function step1Continue()
         {
           gradeable_ques = true;
         }
-
+        
       server_gopts.push(gopt);
     }
-
-  // Check if extra credit was assigned to any question. Length of g_ec will be 0 if
+    
+  // Check if extra credit was assigned to any question. Length of g_ec will be 0 if 
   // extra credit isn't enabled.
   var g_ec = document.getElementsByName('g_extra_credit');
   for (var i=0; i < g_ec.length; i++)
-    {
+    {    
       // if extra credit, modify the corresponding grading option.
       if (g_ec[i].checked)
         {
           server_gopts[i+1] = server_gopts[i+1] + <?=GRADING_OPT_EXTRA_CREDIT?>;
         }
     }
-
+    
   var g_pts = document.getElementsByName('g_pts');
   for (var i=0; i < g_pts.length; i++)
     {
       var g_pt = g_pts[i].value;
-
+      
       // if possible to assign points to this question type, then record how many.
       if ((server_gopts[i+1].indexOf("<?=GRADING_OPT_NORMAL?>") != -1)
           || (server_gopts[i+1].indexOf("<?=GRADING_OPT_MANUAL?>") != -1))
@@ -239,10 +239,10 @@ function step1Continue()
       showAlert('<?=langstr("FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR")?>');
       return;
     }
-
+  
   // show the animation next to the continue button
   $('#s1_mw_working').show();
-
+  
   // call server-side function, passing it the grading options
   google.script.run.gradingStep1SubmitHandler(server_gopts);
 }

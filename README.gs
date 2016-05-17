@@ -89,3 +89,8 @@
 //   Version 46: 12/14/15: Fixed Internet Explorer issue (.includes not supported in Strings), and apostrophee issue with Drive files. 
 //   Version 47: 12/21/15: Fixed 3 %cb bugs (died on numbers, didn't mark incorrect response if first in list, recorded 0.9999... instead of 1),
 //                         and now call doc.saveAndClose() when writing Drive Docs.
+//   Version 48: 5/9/16:   New Autograde that processes only latest submissions. Support for %= formulas. Added translations.
+//   Version 49: 5/10/16:  Added new "Ignore" and "Copy for Reference" options.
+//   Version 50: 5/11/16:  Sped up "Grade by Hand" tool, added %cs[mult], and colored optional Student Feedback column.
+//   Version 51: 5/16/16:  Autograde now reads in answer key from stored property, instead of from Student Submissions sheet each time.
+//                         This is to avoid grading errors if/when the answer key row shifts due to Google forms funnyness.

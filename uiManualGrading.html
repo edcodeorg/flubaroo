@@ -13,12 +13,12 @@
         <table border="0" width="90%">
         <tr>
             <td><b><?= langstr("FLB_STR_MANUAL_GRADING_STEP1") ?></b> &nbsp;
-              <input type="button" class="action" value="<<" style="min-width:10px;" onclick="prevStudent()" />
+              <input type="button" class="action" value="<<" style="min-width:10px;" onclick="prevStudent()" />         
               <input type="button" class="action" value=">>" style="min-width:10px;" onclick="nextStudent()" />
             </td>
         </tr>
         <tr>
-            <td height="120" valign="top">
+            <td height="120" valign="top">        
                 <table border="0" width="100%" id="mgr_mw_stud_ident_data">
                 </table>
             </td>
@@ -26,7 +26,7 @@
         </table>
       </div>
     </td>
-
+    
     <td style="padding-left:50px;" valign="top" width="50%">
     <div id="mgr_mw_sel">
     <b><?= langstr("FLB_STR_MANUAL_GRADING_STEP2") ?></b>&nbsp;&nbsp;
@@ -38,7 +38,7 @@
     </td>
     </tr>
     </table>
-
+  
     <br><br>
     <table border="0" width="100%">
     <tr>
@@ -55,7 +55,7 @@
     </td>
     </tr>
     </table>
-
+    
     <br><br>
     <div>
     <b>5. Enter points:</b> <input type="text" id="mgr_mw_stud_score" size=4></input>
@@ -73,7 +73,7 @@
 
 </div>
 
-
+    
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
 </script>
@@ -82,6 +82,10 @@
 
 current_col_num_gbl = -1; // global current column number
 current_row_num_gbl = -1; // global current row number
+
+current_ques_select_index_gbl = -1;
+total_questions_gbl = 1;
+advance_by_question_gbl = false; // after setting the score, do we go to next student, or next question?
 
 // run on load. sets up the ui fields. passing row and col as '0'
 // tells server this is first load of the UI.
@@ -93,8 +97,11 @@ $(function() {
 });
 
 function populateQuestionList(ques_data)
-{
+{  
   var sel = document.getElementById("mgr_mw_sel_question");
+
+  total_questions_gbl = ques_data.question_col_nums.length;
+  advance_by_question_gbl = ques_data.advance_by_question;
 
   for (var i=0; i < ques_data.question_col_nums.length; i++)
     {
@@ -103,13 +110,17 @@ function populateQuestionList(ques_data)
       option.value = ques_data.question_col_nums[i];
       sel.add(option);
     }
-
+    
+    /*
   if (ques_data.question_col_nums.length)
     {
       current_col_num_gbl = ques_data.question_col_nums[0];
+      current_ques_select_index_gbl = 0;
     }
-
+    */
+    
   current_row_num_gbl = Number(<?= getActiveGradesSheetRowNumber(); ?>);
+  current_col_num_gbl = Number(<?= getActiveGradesSheetColNumber(); ?>);
 
   google.script.run.withSuccessHandler(populateStudentTeacherData)
                      .mgrGetNextManuallyGradedSubmission(current_col_num_gbl, current_row_num_gbl, 0);
@@ -123,6 +134,10 @@ function populateStudentTeacherData(data)
       showAlert("<?= langstr("FLB_STR_MANUAL_GRADING_ERROR_OCCURED") ?>");
       return;
     }
+    
+  // if column/question has been selected by active cell, be sure to match selection in menu.
+  $("#mgr_mw_sel_question").val(data.col_num);
+  current_ques_select_index_gbl = $("#mgr_mw_sel_question").prop('selectedIndex');
 
   var student_response = data.student_response;
   if (typeof student_response === 'string')
@@ -131,12 +146,12 @@ function populateStudentTeacherData(data)
       student_response = activateHyperlink(student_response);
     }
   $('#mgr_mw_stud_response').html(student_response);
-
+  
   $('#mgr_mw_teacher_response_textarea').val(data.teacher_comment);
   $('#mgr_mw_stud_score').val(data.score);
   $('#mgr_mw_stud_pts_possible').html(data.pts_possible);
   $("#mgr_mw_submit_button").prop('disabled', false);
-
+  
   var ak_html = data.answer_key;
   if (typeof ak_html === 'string')
     {
@@ -144,29 +159,29 @@ function populateStudentTeacherData(data)
       ak_html = activateHyperlink(ak_html);
     }
   $('#light').html(ak_html);
-
+  
   var h = "";
   var max_sids = Math.min(data.student_identifiers.sid_ques.length, 3);
-
+  
   for (var i=0; i < max_sids; i++)
     {
       h += "<tr><td><b>" + data.student_identifiers.sid_ques[i] + "</b></td>";
       h += "<td>" + data.student_identifiers.sid_value[i] + "</td></tr>";
     }
-
+    
   $('#mgr_mw_stud_ident_data').html(h);
-
+  
   current_row_num_gbl = data.row_num;
-
+  
   clearAlert();
 }
 
 function selectChange()
 {
   current_col_num_gbl = $("#mgr_mw_sel_question").val();
-
+  
   showLoading(false);
-
+  
   google.script.run.withSuccessHandler(populateStudentTeacherData)
                    .mgrGetNextManuallyGradedSubmission(current_col_num_gbl, current_row_num_gbl, 0);
 }
@@ -174,7 +189,7 @@ function selectChange()
 function nextStudent()
 {
   showLoading(true);
-
+  
   google.script.run.withSuccessHandler(populateStudentTeacherData)
                    .mgrGetNextManuallyGradedSubmission(current_col_num_gbl, current_row_num_gbl, 1);
 }
@@ -191,17 +206,17 @@ function setGradeAndComment()
 {
 
   var score = $('#mgr_mw_stud_score').val();
-
+  
   if (score == "" || isNaN(score))
     {
       showAlert('<?= langstr("FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE") ?>');
       return;
     }
-
+    
  // $('#mgr_mw_working').show();
  $("#mgr_mw_submit_button").prop('value', '<?= langstr("FLB_STR_MANUAL_GRADING_BUTTON_WORKING") ?>');
  $("#mgr_mw_submit_button").prop('disabled', true);
-
+  
   google.script.run.withSuccessHandler(handleGradeSet)
                    .mgrSetStudentGrade(current_col_num_gbl, current_row_num_gbl, score);
 }
@@ -217,10 +232,43 @@ function handleGradeSet()
 function handleCommentSet()
 {
   //$('#mgr_mw_working').hide();
-  $("#mgr_mw_submit_button").prop('value', '<?= langstr("FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE") ?>');
+  $("#mgr_mw_submit_button").prop('value', '<?= langstr("FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE") ?>'); 
   $("#mgr_mw_submit_button").prop('disabled', false);
 
   showAlert('<?= langstr("FLB_STR_MANUAL_GRADING_GRADE_APPLIED") ?>');
+  
+  // with the score now set, advance to the next student or question
+  
+  if (advance_by_question_gbl)
+    {
+      // advance to next question
+      current_ques_select_index_gbl++;
+
+      if (current_ques_select_index_gbl == total_questions_gbl)
+        { 
+          // went through all questions. go on to the next student with the first question.
+          current_ques_select_index_gbl = 0;
+        }
+
+      document.getElementById("mgr_mw_sel_question").selectedIndex = current_ques_select_index_gbl;
+  
+      if (current_ques_select_index_gbl == 0)
+        {
+          // looped through all questions for this student. move to the next student, first question.
+          current_col_num_gbl = $("#mgr_mw_sel_question").val();
+          nextStudent();
+        }
+      else
+        {
+          // move on to the next question for this student.
+          selectChange();
+        }
+    }
+  else
+    {
+      // move onto the next student for this question.
+      nextStudent();
+    }
 }
 
 
@@ -231,7 +279,7 @@ function showLoading(clear_stud_id)
 
   $('#mgr_mw_stud_score').val("");
   $('#mgr_mw_stud_pts_possible').html("");
-
+  
   $("#mgr_mw_submit_button").prop('disabled', true);
 
   if (clear_stud_id)
@@ -272,7 +320,7 @@ function closeAnswerKey()
 // of HTML and turn it into a hyperlink. Used to help if students want to submit their
 // answer in a Google doc, image, etc.
 function activateHyperlink(html)
-{
+{  
   var regex = /"(http.+)"/;
   var link = html;
 
@@ -292,7 +340,7 @@ function activateHyperlink(html)
           link = html.replace(regex, '$1<a target="_blank" href="$2">$2</a>');
         }
     }
-
+  
   return link;
 }
 
