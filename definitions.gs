@@ -21,7 +21,7 @@ FIELD_LOG_DEFAULT_RATE = 25;
 FIELD_LOG_WRAP_AROUND = 50000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 51";
+gbl_version_str = "Version 52";
                   
 // NOTE: Update version in README.gas                  
 

@@ -94,3 +94,5 @@
 //   Version 50: 5/11/16:  Sped up "Grade by Hand" tool, added %cs[mult], and colored optional Student Feedback column.
 //   Version 51: 5/16/16:  Autograde now reads in answer key from stored property, instead of from Student Submissions sheet each time.
 //                         This is to avoid grading errors if/when the answer key row shifts due to Google forms funnyness.
+//   Version 52: 5/19/16:  Added more translated strings for Italian, Spanish, Dutch, Finnish and French (fr). Also updated
+//                         message that shows on sheet enable to have link to flubaroo.com.

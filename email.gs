@@ -1010,8 +1010,8 @@ function makePrettyAnswerKeyValue(ak_val)
   re = new RegExp(pattern, "g");
   ak_val = ak_val.replace(re, " → ");
   
-  pattern = ANSKEY_OPERATOR_CHECKBOX + " ";
-  re = new RegExp(pattern, "g");
+  pattern = ANSKEY_OPERATOR_CHECKBOX;
+  re = new RegExp(pattern, "gi");
   ak_val = ak_val.replace(re, "");
   
   return ak_val;

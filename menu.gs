@@ -186,9 +186,12 @@ function enableInSheet()
 {
   createFlubarooMenu();
   
+  /*
   Browser.msgBox(langstr("FLB_STR_NOTIFICATION"),
                  langstr("FLB_STR_FLUBAROO_NOW_ENABLED"), Browser.Buttons.OK); 
+  */
   
+  UI.showMessageBox(langstr("FLB_STR_NOTIFICATION"), langstr("FLB_STR_FLUBAROO_NOW_ENABLED"));
   showUpdateNotice();
 }
 

@@ -442,7 +442,7 @@ langs = {
         "FLB_STR_MENU_ENABLE" : "Enable Flubaroo in this sheet",
       
         // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
-        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo has been enabled for this sheet. You may now access it from the menu.",
+        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo has been enabled for this sheet. You may now access it from the menu.<br><br>For instructions on how to start grading, click <a target=\"_blank\" href=\"http://www.flubaroo.com\">here</a>.",
       
         // Word that appears on the "Continue" button in grading and emailing grades.
         "FLB_STR_BUTTON_CONTINUE" : "Continue",
@@ -1042,6 +1042,26 @@ langs = {
         "FLB_STR_MENU_SHARE_GRADES": "Compartir Calificaciones",
 
         "FLB_STR_MENU_PRINT_GRADES": "Imprimir Calificaciones",
+      
+        "FBL_STR_PRINT_GRADES_TITLE_PRE": "Imprimir las calificaciones de:",
+
+        "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Puntuación extra",
+
+        "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT": "Permitir puntuación extra cuando se asignen puntos a las preguntas",
+
+        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS": "Muestra más opciones en el paso 1 de la evaluación",
+
+        "FLB_STR_AUTOGRADE_NOT_SUMMARIZED": "DEBIDO A LOS AJUSTES DE LA EVALUACIÓN AUTOMÁTICA, ESTA HOJA PUEDE CONTENER MÁS DE UNA NOTA POR ALUMNO",
+
+        "FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY": "La evaluación automática solo funcionará con el último envío realizado por el alumno  (Ver <a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\"> este artículo</a>)",
+
+        "FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION": "Cuando se \ “Evalúen las preguntas de forma manual\”, avanzar a la siguiente pregunta (en lugar de al siguiente alumno)",
+
+        "FLB_STR_MENU_EXPAND_FORMULAS": "Expandir las fórmulas introducidas por el profesor",
+
+        "FLB_STR_GRADING_OPT_IGNORE": "Ignorar",
+
+        "FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE": "Copia por referencia",
 
         "FLB_STR_TIP_MSG_NUMBER_1": "<b> Flubaroo Consejo # 1: </ b> Flubaroo puede aceptar más de una respuesta correcta.",
 
@@ -1056,7 +1076,12 @@ langs = {
         "FLB_STR_TIP_MSG_NUMBER_6": "<b> Flubaroo Consejo # 6: </ b> ¿Quieres que tus tareas clasifican automáticamente?",
 
         "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Consejo # 7: </ b> Tienes preguntas? Tenemos respuestas en nuestras Preguntas Frecuentes!",
+        
+        "FLB_STR_TIP_MSG_NUMBER_8": "Flubaroo Consejo 8: ¿Perteneces a una escuela GAFE (Google Apps For Education)? ¡Obtén las direcciones de correo electrónico automáticamente!",
 
+        "FLB_STR_TIP_MSG_NUMBER_9": "Flubaroo Consejo  9: ¿No puedes compartir las calificaciones por correo electrónico? ¡Compártelas a través de Google Drive!",
+
+        "FLB_STR_TIP_MSG_NUMBER_10": "Flubaroo Consejo 10: ¿Necesitas una copia impresa de las calificaciones de tus alumnos? ¡Aprende cómo imprimirlas!"
     },
     // END SPANISH ////////////////////////////////////////////////////////////////////////////////
   
@@ -2072,6 +2097,26 @@ langs = {
         "FLB_STR_MENU_SHARE_GRADES": "Delen de Beoordelingen",
       
         "FLB_STR_MENU_PRINT_GRADES": "Printen de Beoordelingen",
+        
+        "FBL_STR_PRINT_GRADES_TITLE_PRE": "Printbare beoordeling voor:",
+
+        "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Extra punten",
+
+        "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT": "Sta extra punten toe bij het toekennen van punten aan vragen",
+
+        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS": "Laat aanvullende beoordelingsopties zien in Stap 1 van de beoordeling",
+
+        "FLB_STR_AUTOGRADE_NOT_SUMMARIZED": "DOOR JE AUTOMATISCHE BEOORDELINGSOPTIES KAN DIT BLAD MEER DAN ÉÉN INZENDING PER STUDENT BEVATTEN",
+
+        "FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY": "De automatische beoordeling zal alleen de meest recente inzending verwerken (zie <a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\">dit artikel</a>).",
+
+        "FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION": "Wanneer je \"Beoordeel vragen handmatig\", gebruikt, moet je automatisch doorgaan naar de volgende vraag (in plaats van de volgende student)",
+
+        "FLB_STR_MENU_EXPAND_FORMULAS": "Geef aangepaste formules weer",
+
+        "FLB_STR_GRADING_OPT_IGNORE": "Negeer",
+
+        "FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE": "Referentiekopie",
 
         "FLB_STR_TIP_MSG_NUMBER_1": "<b> Flubaroo Tip # 1: </ b> Flubaroo kan meer dan één juist antwoord te aanvaarden.",
 
@@ -2086,6 +2131,12 @@ langs = {
         "FLB_STR_TIP_MSG_NUMBER_6": "<b> Flubaroo Tip # 6: </ b> Wilt u uw opdrachten automatisch ingedeeld?",
 
         "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Tip # 7: </ b> U hebt nog vragen? We hebben de antwoorden in onze FAQ!",
+      
+        "FLB_STR_TIP_MSG_NUMBER_8": "<b>Flubaroo Tip #8:</b> Gebruik je GAFE (Google Apps For Education)? Verzamel automatisch de e-mailadressen!",
+
+        "FLB_STR_TIP_MSG_NUMBER_9": "<b>Flubaroo Tip #9:</b> Kun je de beoordelingen niet via e-mail delen? Deel deze via Google Drive!",
+
+        "FLB_STR_TIP_MSG_NUMBER_10": "<b>Flubaroo Tip #10:</b> Wil je een uitdraai van de beoordeling voor je studenten? Leer hoe je deze kunt afdrukken!",
     },
     // END DUTCH //////////////////////////////////////////////////////////////////////////////  
  
@@ -2527,6 +2578,26 @@ langs = {
         "FLB_STR_MENU_SHARE_GRADES": "Partager Grades",
 
         "FLB_STR_MENU_PRINT_GRADES": "Imprimer Grades",
+     
+        "FBL_STR_PRINT_GRADES_TITLE_PRE": "Relevé de note pour :",
+
+        "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Notation extra",
+
+        "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT": "Permet une notation extra lors de l'attribution des points aux questions",
+
+        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS": "Afficher les options de classement supplémentaires à l'étape 1",
+
+        "FLB_STR_AUTOGRADE_NOT_SUMMARIZED": "En raison de vos réglages de notation automatique, cette fiche peut contenir plus d’une soumission notée par étudiant",
+
+        "FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY": "La notation automatique traitera la soumission la plus récente d’un étudiant (voir<a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\">this article</a>).",
+
+        "FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION": "Lorsque vous utilisez \"Notation manuelle \", il avance automatiquement à  la question suivante (au lieu du prochain étudiant)",
+
+        "FLB_STR_MENU_EXPAND_FORMULAS": "Développer les formules personnalisées",
+
+        "FLB_STR_GRADING_OPT_IGNORE": "Ignorer",
+
+        "FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE": "Copie pour référence",
 
         "FLB_STR_TIP_MSG_NUMBER_1": "<b> Flubaroo Astuce n ° 1: </ b> Flubaroo peut accepter plus d'une réponse correcte.",
 
@@ -2541,7 +2612,12 @@ langs = {
         "FLB_STR_TIP_MSG_NUMBER_6": "<b> Flubaroo Conseil n ° 6: </ b> Vous voulez que vos formulaires soient évalués automatiquement?",
 
         "FLB_STR_TIP_MSG_NUMBER_7": "<b> Flubaroo Conseil n ° 7: </ b> Vous avez des questions? Nous avons les réponses dans notre FAQ!",
+        
+        "FLB_STR_TIP_MSG_NUMBER_8": "<b>Flubaroo Conseil #8:</b> Vous avez Google Education? Collecter les emails automatiquement!",
 
+        "FLB_STR_TIP_MSG_NUMBER_9": "<b>Flubaroo Conseil #9:</b> Vous ne pouvez pas partager vos notations par courriel? Partagez via Google Drive!",
+
+        "FLB_STR_TIP_MSG_NUMBER_10": "<b>Flubaroo Conseil #10:</b> Vous voulez une copie papier de notes de vos élèves? Apprenez à les imprimer!!",
    },
    // END FRENCH //////////////////////////////////////////////////////////////////////////////////
 
@@ -6176,6 +6252,14 @@ Voit sisällyttää dokumenttiin myös viestin, sekä kysymysluettelon ja/tai oi
 "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Lisäpisteet",
 // Text for Advanced Options, describing option to allow extra credit.
 "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Salli lisäpisteet kysymysten pisteitä määrättäessä",
+"FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS": "Näytä tarkistuksen lisävaihtoehdot vaiheessa yksi",
+"FLB_STR_AUTOGRADE_NOT_SUMMARIZED": "AUTOMAATTISEN TARKISTUKSEN ASETUKSISTASI JOHTUEN TAULUKKO SAATTAA SISÄLTÄÄ ENEMMÄN KUIN YHDEN ARVIOIDUN PALAUTUKSEN OPPILASTA KOHTI",
+"FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY": "Automaattinen tarkistus käsittelee ainoastaan viimeisimmän palautuksen (ks. <a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\">this article</a>).",
+"FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION": "Käytettäessä \”Tarkista Kysymykset Käsin\”, siirry automaattisesti seuraavaan kysymykseen (seuraavan vastaajan sijaan)",
+"FLB_STR_MENU_EXPAND_FORMULAS": "Laajenna Kustomoidut Kaavat",
+"FLB_STR_GRADING_OPT_IGNORE": "Ohita",
+"FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE": "Kopioi viitteeksi",
+
 // Flubaroo Tips, shown when grading completes.
 "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo vinkki #1:</b> Flubaroo hyväksyy myös yhtä useampia oikeita vastauksia.",
 "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo vinkki #2:</b> Flubaroo osaa tarkistaa lukualueita esim. luonnontieteiden ja matematiikan kyselyissä.",
@@ -6186,8 +6270,7 @@ Voit sisällyttää dokumenttiin myös viestin, sekä kysymysluettelon ja/tai oi
 "FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo vinkki #7:</b> Onko sinulla kysyttävää? Vastaus löytyy FAQ:sta",
 "FLB_STR_TIP_MSG_NUMBER_8" : "<b>Flubaroo vinkki #8:</b> Oletteko GAFE koulu? Kerää vastaajien sähköpostiosoitteet automaattisesti!",
 "FLB_STR_TIP_MSG_NUMBER_9" : "<b>Flubaroo vinkki #9:</b> Eikö tuloksia voi jakaa sähköpostitse? Jaa ne Google Drivessa!",
-"FLB_STR_TIP_MSG_NUMBER_10" : "<b>Flubaroo vinkki #10:</b> Haluatko vastaajille paperikopion tuloksista? Tulostamiseen löytyy keino!",
-},
+"FLB_STR_TIP_MSG_NUMBER_10" : "<b>Flubaroo vinkki #10:</b> Haluatko vastaajille paperikopion tuloksista? Tulostamiseen löytyy keino!",},
 // END FINNISH //////////////////////////////////////////////////////////////////////////////////
 
 // START BULGARIAN ////////////////////////////////////////////////////////////////////////////////
@@ -7245,7 +7328,46 @@ o altri dati dal foglio Valutazioni recentemente?</p>\
      
          // Text for Advanced Options, describing option to allow extra credit.      
         "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Permetti credito extra quando si assegnano punti alle domande",
- 
+      
+        // Text for Advanced Options, asking if user wants to show some additional options in the pull-down menu in Step 1 of grading.
+        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS" : "Mostra opzioni aggiuntive per il passo 1 della valutazione",
+      
+        // Notice for Grades sheet (shown at top) if Autograde is enabled. Tells the user that grading isn't only considering a student's most recent submission.
+        "FLB_STR_AUTOGRADE_NOT_SUMMARIZED" : "A CAUSA DELLE TUE IMPOSTAZIONI PER LA VALUTAZIONE AUTOMATICA QUESTO FOGLIO POTREBBE CONTENERE PIÙ DI UNA VALUTAZIONE PER STUDENTE",
+      
+        // Text for Advanced Options, letting user decide if they want Autograde to grade only a student's most recent submission (if checked).
+        "FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY" : "La valutazione automatica elaborerà solo l’immissione più recente dello studente (vedi <a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\">questo articolo</a>)",
+      
+        // Text for Advanced Options, asking user if when using the "Grade Questions by Hand" tool, if it should auto advance to the next question when
+        // a score is set (versus the next student).
+        "FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION" : "Durante la valutazione manuale avanza automaticamente alla domanda successiva (invece che allo studente successivo)",
+      
+        // Advanced menu option that will expand the special tokens in formulas written by the teacher in the Grades sheet.
+        "FLB_STR_MENU_EXPAND_FORMULAS" : "Espandi le formule dell’utente",
+       
+         // Grading option which ignores a question
+        "FLB_STR_GRADING_OPT_IGNORE" : "Ignora",
+
+         // Grading option which copies a column for reference to the Grades sheet
+        "FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE" : "Copia per riferimento",
+      
+        // Message shown in sidebar for Flubaroo update announcements
+        "FLB_STR_EMAIL_ME_THIS_ANNOUCNEMENT" : "Mi invia questo annuncio",
+      
+        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS": "Mostra opzioni aggiuntive per il passo 1 della valutazione",
+
+        "FLB_STR_AUTOGRADE_NOT_SUMMARIZED": "A CAUSA DELLE TUE IMPOSTAZIONI PER LA VALUTAZIONE AUTOMATICA QUESTO FOGLIO POTREBBE CONTENERE PIÙ DI UNA VALUTAZIONE PER STUDENTE",
+
+        "FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY": "La valutazione automatica elaborerà solo l’immissione più recente dello studente (vedi <a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\">questo articolo</a>)",
+
+        "FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION": "Durante la valutazione manuale avanza automaticamente alla domanda successiva (invece che allo studente successivo)",
+
+        "FLB_STR_MENU_EXPAND_FORMULAS": "Espandi le formule dell’utente",
+
+        "FLB_STR_GRADING_OPT_IGNORE": "Ignora",
+
+        "FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE": "Copia per riferimento",
+      
         // Flubaroo Tips, shown when grading completes.
         "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Suggerimento #1:</b> Flubaroo può accettare più di una risposta corretta.",
         "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Suggerimento #2:</b> Flubaroo può valutare intervalli numerici per test scientifici e matematici.",
@@ -7265,5 +7387,4 @@ o altri dati dal foglio Valutazioni recentemente?</p>\
 } // end langs
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 

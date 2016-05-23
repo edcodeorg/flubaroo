@@ -265,7 +265,13 @@ GradedSubmission.prototype.gradeIt = function()
             
             // The teacher just wants to copy this column to the Grads sheet, for reference.
             // It will not affect grading.
-            grade_val = q.getFullSubmissionText();
+            var ref_val = q.getFullSubmissionText();
+            if (typeof ref_val == "number" || (typeof ref_val == "string" && !isNaN(ref_val)))
+              {
+                ref_val = "'" + ref_val;
+              }
+            
+            grade_val = ref_val;
             break;
             
         case GRADING_OPT_IGNORE:
@@ -378,12 +384,13 @@ GradedSubmission.prototype.gradeSubmission = function(q)
           // Found '%or' operator.
           key_list = this.processOrInKey(key);
         }
-      else if ((key.search(ANSKEY_OPERATOR_CHECKBOX + " ") == 0) && (key.length > 4))
+      else if ((key.search(ANSKEY_OPERATOR_CHECKBOX) == 0) && (key.length > 4))
         {
-          var regex = /^%cb(\d+)?(\.\d+)? (.*)/i;
+          var regex = /^%cb(\d+)?(\.\d+)? *(.*)/i;
+
           var found = key.match(regex);
 
-          Debug.info("%cb matches: " + found[0] + " | " + found[1] + " | " + found[2] + " | " + found[3]);
+          //Debug.info("%cb matches: " + found[0] + " | " + found[1] + " | " + found[2] + " | " + found[3]);
           
           if (found[1])
             {
