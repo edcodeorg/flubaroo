@@ -711,7 +711,7 @@ function doShareGrades()
       div_body += '<b>' + langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER") + ': </b>' + graded_ques.getFullSubmissionText() + '</p>'; 
      
       var ak_has_formula = false;
-      if (ak_value.substring(0,2) == "%=")
+      if (typeof ak_value === 'string' && ak_value.substring(0,2) == "%=")
         {
           // don't show formulas in the answer key when sharing grades.
           // unwiedly, long, and not necessarily fully decipherable by the student anyway.
