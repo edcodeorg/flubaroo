@@ -289,9 +289,17 @@ function writeContentsOfGradeDocument(grades_doc,
          {
            continue;
          }
-
-       var ak_value = makePrettyAnswerKeyValue(q.getAnswerKeyText());      
+ 
+      var ak_has_formula = false;
+      var ak_value = makePrettyAnswerKeyValue(q.getAnswerKeyText());      
       
+      if (typeof ak_value === 'string' && ak_value.substring(0,2) == "%=")
+        {
+          // don't show formulas in the answer key when sharing grades.
+          // unwiedly, long, and not necessarily fully decipherable by the student anyway.
+          ak_has_formula = true;
+        }
+       
        var score = "";
        if (gopt === GRADING_OPT_SKIP)
          {
@@ -324,12 +332,22 @@ function writeContentsOfGradeDocument(grades_doc,
       var row_data = [];
 
       row_data.push(q.getFullQuestionText());
-      row_data.push(q.getFullSubmissionText());
+      row_data.push(q.getFullSubmissionText());   
+       
       if (show_answers === 'true')
         {
-          row_data.push(ak_value);
+          if (isNormallyGraded(gopt) && !ak_has_formula )
+            {
+              row_data.push(ak_value);
+            }
+          else
+            {
+              row_data.push("");
+            }
         }
+      
       row_data.push(score);
+      
       if (has_manually_graded_ques)
         {
           row_data.push(q.getGradedTeacherComment());
