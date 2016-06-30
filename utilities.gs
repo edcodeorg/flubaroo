@@ -27,7 +27,7 @@ var whole_sheet_num_rows_g = 0;
 // Sets up menu (really just calls onOpen() ).
 function onInstall(e)
 {
-  onOpen(e);  
+  onOpen(e);
 }  
 
 // onOpen:
@@ -889,14 +889,38 @@ function showUpdateNotice()
   // compare this update's id to the last update's id to 
   // see if this is a new message that needs to be shown.
   var up = PropertiesService.getUserProperties(); 
+  var flubaroo_uid = up.getProperty("flubaroo_uid"); // set upon completion of first grading ever
 
+  // Check if this is the very first install of Flubaroo ever for this user.
+  // if so, we show a welcome message instead. 
+  // We also check that flubaroo_uid is null too, to avoid showing this message to a bunch of exsting users
+  // since this welcome message was only introduced in May 2016.
+  var welcome_shown = true;
+  if ((up.getProperty(USER_PROP_FIRST_TIME_WELCOME_SHOWN) === null)
+       && (flubaroo_uid === null)
+     )
+    {
+      welcome_shown = false;
+    }
+  
   // get the date of the last notice, and only show this message
   // if it has a different date (i.e. it's a new, different message).
   var notice_date = up.getProperty(USER_PROP_UPDATE_NOTICE_DATE);
   
   Debug.info("comparing notice_date: '" + notice_date + "', to: '" + gbl_update_notice_date + "'");
   
-  if (notice_date != gbl_update_notice_date)
+  if (!welcome_shown)
+    {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      if (ss)
+        {
+          UI.showSidebarMessage(langstr("FLB_STR_NOTIFICATION"), langstr("FLB_STR_FLUBAROO_NOW_INSTALLED"), false);
+      
+          // don't show the welcome message again.
+          up.setProperty(USER_PROP_FIRST_TIME_WELCOME_SHOWN, "true");    
+        }
+    }
+  else if (notice_date != gbl_update_notice_date)
     {
       // new message. show it!
       var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -908,7 +932,7 @@ function showUpdateNotice()
           up.setProperty(USER_PROP_UPDATE_NOTICE_DATE, gbl_update_notice_date);
         }      
     }  
-  
+
   Debug.writeToFieldLogSheet();
 }
 

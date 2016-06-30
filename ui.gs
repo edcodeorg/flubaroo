@@ -1041,8 +1041,8 @@ function getFlubarooTipHTML()
   var text = "";
   var url = "";
   
-  var dp = PropertiesService.getDocumentProperties();
-  var nt = dp.getProperty(DOC_PROP_NEXT_TIP_NUMBER);
+  var up = PropertiesService.getUserProperties();
+  var nt = up.getProperty(USER_PROP_NEXT_TIP_NUMBER);
   
   if (!nt)
     {
@@ -1104,7 +1104,7 @@ function getFlubarooTipHTML()
       nt = 1;
     }
 
-  dp.setProperty(DOC_PROP_NEXT_TIP_NUMBER, nt.toString());
+  up.setProperty(USER_PROP_NEXT_TIP_NUMBER, nt.toString());
   
   article = article.replace("%s", url);
   var html = text + " " + article;

@@ -306,12 +306,12 @@ function gradingStep2SubmitHandler(ak_subm_row)
       Debug.info("gradingStep2SubmitHandler() - collecting info on " + 
                 "grades already emailed and student feedback");
     
-      gws_graded = new GradesWorksheet(ss, INIT_TYPE_GRADED_PARTIAL);
+      gws_graded = new GradesWorksheet(ss, INIT_TYPE_GRADED_PARTIAL, -1);
     }  
     
   // Create a new gws object from the submissions sheet.
   Debug.info("gradingStep2SubmitHandler() - creating new GradesWorksheet with init type: " + subm_init_type);
-  gws = new GradesWorksheet(ss, subm_init_type);
+  gws = new GradesWorksheet(ss, subm_init_type, -1);
     
   // Write the submissions to the new grades sheet. Whether we're 
   // just writing the last submission or all of them depends on 

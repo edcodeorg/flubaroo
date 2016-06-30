@@ -73,11 +73,6 @@ function runTests()
 // The spreadsheet need to be set to the local timezone for the 
 // date comparisons to work (File>Spreadsheet settings...).
 
-function x()
-{
-  Browser.msgBox(testQAGradesSheet());
-}
-
 function testQAGradesSheet() 
 {
   Debug.info("testQAGradesSheet()");
@@ -130,41 +125,3 @@ function testQAGradesSheet()
   return passed;
   
 } // testQAGradesSheet()
-
-
-// DAA testing
-function testFormulaExpand()
-{
-  var rf = 'CELL("contents", INDIRECT(ADDRESS($A$1+ROW()-5, COLUMN(), 3, TRUE)))';
-  
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var grades_sheet = getSheetWithGrades(ss);
-  
-  var ar = grades_sheet.getActiveRange();
-  
-  var formulas = ar.getFormulas();
-  
-  for (var i=0; i < formulas.length; i++)
-    {
-      var str = formulas[i][0];
-      str = str.replace("FLB_STUDENT_RESPONSE", rf);
-      
-      formulas[i][0] = str;
-    }
-  
-  ar.setFormulas(formulas);
-  
-}
-
-
-function testFormulaWrite()
-{
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("formulas");
-  
-  var r = sheet.getRange(1, 1, 1, 4);
-  
-  var v = [ ['0', 0, 'abc', "=if(EQ(1, 1), \"a\", \"b\")"] ];
-      
-  r.setValues(v);  
-}

@@ -45,10 +45,11 @@ gbl_invalid_grades_sheet_error = "";
 //    init_type: Specifies how GradesWorksheet is being initialized:
 //               - INIT_TYPE_SUBM: Init from the Student Submissions sheet, during grading.
 //               - INIT_TYPE_GRADED_*: Init from the 'Grades' sheet, such as when emailing grades
-//
-function GradesWorksheet(spreadsheet, init_type)
+//    num_graded_submissions_to_read: Only used for INIT_TYPE_GRADED_ONLY_LATEST. Otherwise pass -1.
+//                                    Specifies how many graded submissions to read in (from the bottom).
+function GradesWorksheet(spreadsheet, init_type, num_graded_submissions_to_read)
 {
-  this.initGWSVars(spreadsheet, init_type);
+  this.initGWSVars(spreadsheet, init_type, num_graded_submissions_to_read);
   
   if (init_type == INIT_TYPE_SUBM)
     {
@@ -59,7 +60,7 @@ function GradesWorksheet(spreadsheet, init_type)
     }
   else if (init_type == INIT_TYPE_SUBM_ONLY_LATEST)
     {
-      Debug.info("GradesWorksheet: INIT_TYPE_SUBM_ONLY_LATEST");      
+      Debug.info("GradesWorksheet: INIT_TYPE_SUBM_ONLY_LATEST. num_graded_submissions_to_read = " + num_graded_submissions_to_read);      
       this.processSubmissionsSheet();
     }
   else // INIT_TYPE_GRADED_*
@@ -74,10 +75,11 @@ function GradesWorksheet(spreadsheet, init_type)
   Debug.writeToFieldLogSheet();
 }
 
-GradesWorksheet.prototype.initGWSVars = function(spreadsheet, init_type)
+GradesWorksheet.prototype.initGWSVars = function(spreadsheet, init_type, num_graded_submissions_to_read)
 {
   Debug.info("initGWSVars: entering. init_type=" + init_type);
   this.init_type = init_type;
+  this.num_graded_submissions_to_read = num_graded_submissions_to_read;
   
   this.spreadsheet = spreadsheet;
   this.submissions_sheet = getSheetWithSubmissions(this.spreadsheet); 
@@ -115,6 +117,9 @@ GradesWorksheet.prototype.initGWSVars = function(spreadsheet, init_type)
   this.avg_subm_score = 0;
   this.num_low = 0; 
   
+  // 'true' if one of the answer key values is actually a '%=' formula.
+  this.has_formula_anskey = false;
+  
   Debug.info("initGWSVars: leaving");
 }
 
@@ -133,6 +138,12 @@ GradesWorksheet.prototype.getNumStudentIdentifiers= function()
   return this.num_student_identifiers;
 }
 
+// getNumGradedSubmissions:
+// Returns the number of graded submissions in the Grades worksheet.
+// Note that this is the total number in the sheet itself, and not
+// the number actually graded in the gws object (which could be less if
+// we're using Autograde and grading just the most recent submissions).
+//
 // TODO_AJR - Would be nice to just be switching on init_type
 // rather than assuming the fp has been set up, which it is when the 
 // submission sheet is processed.
@@ -162,6 +173,20 @@ GradesWorksheet.prototype.getNumGradedSubmissions = function()
     }
 
   return num;
+}
+
+// getNumGradedSubmissions:
+// For use with Autograde when grading only most recent submissions (vs whole
+// Student Submissions sheet). Returns just the number of submissions that
+// were most recently graded (vs total # in the Grades sheet).
+GradesWorksheet.prototype.getNumRecentGradedSubmissions = function()
+{
+  if (this.fingerprint_list != null && (this.fingerprint_list.length > 0))
+    {
+      return this.fingerprint_list.length;
+    }
+  
+  return 0;
 }
 
 // addGradedSubmission: Adds a new graded submission. If already exists (same fingerprint), replaces
@@ -330,7 +355,7 @@ GradesWorksheet.prototype.processSubmissionsSheet = function()
       answer_key_vals = getAutogradeAnswerKeyValues(this.submissions_sheet, this.answer_key_row_num);
     }
   
-  // Create a copy of the array, not a reference to it.
+  // Create a copy of the answer key array, not a reference to it.
   var answer_key_vals_lc = answer_key_vals.slice(0);  
   
   for (var i = 0; i < answer_key_vals_lc.length; i++)
@@ -340,6 +365,8 @@ GradesWorksheet.prototype.processSubmissionsSheet = function()
           answer_key_vals_lc[i] = strTrim(answer_key_vals_lc[i].toLowerCase());
         }
     }
+  
+  this.has_formula_anskey = gwsAnswerKeyHasFormula(answer_key_vals);
     
   // TODO_AJR - If, reading in the answer key values, one isn't a string is that
   // a problem?
@@ -525,6 +552,8 @@ GradesWorksheet.prototype.processGradesSheet = function()
                                          "",
                                          numb_graded_submissions);
 
+  this.has_formula_anskey = gwsAnswerKeyHasFormula(answer_key_vals);
+  
   // Check if any help tips are present. They will be if there's at least one
   // non-empty cell in this row. otherwise the row will be entirely blank.
   
@@ -546,6 +575,9 @@ GradesWorksheet.prototype.processGradesSheet = function()
   
   // TODO_AJR - add else.
   
+  // Read in and process graded submissions in the Grades sheet.
+  var write_start_row = gbl_grades_start_row_num + 1;
+  
   if (this.init_type == INIT_TYPE_GRADED_META)
     {
       // Just process a single submission so we can use it later to 
@@ -553,6 +585,19 @@ GradesWorksheet.prototype.processGradesSheet = function()
       // process *all* of the submissions. Used to construct the UI 
       // for emailing grades.
       max_submissions_to_read = 1;
+    }
+  else if (this.init_type == INIT_TYPE_GRADED_ONLY_LATEST)
+    {
+      // we want to read only the last few rows that were (just) written.
+      // this is for emailing grades when autograde is in use, but a '%=' is in the answer key.
+      max_submissions_to_read = this.num_graded_submissions_to_read;
+      var last_written_graded_subm_row = gbl_grades_start_row_num + 1 + this.getNumGradedSubmissions() - 1;
+      write_start_row = last_written_graded_subm_row - max_submissions_to_read + 1;
+      
+      Debug.info("GradesWorksheet.processGradesSheet() - init_type == INIT_TYPE_GRADED_ONLY_LATEST.");
+      Debug.info("GradesWorksheet.processGradesSheet() - max_submissions_to_read = " + max_submissions_to_read);
+      Debug.info("GradesWorksheet.processGradesSheet() - last_written_graded_subm_row = " + last_written_graded_subm_row);
+      Debug.info("GradesWorksheet.processGradesSheet() - first row to read in Grades: " + write_start_row);
     }
   else // INIT_TYPE_GRADED_FULL or INIT_TYPE_GRADED_PARTIAL
     {
@@ -562,10 +607,7 @@ GradesWorksheet.prototype.processGradesSheet = function()
   
   Debug.info("GradesWorksheet.processGradesSheet() - max submissions: " + 
               max_submissions_to_read);
-  
-  // Read in and process graded submissions in the Grades sheet.
-  var write_start_row = gbl_grades_start_row_num + 1;
-             
+               
   for (i = 0; i < max_submissions_to_read; i++)
     {
       
@@ -1213,7 +1255,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
 
     if (grades_sheet_update_type != GRADES_SHEET_UPDATE_TYPE_REGEN)
       { 
-        // increase current number graded by the number of subm we just inserted.
+        // increase current number graded by the number of subm we just *inserted*.
         num_graded_subm = fp_length + NumGradedSubm.get();
       }
     else // regenerating whole Grades sheet
@@ -1562,7 +1604,10 @@ GradesWorksheet.prototype.hasManuallyGradedQuestion = function()
   return this.has_manually_graded_question;
 }
 
-
+GradesWorksheet.prototype.hasFormulaAnswerKey = function()
+{
+  return this.has_formula_anskey;
+}
 
 // gwsGradesSheetIsValid: Returns true if grades_sheet is valid (grading completed). False otherwise.
 // Assumes the grades_sheet passed isn't null (Grades sheet exists)
@@ -1726,4 +1771,19 @@ function gwsCheckForFormattedCellsInRow(row_to_write)
     }
   
   return col_nums;
+}
+
+function gwsAnswerKeyHasFormula(answer_key_vals)
+{
+  for (var i=0; i < answer_key_vals.length; i++)
+    {
+      var ak_val = answer_key_vals[i];
+      if (typeof ak_val == "string" && ak_val.substring(0, 2) == "%=")
+        {
+          Debug.info("gwsAnswerKeyHasFormula: returning true");
+          return true;
+        }
+    }
+  
+  return false;
 }

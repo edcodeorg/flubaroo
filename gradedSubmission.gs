@@ -105,7 +105,7 @@ function GradedSubmission(gws,
   this.student_feedback = "";
   this.q_index = 0;
   this.subm_copy_row_index = 0;
-  
+ 
   this.initGSVars();
 }
 

@@ -100,15 +100,35 @@ function doShareGrades()
   // Initialize a gws object from the Grades sheet
   if (Autograde.isOn() && autograded_gws_g)
     {
-      // Can use the one from Autograde, which just completed.
-      Debug.info("doShareGrades(): grabbing existing gws object from autograde.");
-      gws = autograded_gws_g;
+      // Autograde just completed, so we can potentially use the gws object from it, 
+      // which is already in memory. Only exception is if the answer key has a custom '%='
+      // formula. In this case we have to read the scores back from the spreadsheet, since
+      // we won't have known ahead of time what the formula would evaluate them to.
+      if (!autograded_gws_g.hasFormulaAnswerKey())
+        {
+          // Can use the one from Autograde, which just completed.
+          Debug.info("doShareGrades(): grabbing existing gws object from autograde.");
+          gws = autograded_gws_g;
+        }
+      else // answer key contains a '%=' formula. 
+        {
+          if (Autograde.getDoFullRegrade())
+            {
+              Debug.info("doShareGrades(): answer key has '%=' formula in it. Initializing from existing Grades sheet with type: INIT_TYPE_GRADED_FULL");
+              gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_FULL, -1);
+            }
+          else
+            {
+              Debug.info("doShareGrades(): answer key has '%=' formula in it. Initializing from existing Grades sheet with type: INIT_TYPE_GRADED_ONLY_LATEST");
+              gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_ONLY_LATEST, autograded_gws_g.getNumRecentGradedSubmissions());
+            }
+        }
     }
   else
     {
       // Initialise gws from the grades sheet.
       Debug.info("doShareGrades(): generating new gws object from Grades sheet.");
-      gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_FULL);
+      gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_FULL, -1);
     }
   
   var points_possible =  gws.getPointsPossible();
@@ -583,7 +603,7 @@ function doShareGrades()
                 
                 if (isNormallyGraded(gopt))
                   {
-                    if (q.getGradedVal() == ques_pts_worth)
+                    if (q.getGradedVal() >= ques_pts_worth)
                       {
                         grade_status = langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT");
                       }
@@ -659,7 +679,7 @@ function doShareGrades()
         {
           var ques_pts_worth = getPointsWorth(gopt);
 
-          if (graded_ques.getGradedVal() == ques_pts_worth)
+          if (graded_ques.getGradedVal() >= ques_pts_worth)
             {
               bgcolor = bgcolor_green;
             }
@@ -690,8 +710,16 @@ function doShareGrades()
       div_body += '<p style="width:400px;font-size:medium;">';
       div_body += '<b>' + langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER") + ': </b>' + graded_ques.getFullSubmissionText() + '</p>'; 
      
-      if (isNormallyGraded(gopt) && (grade_status === langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT")) && 
-          show_answers === 'true')
+      var ak_has_formula = false;
+      if (ak_value.substring(0,2) == "%=")
+        {
+          // don't show formulas in the answer key when sharing grades.
+          // unwiedly, long, and not necessarily fully decipherable by the student anyway.
+          ak_has_formula = true;
+        }
+      
+      if (isNormallyGraded(gopt) && (grade_status === langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT")) 
+          && !ak_has_formula && show_answers === 'true')
         {
           div_body += '<p style="width:400px;font-size:medium;">'
           div_body += '<b>' + langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER") + ': </b>' + ak_value;
@@ -902,7 +930,7 @@ function doPrintGrades()
 
   // Initialise gws from the grades sheet.
   Debug.info("doPrintGrades(): generating new gws object from Grades sheet.");
-  var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_FULL);
+  var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_FULL, -1);
   var points_possible =  gws.getPointsPossible();
   var has_manually_graded_question = gws.hasManuallyGradedQuestion();
   

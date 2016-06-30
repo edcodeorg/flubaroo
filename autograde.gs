@@ -987,6 +987,7 @@ function getAutogradeAnswerKeyValues(subm_sheet, ak_row_number)
     {
       // we haven't yet stored the options. mostly likely b/c this instance of Autograde
       // was already turned on before I added this functionality, or because 
+      // the user enabled autograde without updating their grading options.
       ag_ak_prop = setAutogradeAnswerKeyValues(subm_sheet, ak_row_number);
     }
   

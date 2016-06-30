@@ -96,3 +96,6 @@
 //                         This is to avoid grading errors if/when the answer key row shifts due to Google forms funnyness.
 //   Version 52: 5/19/16:  Added more translated strings for Italian, Spanish, Dutch, Finnish and French (fr). Also updated
 //                         message that shows on sheet enable to have link to flubaroo.com.
+//   Version 53: 6/10/16:  Added new user message for very first install, directing users to Flubaroo.com. Updated next tip # counter to use
+//                         user property vs doc property.
+//   Version 54: 7/1/16:   Fixed issue with %= when grades shared. Ensures that first install welcome message is only ever shown once.

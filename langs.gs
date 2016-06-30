@@ -442,7 +442,7 @@ langs = {
         "FLB_STR_MENU_ENABLE" : "Enable Flubaroo in this sheet",
       
         // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
-        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo has been enabled for this sheet. You may now access it from the menu.<br><br>For instructions on how to start grading, click <a target=\"_blank\" href=\"http://www.flubaroo.com\">here</a>.",
+        "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo has been enabled for this sheet. You may now access it from the menu.<br><br>For instructions on how to start grading, click <a target=\"_blank\" href=\"http://www.flubaroo.com/#enabled\">here</a>.",
       
         // Word that appears on the "Continue" button in grading and emailing grades.
         "FLB_STR_BUTTON_CONTINUE" : "Continue",
@@ -700,6 +700,9 @@ langs = {
       
         // Message shown in sidebar for Flubaroo update announcements
         "FLB_STR_EMAIL_ME_THIS_ANNOUCNEMENT" : "Email Me This Announcement",
+      
+         // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
+        "FLB_STR_FLUBAROO_NOW_INSTALLED" : "<b>Hello There Newcomer!</b><p>Thanks for installing Flubaroo and joining tens of thousands of educators who are saving time and gaining insight into student understanding.</p><p>To help you get started, visit <a target=\"_blank\" href=\"http://www.flubaroo.com/#firstinstall\">flubaroo.com</a> to read an illustrated overview and view a short instructional video.</p><p>You can also find some sample student submissions to grade <a target=\"_blank\" href=\"https://goo.gl/0e9ut6\">here</a>, which you can copy/paste into this sheet to try out Flubaroo with.</p><p>Good luck and happy Flubaroo'ing!</p><p><b>--The Flubaroo Team</b></p>",
       
         // Flubaroo Tips, shown when grading completes.
         "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Tip #1:</b> Flubaroo can accept more than one correct answer.",

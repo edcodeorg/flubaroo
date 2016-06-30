@@ -21,7 +21,7 @@ FIELD_LOG_DEFAULT_RATE = 25;
 FIELD_LOG_WRAP_AROUND = 50000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 52";
+gbl_version_str = "Version 54";
                   
 // NOTE: Update version in README.gas                  
 
@@ -100,6 +100,8 @@ INIT_TYPE_GRADED_PARTIAL = 3;   // same as INIT_TYPE_GRADED_FULL, but only skips
                                 // in the hidden rows. Used when reading in an existing Grades sheet when re-grading.
 INIT_TYPE_SUBM_ONLY_LATEST = 4; // same as INIT_TYPE_SUBM, but only pulls in latest submissions that haven't been graded yet
                                 // (for use with autograde).
+INIT_TYPE_GRADED_ONLY_LATEST = 5; // same as INIT_TYPE_GRADED_FULL, but reads in only the most recently written rows to the Grades
+                                  // sheet. For use with autograde when only grading most recent submissions. 
 
 GRADES_SHEET_UPDATE_TYPE_REGEN = 1;  // Typical case of regenerating entire Grades sheet
 GRADES_SHEET_UPDATE_TYPE_INSERT = 2; // Case sometimes used by Autograde that just inserts new graded rows into existing Grades sheet.
@@ -183,7 +185,7 @@ DOC_PROP_AUTOGRADE_RUNNING = "flubaroo_auto_grade_running";
 DOC_PROP_AUTOGRADE_DO_FULL_REGRADE = "flubaroo_auto_grade_do_full_regrade";
 DOC_PROP_AUTOGRADE_ANSWER_VALUES = "flubaroo_auto_grade_anskey_values";
 
-DOC_PROP_NEXT_TIP_NUMBER = "flubaroo_next_tip_number";
+USER_PROP_NEXT_TIP_NUMBER = "flubaroo_next_tip_number";
 
 DOC_PROP_MGR_STORED_METADATA = "flubaroo_mgr_stored_metadata";
 
@@ -217,6 +219,9 @@ USER_PROP_LATEST_VERSION_INSTALLED = "flubaroo_latest_version_installed";
 USER_PROP_AUTOGRADE_ACTIVE_USES = "flubaroo_auto_grade_active_uses";
 
 USER_PROP_UPDATE_NOTICE_DATE = "update_notice_date";
+
+// Set when/if the welcome message is shown on first install.
+USER_PROP_FIRST_TIME_WELCOME_SHOWN = "flubaroo_welcome_message_shown";
 
 // window height & width for UIs
 UI_STEP1_WIDTH = 600;

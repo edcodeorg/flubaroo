@@ -144,7 +144,7 @@ function formHistogramURL(histogram_buckets)
    var app = UiApp.createApplication().setTitle(langstr("FLB_STR_VIEW_REPORT_WINDOW_TITLE"))
                                       .setWidth("680").setHeight("490");
      
-   var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_META);
+   var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_META, -1);
    var points_possible = gws.getPointsPossible();  
    var avg_subm_score = gws.getAverageScore().toFixed(2);
    var num_subm = gws.getNumGradedSubmissions();
@@ -204,7 +204,7 @@ function formHistogramURL(histogram_buckets)
    var dp = PropertiesService.getDocumentProperties();
    var app = UiApp.getActiveApplication();
    var ss = SpreadsheetApp.getActiveSpreadsheet(); 
-   var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_META);
+   var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_META, -1);
    var points_possible = gws.getPointsPossible();  
    var avg_subm_score = gws.getAverageScore().toFixed(2);
    var num_subm = gws.getNumGradedSubmissions();   

@@ -192,6 +192,7 @@ function enableInSheet()
   */
   
   UI.showMessageBox(langstr("FLB_STR_NOTIFICATION"), langstr("FLB_STR_FLUBAROO_NOW_ENABLED"));
+
   showUpdateNotice();
 }
 
