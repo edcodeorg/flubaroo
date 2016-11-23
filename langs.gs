@@ -581,7 +581,7 @@ langs = {
         "FLB_STR_MANUAL_GRADING_STEP4" : "4. Enter Notes for Student (sent in email):", 
 
         // Label next to the fifth step in the "Grade by Hand" window, which allows the teacher to enter points.
-        "FLB_STR_MANUAL_GRADING_STEP5" : "4. Enter Points:", 
+        "FLB_STR_MANUAL_GRADING_STEP5" : "5. Enter Points:", 
       
         // Text for the link that shows the teacher's answer key / rubric in the "Grade by Hand" window.
         "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "review answer key", 
