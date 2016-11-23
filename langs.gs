@@ -10,67 +10,61 @@
 gbl_lang_id = ""; // identifies the language if the UI.
 
 function setLanguage()
-{   
-   var ss = SpreadsheetApp.getActiveSpreadsheet();
-   var app = UiApp.createApplication()
-                      .setTitle(langstr("FLB_STR_MENU_SET_LANGUAGE"))
-                      .setWidth("320").setHeight("100");
+{
+  var html = HtmlService.createHtmlOutput()
+                        .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+                        .setWidth(320).setHeight(100);
 
-   var handler = app.createServerClickHandler('setLanguageHandler');
-  
-   // create the main panel to hold all content in the UI for this step,
-   var main_panel = app.createVerticalPanel()
-                       .setStyleAttribute('border-spacing', '10px');
-   app.add(main_panel);
-  
-   ss.show(app);
+  var title = langstr("FLB_STR_MENU_SET_LANGUAGE");
+  html.setTitle(title);
+    
+  var h = '<!DOCTYPE html><link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">';
  
-   // create a pull-down box containing all the questions which identify a
-   // student. 
-   var lbox_name = "language_select";
-   var lbox = app.createListBox(false).setId(lbox_name).setName(lbox_name);
-   var position = -1;
-   
-   for (var item in langs)
-     {
-       lbox.addItem(langs[item]["FLB_LANG_IDENTIFIER"], item);
-     }
-   
-   lbox.setSelectedIndex(0);    
-   handler.addCallbackElement(lbox);  
+  h += '<form id="langsel_form" action ="">';
+  h += '<select name="langsel" id="langsel">';
   
-    var hpanel = app.createHorizontalPanel()
-       .setStyleAttribute('border-spacing', '6px')
-    .add(app.createLabel(langstr("FLB_STR_MENU_SET_LANGUAGE") + ":"))
-       .add(lbox);
-   main_panel.add(hpanel);
-
-   var btnSubmit = app.createButton(langstr("FLB_STR_BUTTON_CONTINUE"),handler).setId('CONTINUE');
+  for (var item in langs)
+    {
+      h += '<option value="' + item + '"';
+      if (item == 0)
+        {
+          // set default to english
+          h += " selected"; 
+        }
+      h += '>' + langs[item]["FLB_LANG_IDENTIFIER"] + '</option>';
+    }
   
-   main_panel.add(btnSubmit);
- 
-   ss.show(app);   
- }
+  h += '</select>';
 
-function setLanguageHandler(e)
+  var onclick="google.script.run.withSuccessHandler(languageSet).setLanguageHandler(this.parentNode)";
+  h += '<br><br><input type="button" class="action" onclick="' + onclick + '" value="' + langstr("FLB_STR_MENU_SET_LANGUAGE") + '"/>';
+  h += '</div>';
+  h += '</form>';
+
+  h += '<script>function languageSet() { google.script.host.close(); } </script>';
+  
+  html.append(h);
+  SpreadsheetApp.getUi()
+                .showModalDialog(html, title);
+}
+
+
+function setLanguageHandler(formObject)
  {
    var ss = SpreadsheetApp.getActiveSpreadsheet();
    var app = UiApp.getActiveApplication();
 
    var up = PropertiesService.getUserProperties();
    
-   var language_id = e.parameter.language_select;
- 
+   //var language_id = e.parameter.language_select;
+   var language_id = formObject.langsel;
+    
    up.setProperty(USER_PROP_LANGUAGE_ID, language_id);
    
    // reload menu
    createFlubarooMenu();
    
-   // rename Student Submissions sheet, if it was already set to an English name.
-   //renameSubmissionsSheet();
-   
-   app.close()
-   return app;
+   return;
  }
 
 
@@ -194,8 +188,8 @@ langs = {
         "FLB_STR_WAIT_INSTR2" :  "Please wait while your assignment is graded. This may take a minute or two to complete.",
 
         // Asks user if they are sure they want to re-grade, if Grades sheet exists.
-        "FLB_STR_REPLACE_GRADES_PROMPT" : "This will replace your existing grades. Are you sure you want to continue?",
-
+        "FLB_STR_REPLACE_GRADES_PROMPT" : "This will update your existing Grades sheet. Are you sure you want to continue?",
+      
         // Window title for "Preparing to grade" window
         "FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - Preparing to Grade",
 
@@ -382,7 +376,7 @@ langs = {
         "FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE": "You also included this message",
 
         // About Flubaroo message (1 of 2)
-        "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo is a free, time-saving tool that allows teachers to quickly grade multiple choice assignments and analyze the results",
+        "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo is a free, time-saving tool that allows teachers to quickly run and analyze online assessments.",
 
         // About Flubaroo message (2 of 2)
         "FLB_STR_ABOUT_FLUBAROO_MSG2" : "To learn more, visit www.flubaroo.com.",
@@ -415,7 +409,7 @@ langs = {
         "FLB_STR_MENU_EDIT_HELP_TIPS" : "Edit Help Tips",
 
         // Menu option to view report.
-        "FLB_STR_MENU_VIEW_REPORT" : "View Report",
+        "FLB_STR_MENU_VIEW_REPORT" : "View Grade Report",
 
         // Menu option to learn About Flubaroo.
         "FLB_STR_MENU_ABOUT" : "About Flubaroo",
@@ -475,7 +469,7 @@ langs = {
         "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Message To Include (optional):",
 
         // Window title for View Report window
-        "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Grading Report",
+        "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Grade Report",
 
         // Title of historgram chart in report
         "FLB_STR_VIEW_REPORT_HISTOGRAM_CHART_TITLE" : "Histogram of Grades",
@@ -544,7 +538,7 @@ langs = {
         "FLB_STR_GRADING_OPT_NORMAL_GRADING" : "Normal Grading",
 
         // Grading option which indicates Manual Grading (for display only in Step 1)
-        "FLB_STR_GRADING_OPT_MANUAL_GRADING" : "Grade by Hand (New!)",
+        "FLB_STR_GRADING_OPT_MANUAL_GRADING" : "Grade by Hand",
       
         // Message shown if user tries to enable autograde when a question is set for Manual Grading.
         "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS" : "Autograde cannot be enabled because you have one or more questions that are set to be hand graded.",
@@ -585,6 +579,9 @@ langs = {
       
         // Label next to the fourth step in the "Grade by Hand" window, which allows the teacher to enter notes.
         "FLB_STR_MANUAL_GRADING_STEP4" : "4. Enter Notes for Student (sent in email):", 
+
+        // Label next to the fifth step in the "Grade by Hand" window, which allows the teacher to enter points.
+        "FLB_STR_MANUAL_GRADING_STEP5" : "4. Enter Points:", 
       
         // Text for the link that shows the teacher's answer key / rubric in the "Grade by Hand" window.
         "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "review answer key", 
@@ -677,7 +674,7 @@ langs = {
         "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Allow extra credit when assigning points to questions",
  
         // Text for Advanced Options, asking if user wants to show some additional options in the pull-down menu in Step 1 of grading.
-        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS" : "Show additional grading options in Step 1 of grading",
+        "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS" : "Show additional grading options in Step 1 of grading (Ignore, Copy for Reference, etc)",
       
         // Notice for Grades sheet (shown at top) if Autograde is enabled. Tells the user that grading isn't only considering a student's most recent submission.
         "FLB_STR_AUTOGRADE_NOT_SUMMARIZED" : "BECAUSE OF YOUR AUTOGRADE SETTINGS, THIS SHEET MAY CONTAIN MORE THAN ONE GRADED SUBMISSION PER STUDENT",
@@ -703,6 +700,107 @@ langs = {
       
          // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
         "FLB_STR_FLUBAROO_NOW_INSTALLED" : "<b>Hello There Newcomer!</b><p>Thanks for installing Flubaroo and joining tens of thousands of educators who are saving time and gaining insight into student understanding.</p><p>To help you get started, visit <a target=\"_blank\" href=\"http://www.flubaroo.com/#firstinstall\">flubaroo.com</a> to read an illustrated overview and view a short instructional video.</p><p>You can also find some sample student submissions to grade <a target=\"_blank\" href=\"https://goo.gl/0e9ut6\">here</a>, which you can copy/paste into this sheet to try out Flubaroo with.</p><p>Good luck and happy Flubaroo'ing!</p><p><b>--The Flubaroo Team</b></p>",
+      
+        // Message shown in the "Share Grades" and "Print Grades" dialogues, that indicates whether the student's own
+        // response (answer) to a question should show up in what gets emailed to them.
+        "FLB_STR_EMAIL_GRADES_INCLUDE_STUDENT_RESPONSES" : "Include the Student's Responses",
+      
+        // Link in 'Share Grades' dialouge that reveals the hidden advanced options.
+        "FLB_STR_EMAIL_GRADES_SHOW_ADVANCED" : "Show Advanced Options (Stickers & More)",
+
+        // Link in 'Share Grades' dialouge that hides the hidden advanced options.
+        "FLB_STR_EMAIL_GRADES_HIDE_ADVANCED" : "Hide Advanced Options",
+      
+        // Option in 'Share Grades' to say that all questions should be included
+        "FLB_STR_EMAIL_GRADES_INCLUDE_ALL_QUESTIONS" : "Include all questions",
+    
+        // Option in 'Share Grades' to say that only questions with correct answers should be included
+        "FLB_STR_EMAIL_GRADES_INCLUDE_CORRECT_QUESTIONS" : "Include only questions with correct answers",
+    
+        // Option in 'Share Grades' to say that only questions with incorrect answers should be included
+        "FLB_STR_EMAIL_GRADES_INCLUDE_INCORRECT_QUESTIONS" : "Include only questions with incorrect answers",
+  
+        // Generic "Loading..." string used in various places.
+        "FLB_STR_LOADING" : "Loading...",
+      
+        // Message shown if only questions with correct answers are included when sharing grades
+        "FLB_STR_EMAIL_GRADES_ONLY_CORRECT" : "Below is a summary of questions you got CORRECT:",
+
+        // Message shown if only questions with incorrect answers are included when sharing grades
+        "FLB_STR_EMAIL_GRADES_ONLY_INCORRECT" : "Below is a summary of questions you got INCORRECT:",
+  
+        // Message shown in Advanced Options to select what info is shared about the overall score
+        "FLB_STR_ADV_OPTIONS_SHARE_SCORE_TYPE" : "When sharing grades via email or Drive, show the total score as",
+       
+        // Message shown in Advanced Options to select option for whether to include answer key for "Grade by Hand" questions
+        "FLB_STR_ADV_OPTIONS_INCLUDE_ANSKEY_FOR_MGR_QUESTIONS" : "For Grade by Hand questions, allow answer key to be shown in shared grades",
+      
+        // Message shown in Advanced Options to pick sender name in emails sent
+        "FLB_STR_ADV_OPTIONS_EMAIL_SENDER_NAME_QUESTION" : "Name shown when emailing grades to students",
+      
+        // Message shown in Advanced Options to choose max assignable points per question
+        "FLB_STR_ADV_OPTIONS_MAX_QUESTION_POINTS" : "Maximum points assignable per question",
+      
+        // Options for FLB_STR_ADV_OPTIONS_SHARE_SCORE_TYPE. These follow the prompt in FLB_STR_ADV_OPTIONS_SHARE_SCORE_TYPE.
+        "FLB_STR_GRADE_SHARE_SHOW_POINTS_AND_PERCENT": "points and percent",
+        "FLB_STR_GRADE_SHARE_SHOW_POINTS_ONLY": "points only (no percent)",
+        "FLB_STR_GRADE_SHARE_SHOW_NEITHER": "neither points nor percent",
+      
+        // Text for link in "Share Grades" window that lets teacher decide to include a sticker (and choose one)
+        "FLB_STR_GRADE_SHARE_SETUP_STICKER": "Setup Sticker",
+      
+        // Text shown next to "Setup Sticker" text, indicating  if no sticker will be sent
+        "FLB_STR_GRADE_SHARE_STICKER_NOT_ENABLED": "(not enabled)",
+      
+        // Text for link in "Share Grades" window that lets teacher decide to send a Certificate (and choose one)      
+        "FLB_STR_GRADE_SHARE_SETUP_CERTIFICATE": "Setup Certificate",
+      
+        // Instructions for "Include Sticker" overlay in Share Grades window
+        "FLB_STR_GRADE_SHARE_INCLUDE_STICKER_INSTR": "Flubaroo can include a sticker for students who score \
+                                                      at or above a certain percent. Use the fields below to select \
+                                                      the percent (0 to 100%), and which sticker to include.",
+      
+        // Text for drop-down to select score above which sticker will be sent
+        "FLB_STR_GRADE_SHARE_MIN_STICKER_PERCENT": "Include When Score At or Above",
+      
+        // Instructions for how to select a sticker
+        "FLB_STR_GRADE_SHARE_PICK_STICKER":  "Click on a Sticker to Select. Scroll Left & Right for More",
+      
+        // First choice in sticker drop-down list, saying that no sticker will be included
+        "FLB_STR_GRADE_SHARE_NO_STICKER_INCLUDED": "No Sticker",
+      
+        // Text shown next to checkbox to choose whether to send a sticker
+        "FLB_STR_GRADE_SHARE_STICKER_ENABLE": "Include a Sticker",
+      
+        // Text shown in preview box when no sticker has been selected from the drop-down.
+        "FLB_STR_GRADE_SHARE_STICKER_NONE_SELECTED": "No sticker selected",
+      
+        // Text shown if images couldn't be fetched (on error).
+        "FLB_STR_GRADE_SHARE_STICKER_PICKER_ERROR": 'Unable to load stickers. Please try again. If still unable, contact <a target="_blank" href="http://www.flubaroo.com/contact">Flubaroo support</a>.',
+
+        // "Add more stickers!" text that shows up next to the drop-down to pick sticker when sharing grades
+        "FLB_STR_GRADE_SHARE_STICKER_ADD_MORE": "Want to add more stickers? Click here!",
+      
+        // Text on the button to save and close settings in the sticker picker
+        "FLB_STR_GRADE_SHARE_STICKER_DONE_BUTTON": "Done",
+      
+        // Message that shows in the Sticker picker window when a .zip files is being uncompressed.
+        "FLB_STR_GRADE_SHARE_UNZIPPING": "Unzipping stickers. This may take a minute.",
+      
+        // Name of the optional sheet which contains a list of assignable categories.
+        "FLB_STR_CATEGORIES_SHEET_NAME": "Categories",
+      
+        // Name of field in Step 1 of grading to select a category name for a question
+        "FLB_STR_GRADE_STEP1_LABEL_CATEGORY": "Category",
+      
+        // Name of sheet for the Categories Report
+        "FLB_STR_CATEGORY_SHEET_NAME": "Categories Report",
+      
+         // Name of the Flubaroo menu item that generates/updates the Category report.
+        "FLB_STR_MENU_VIEW_CATEGORY_REPORT" : "Run Categories Report",
+      
+        // Advanced option to clear Grades sheet instead of deleting it when regrading (experimental).
+        "FLB_STR_ADV_OPTIONS_CLEAR_GRADES" : "When regrading, clear the 'Grades' sheet instead of deleting it (<b>Experimental!</b>)",
       
         // Flubaroo Tips, shown when grading completes.
         "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Tip #1:</b> Flubaroo can accept more than one correct answer.",
@@ -5811,7 +5909,7 @@ langs = {
 
         "FLB_STR_GRADING_OPT_NORMAL_GRADING": "Normální Třídění",
 
-        "FLB_STR_GRADING_OPT_MANUAL_GRADING": "Grade po ruce (New!)",
+        "FLB_STR_GRADING_OPT_MANUAL_GRADING": "Grade po ruce",
 
         "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS": "Autograde nelze povolit, protože máte jeden nebo více otázek, které jsou nastaveny, aby se ruka odstupňovaná.",
 

@@ -19,7 +19,15 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
     }
   else
     {
-      main_folder = DriveApp.createFolder(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"))
+      try
+        {
+          main_folder = DriveApp.createFolder(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"));
+        }
+      catch (e)
+        {
+          Debug.info("Unable to create folder '" + langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME") + "'. error: " + e);
+          return null;
+        }
     }
  
   // Next locate the folder for this assignment in the main folder. If it doesn't exist, create it.
@@ -35,7 +43,15 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
     {
       // no folder yet for this assignment (first grading). create one.
       Debug.info("Folder '" + drive_share_assignment_folder_name + "' didn't exist. Creating it.");
-      af = DriveApp.createFolder(drive_share_assignment_folder_name);
+      try
+        {
+          af = DriveApp.createFolder(drive_share_assignment_folder_name);
+        }
+      catch (e)
+        {
+          Debug.info("Unable to create folder '" + drive_share_assignment_folder_name + "'. error: " + e);
+          return null;
+        }
     }
   
   // move the folder for this assignment into the main folder. but first, remove it from "My Drive"
@@ -59,21 +75,33 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
 // teacher's folder for the assignment, and then shares it with the student ('Comment' access).
 // Returns the document as a Drive File object.
 function createGradeDocument(mydrive_folder, assignment_name, assignment_folder, 
-                             instructor_message, show_questions, show_answers,
-                             points_possible, email_address, 
-                             has_manually_graded_ques, graded_subm)
+                             instructor_message, show_questions, show_questions_type,
+                             show_answers, show_student_response,
+                             points_possible, show_score_option, email_address, 
+                             has_manually_graded_ques, show_anskey_for_mgr_ques,
+                             graded_subm, sticker_img, sticker_percent)
 
 {
-  var doc_title = langstr("FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE") + " " + email_address + ": " + assignment_name;
+  var clean_email_address = email_address.replace(/'/g, "");
+  var doc_title = langstr("FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE") + " " + clean_email_address + ": " + assignment_name;
       
   var new_doc = createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title);
     
+  if (new_doc === null)
+    {
+      return null;
+    }
+  
   Debug.info("New file has been created with title: " + doc_title);
   Debug.info("Now writing contents...");
   
+  
   writeContentsOfGradeDocument(new_doc,
-                               assignment_name, instructor_message, show_questions, show_answers,
-                               points_possible, has_manually_graded_ques, graded_subm, false);
+                               assignment_name, instructor_message, show_questions, 
+                               show_questions_type, show_answers, show_student_response,
+                               points_possible, show_score_option,
+                               has_manually_graded_ques, show_anskey_for_mgr_ques,
+                               graded_subm, false, sticker_img, sticker_percent);
       
   // save and close the doc
   new_doc.saveAndClose();
@@ -130,7 +158,16 @@ function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
   
   // Create new doc, and remove it from "My Drive" just after creation.
   // (less clutter in My Drive view this way).
-  var new_doc = DocumentApp.create(doc_title);
+  var new_doc;
+  try
+    {
+      new_doc = DocumentApp.create(doc_title);
+    }
+  catch (e)
+    {
+      Debug.info("Unable to create new doc '" + doc_title + "', error: " + e);
+      return null;
+    }
   
   var body = new_doc.getBody();
   
@@ -163,14 +200,17 @@ function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
 // Writes into the document the contents of the grades summary and table of grades for the
 // submittion given.
 function writeContentsOfGradeDocument(grades_doc,
-                                      assignment_name, instructor_message, show_questions, show_answers,
-                                      points_possible, has_manually_graded_ques, graded_subm, append)
+                                      assignment_name, instructor_message, show_questions,
+                                      show_questions_type, show_answers, show_student_response,
+                                      points_possible, show_score_option, 
+                                      has_manually_graded_ques, show_anskey_for_mgr_ques,
+                                      graded_subm, append, sticker_img, sticker_percent)
 {
   var body = grades_doc.getBody();
-
+  
   // write a header that includes the assignment name, student identifying information and timestamp
   var header = assignment_name + "\r\r";
-  
+ 
   for (var q = graded_subm.getFirstQuestion(); q != null; q = graded_subm.getNextQuestion(q))
     {
       if (q.getGradingOption() === GRADING_OPT_STUD_ID)
@@ -178,9 +218,9 @@ function writeContentsOfGradeDocument(grades_doc,
           header += q.getFullSubmissionText() + "\r";
         }
     }
-  
+
   header += graded_subm.getTimestamp();
-  
+
   var par;
   if (!append)
     {      
@@ -192,29 +232,50 @@ function writeContentsOfGradeDocument(grades_doc,
     }
   par.setBold(true);
   
+  if (sticker_img && (graded_subm.getScorePercent() >= sticker_percent))
+    {
+      var blob = sticker_img.getBlob();
+      var pi = par.addPositionedImage(blob);
+      pi.setLayout( DocumentApp.PositionedLayout.WRAP_TEXT);
+   
+      // to format properly in the doc, all sticker images should be 200px wide. rescale if needed.
+      var ratio = 200 / pi.getWidth();
+      pi.setWidth( pi.getWidth() * ratio );
+      pi.setHeight( pi.getHeight() * ratio );
+      pi.setLeftOffset(560);
+    }   
+  
   var style = {};
   style[DocumentApp.Attribute.FONT_SIZE] = 11;
   par.setAttributes(style);
   
-  var score_str = "";
-  if (isInt(graded_subm.getScorePoints()))
+  if (show_score_option != GRADE_SCORE_SHOW_NEITHER)
     {
-      score_str = graded_subm.getScorePoints().toString();
-    }
-  else
-    {
-      score_str = floatToPrettyText(graded_subm.getScorePoints());
-    }
+      var score_str = "";
+      if (isInt(graded_subm.getScorePoints()))
+        {
+          score_str = graded_subm.getScorePoints().toString();
+        }
+      else
+        {
+          score_str = floatToPrettyText(graded_subm.getScorePoints());
+        }
   
-  // write out the students score. put it in a "box" (a 1x1 table).
-  var pts_string = langstr("FLB_STR_EMAIL_GRADES_YOUR_GRADE") + ": " 
-                   + score_str + " / " + points_possible 
-                   + " (" + floatToPrettyText(graded_subm.getScorePercent() * 100) + "%)";
-  par = body.appendParagraph(pts_string);
-  par.setBold(true);
-  style = {};
-  style[DocumentApp.Attribute.FONT_SIZE] = 11;
-  par.setAttributes(style);
+      // write out the students score. put it in a "box" (a 1x1 table).
+      var pts_string = langstr("FLB_STR_EMAIL_GRADES_YOUR_GRADE") + ": " 
+                       + score_str + " / " + points_possible + " ";
+      
+      if (show_score_option != GRADE_SHARE_SHOW_POINTS_ONLY)
+        {
+          pts_string += "(" + floatToPrettyText(graded_subm.getScorePercent() * 100) + "%)";
+        }
+      
+      par = body.appendParagraph(pts_string);
+      par.setBold(true);
+      style = {};
+      style[DocumentApp.Attribute.FONT_SIZE] = 11;
+      par.setAttributes(style);
+    }
   
   if (instructor_message !== "")
     {
@@ -241,7 +302,16 @@ function writeContentsOfGradeDocument(grades_doc,
       par.setIndentStart(in2Pts(0.5));
     }
   
-  if (show_questions === 'false')
+   if (show_questions_type === QUESTIONS_SHARE_CORRECT)
+     {
+       par = body.appendParagraph('\r' + langstr("FLB_STR_EMAIL_GRADES_ONLY_CORRECT"));
+     }
+   else if (show_questions_type === QUESTIONS_SHARE_INCORRECT)
+     {
+       par = body.appendParagraph('\r' + langstr("FLB_STR_EMAIL_GRADES_ONLY_INCORRECT"));
+     }
+  
+  if (show_questions !== 'true')
     {
       // we're done!
       return;
@@ -253,8 +323,12 @@ function writeContentsOfGradeDocument(grades_doc,
   // create and append a table with all of the information about the submission.
   var header_row = [];
   header_row.push(langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER"));
-  header_row.push(langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER"));
-
+  
+  if (show_student_response)
+    {
+      header_row.push(langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER"));
+    }
+  
   if (show_answers === 'true')
     {
       header_row.push(langstr("FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER"));
@@ -300,6 +374,26 @@ function writeContentsOfGradeDocument(grades_doc,
           ak_has_formula = true;
         }
        
+      // should we include this question in the summary?
+      var ques_pts_worth = getPointsWorth(q.getGradingOption());
+
+      if (q.getGradedVal() >= ques_pts_worth) // full credit or more
+        {
+          if (show_questions_type === QUESTIONS_SHARE_INCORRECT && (gopt !== GRADING_OPT_SKIP))
+            {
+              // Question is correct. Don't include if we're only showing incorrect questions.
+              continue;
+            }
+         }
+       else // incorrect (or not full-score, or not graded yet)
+         {
+           // Question is incorrect. Don't include if we're only showing correct questions.
+           if (show_questions_type === QUESTIONS_SHARE_CORRECT && (gopt !== GRADING_OPT_SKIP))
+             {
+               continue;
+             }
+         }
+      
        var score = "";
        if (gopt === GRADING_OPT_SKIP)
          {
@@ -332,11 +426,16 @@ function writeContentsOfGradeDocument(grades_doc,
       var row_data = [];
 
       row_data.push(q.getFullQuestionText());
-      row_data.push(q.getFullSubmissionText());   
-       
+      
+      if (show_student_response)
+        {
+          row_data.push(q.getFullSubmissionText());    
+        }
+
       if (show_answers === 'true')
         {
-          if (isNormallyGraded(gopt) && !ak_has_formula )
+          if ( (isNormallyGraded(gopt) || (isManuallyGraded(gopt) && show_anskey_for_mgr_ques))
+                && !ak_has_formula )
             {
               row_data.push(ak_value);
             }
@@ -365,9 +464,17 @@ function writeContentsOfGradeDocument(grades_doc,
   var your_ans_col_index = 1;
   var correct_ans_col_index = 2; // if present
   var pts_col_index = 3;
-  var help_tip_col_index = 5;
   var mgr_teacher_comment_col_index = 4;
-  if (show_answers === 'false')
+  var help_tip_col_index = 5;
+
+  if (show_student_response !== 'true')
+    {
+      correct_ans_col_index--;
+      pts_col_index--;
+      help_tip_col_index--;
+      mgr_teacher_comment_col_index--;
+    }
+  if (show_answers !== 'true')
     {
       pts_col_index--;
       help_tip_col_index--;
@@ -382,7 +489,7 @@ function writeContentsOfGradeDocument(grades_doc,
   table_in_doc.getRow(0).setBold(true);
   
   var additional_width = 0.0;
-  if (show_answers === 'false')
+  if (show_answers !== 'true')
     {
       additional_width += 0.4;
     }   

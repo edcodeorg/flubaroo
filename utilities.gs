@@ -577,7 +577,7 @@ function clearNotesOnSubmRow(subm_sheet, row_num)
 // Row ids start from 1. Note that this will override any pre-existing content
 // in the affected cells of that row.
 // The row need not exist ahead of time.
-function writeArrayToRow(sheet, row_num, start_col, row_values, bold, color)
+function writeArrayToRow(sheet, row_num, start_col, row_values, format, color)
 {
    var row_range = sheet.getRange(row_num, 1, start_col, row_values.length);
    var set_of_rows = new Array(1);
@@ -585,10 +585,14 @@ function writeArrayToRow(sheet, row_num, start_col, row_values, bold, color)
    
    set_of_rows[0] = row_values;
   
-   if (bold)
+   if (format === "bold")
      {
        row_range.setFontWeight("bold");
      }
+  else if (format === "italic")
+    {
+      row_range.setFontStyle("italic");
+    }
   
    if (color)
      {
@@ -890,7 +894,7 @@ function showUpdateNotice()
   // see if this is a new message that needs to be shown.
   var up = PropertiesService.getUserProperties(); 
   var flubaroo_uid = up.getProperty("flubaroo_uid"); // set upon completion of first grading ever
-
+  
   // Check if this is the very first install of Flubaroo ever for this user.
   // if so, we show a welcome message instead. 
   // We also check that flubaroo_uid is null too, to avoid showing this message to a bunch of exsting users
@@ -907,7 +911,7 @@ function showUpdateNotice()
   // if it has a different date (i.e. it's a new, different message).
   var notice_date = up.getProperty(USER_PROP_UPDATE_NOTICE_DATE);
   
-  Debug.info("comparing notice_date: '" + notice_date + "', to: '" + gbl_update_notice_date + "'");
+  Debug.info("showUpdateNotice(): comparing notice_date: '" + notice_date + "', to: '" + gbl_update_notice_date + "'");
   
   if (!welcome_shown)
     {
@@ -1163,3 +1167,166 @@ function expandFormulaTokensInRange()
   
   r.setValues(vals);
 }
+
+// unzipStickers:
+// Looks for a zip file in the user's "Flubaroo - Stickers" folder, and if found, unzips the contents.
+// Also deletes the zip file.
+function unzipStickers()
+{
+  var folders = DriveApp.searchFolders("title = '" + MY_FLUBAROO_STICKERS_FOLDER + "' and 'me' in owners");
+  var my_stickers_folder = null;
+  var root_folder = DriveApp.getRootFolder();
+  var zf = null;
+  
+  if (folders.hasNext())
+    {
+      my_stickers_folder = folders.next();
+    }
+  else
+    {
+      return 0;
+    }
+
+  // find any zip files
+  var zip_files = null;
+  for (var z = 0; z < ZIP_TYPES_ARRAY.length; z++)
+    {
+      zip_files = my_stickers_folder.getFilesByType(ZIP_TYPES_ARRAY[z]);
+      if (zip_files.hasNext())
+        {
+          break;
+        }
+    }
+  
+  if ((zip_files != null) && zip_files.hasNext())
+    {
+      zf = zip_files.next();
+      var zf_blob = zf.getBlob();
+      var uzf;
+      
+      try
+        {
+          uzf = Utilities.unzip(zf_blob);
+        }
+      catch (e)
+        {
+          // Handle Windoze  
+          zf_blob.setContentType('application/zip');
+          uzf = Utilities.unzip(zf_blob);
+        }  
+      
+      for (var i=0; i < uzf.length; i++)
+        {
+          var zip_blob = uzf[i];
+          
+          // create new file from blob.
+          var new_file;
+          var max_retries = 3;
+          for (var retry=0; retry < max_retries; retry++)
+            {
+              try
+                {              
+                  Debug.info("unzipStickers: unzipping file " + i + " ...");
+                  new_file = DriveApp.createFile(zip_blob);
+              
+                  // set so anyone with link can view. makes access from web page (ui) more reliable if user
+                  // is logged-in with other accounts.
+                  Debug.info("unzipStickers: setting sharing permissions on file " + i + " ...");
+                  new_file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+                  
+                  // success. quit retry loop.
+                  break;
+                }
+              catch (e)
+                {
+                  Debug.info("Unable to create or change permissions on zip file. Retry=" + retry + ": " + e);
+                  if (retry === (max_retries - 1))
+                    {
+                      return STATUS_FILE_ERROR;
+                    }
+                  else
+                    {
+                      // haven't hit max retries yet. retry now...
+                      Debug.info("failed on unzipping file. will retry. error: " + e);
+                      Utilities.sleep(10);
+                      continue;
+                    }
+                }
+            }
+          
+          my_stickers_folder.addFile(new_file);
+          root_folder.removeFile(new_file);
+          
+          Utilities.sleep(10); // don't hammer on Drive
+        }
+    }
+  
+  if (zf)
+    {
+      var max_retries = 3;
+      for (var retry=0; retry < max_retries; retry++)
+        {
+          try
+            {
+              Debug.info("removing zip file..");
+              my_stickers_folder.removeFile(zf);
+              zf.setTrashed(true);
+              
+              break;
+            }
+          catch (e)
+            {
+              Debug.info("Unable to remove zip file. Retry=" + retry + ": " + e);
+              if (retry === (max_retries - 1))
+                {
+                  return STATUS_FILE_ERROR;
+                }
+              else
+                {
+                  // haven't hit max retries yet. retry now...
+                  Debug.info("failed on removing zip file. will retry. error: " + e);
+                  Utilities.sleep(10);
+                  continue;
+                }
+            }
+        }
+    }
+  
+  return 0;
+}
+
+// checkIfZipFilePresent:
+// Checks the user's "Flubaroo - Stickers" folder to see if any zip file is present there.
+// Returns true or false.
+//
+function checkIfZipFilePresent()
+{
+  var folders = DriveApp.searchFolders("title = '" + MY_FLUBAROO_STICKERS_FOLDER + "' and 'me' in owners");
+  if (folders.hasNext())
+    {
+      my_stickers_folder = folders.next();
+    }
+  else
+    {
+      return false;
+    }
+  
+  // find any zip files
+  var zip_files = null;
+  for (var z = 0; z < ZIP_TYPES_ARRAY.length; z++)
+    {
+      zip_files = my_stickers_folder.getFilesByType(ZIP_TYPES_ARRAY[z]);
+      if (zip_files.hasNext())
+        {
+          break;
+        }
+    }
+  
+  if ((zip_files != null) && zip_files.hasNext())
+    {
+      return true;
+    }
+  
+  return false;
+}
+

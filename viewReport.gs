@@ -31,17 +31,16 @@ function viewReport()
   
    /* form the histogram */
    var points_possible = grades_sheet.getRange(GRADES_POINTS_POSSIBLE_CELL).getValue();
-  
+    
    var histogram_buckets = createHistogramBuckets(grades_sheet, points_possible);
-
-   // Record the url of the historgram chart.
+  
+   // Save the url of the historgram chart.
    var histogram_url = formHistogramURL(histogram_buckets);
-   
+
    var dp = PropertiesService.getDocumentProperties();
    dp.setProperty(DOC_PROP_HISTOGRAM_URL, histogram_url);
    
-   var app = createReportUI(ss, grades_sheet);
-   ss.show(app);
+   createReportUI(ss, grades_sheet);
 }
 
 function createHistogramBuckets(grades_sheet, points_possible)
@@ -56,7 +55,7 @@ function createHistogramBuckets(grades_sheet, points_possible)
   
   
   var scores = grades_sheet.getRange(col_range).getValues();
-  Debug.info(scores);
+
   // determine the max points possible. could be the case if teacher
   // gave bonus pts.
   for (var i=0; i < scores.length; i++)
@@ -80,7 +79,6 @@ function createHistogramBuckets(grades_sheet, points_possible)
   for (var i=0; i < scores.length; i++)
     {
       var s = scores[i][0];
-      Debug.info("hg s=" + s);
       if ((s !== "") && !isNaN(s))
         {       
           s = Math.floor(s); // round down partial credit for the sake of bucketing (i.e. 1.6 -> 1).
@@ -141,65 +139,60 @@ function formHistogramURL(histogram_buckets)
  {
    var dp = PropertiesService.getDocumentProperties();
     
-   var app = UiApp.createApplication().setTitle(langstr("FLB_STR_VIEW_REPORT_WINDOW_TITLE"))
-                                      .setWidth("680").setHeight("490");
-     
+   var html = HtmlService.createHtmlOutput()
+                          .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+                          .setWidth(680).setHeight(500);
+
+   var title = langstr("FLB_STR_VIEW_REPORT_WINDOW_TITLE");
+   html.setTitle(title);
+    
+   var h = '<!DOCTYPE html><link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">';
+   h += '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>';
+         
    var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_META, -1);
    var points_possible = gws.getPointsPossible();  
    var avg_subm_score = gws.getAverageScore().toFixed(2);
    var num_subm = gws.getNumGradedSubmissions();
+   var email_address = Session.getEffectiveUser().getEmail();
    
-   var title = ss.getName();
+   var ss_name = ss.getName();
    
    var chart_url = dp.getProperty(DOC_PROP_HISTOGRAM_URL);
-  
-   // Declare the handler that will be called when the 'Continue' or 'Cancel'
-   // buttons are clicked.
-   var handler = app.createServerClickHandler('emailReportHandler');
+   var onclick="$('#emailme').prop('disabled',true); google.script.run.withSuccessHandler(vrEmailSent).emailReportHandler()";
+    
+   // "Email Me Report" button
+   h += '<div id="notice" style="color: #FF8C00;display:none;"></div>';
+   h += '<div style="float:right;padding-right:25px;">'
+   h += '<input type="button" class="action" id="emailme" onclick="' + onclick + '" value="' + langstr("FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME") + '"/>';
+   h += '</div>';
    
-   var email_addr = Session.getEffectiveUser().getEmail();
-   var email_addr_field = app.createHidden("email_addr", email_addr)
-                                .setId("email_addr").setName("email_addr");
-                                  
-   var hidden_vars = app.createVerticalPanel().setVisible(false);
-   hidden_vars.add(email_addr_field);
-   handler.addCallbackElement(email_addr_field);
+   // Summary at top
+   h += '<div>';
+   h += '<table border=0>';
+   h += '<tr><td><b>' + langstr("FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR") + ': ' + ss_name + '</b></td></tr>';
+   h += '<tr><td>' + langstr("FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE") + ': ' + points_possible + '</td></tr>';
+   h += '<tr><td>' + langstr("FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS") + ': ' + avg_subm_score + '</td></tr>';
+   h += '<tr><td>' + langstr("FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS") + ': ' + num_subm + '</td></tr>';
+   h += '</table>';
+   h += '</div>';
+ 
+   // Histogram
+   h += '<br><br>';
+   h += '<img src="' + chart_url + '">';
    
-   // create the main panel to hold all content in the UI.
-   var main_panel = app.createVerticalPanel()
-                       .setStyleAttribute('border-spacing', '10px');
-         
-   var grid = app.createGrid(4,1).setCellSpacing(5);
+   // Javascript
+   var msg = langstr("FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION") + ': ' + email_address;
+   h += "<script>function vrEmailSent() {  $('#notice').html('" + msg + "'); $('#notice').show(200); \
+             $('#emailme').prop('disabled',false); }</script>";
    
-   grid.setWidget(0, 0, app.createLabel(langstr("FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR") + ': ' + title)
-                              .setStyleAttribute('textDecoration','underline'));
-   grid.setWidget(1, 0, app.createLabel(langstr("FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE") + ': ' + points_possible));
-   grid.setWidget(2, 0, app.createLabel(langstr("FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS") +  ': ' + avg_subm_score));
-   grid.setWidget(3, 0, app.createLabel(langstr("FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS") +  ': ' + num_subm));
+   html.append(h);
    
-   // add a top level hpanel for instructions and picture
-   var hpanel = app.createHorizontalPanel()
-       .setStyleAttribute('border-spacing', '10px')
-       .add(app.createImage(chart_url));
-   
-   main_panel.add(grid);
-   main_panel.add(hpanel);
-        
-    // add the Continue and Cancel buttons at the bottom.
-   var btnGrid = app.createGrid(1, 1).setStyleAttribute('float', 'right');
-   var btnSubmit = app.createButton(langstr("FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME"),handler)
-                      .setId('EMAIL')
-   
-   btnGrid.setWidget(0,0,btnSubmit);
-   main_panel.add(btnGrid);
-   main_panel.add(hidden_vars);
-   
-   app.add(main_panel);
-       
-   return app;
+   // show the report
+   SpreadsheetApp.getUi()
+                 .showModalDialog(html, title);
  }
  
- function emailReportHandler(e)
+ function emailReportHandler()
  {
    var dp = PropertiesService.getDocumentProperties();
    var app = UiApp.getActiveApplication();
@@ -211,7 +204,8 @@ function formHistogramURL(histogram_buckets)
    var title = ss.getName();
    var chart_url = dp.getProperty(DOC_PROP_HISTOGRAM_URL);
    var title = ss.getName();
-   var email_address = e.parameter.email_addr;
+   var email_address = Session.getEffectiveUser().getEmail();
+
    var msg_title = langstr("FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR") + ": " + title;
  
    // form the html to email
@@ -228,18 +222,10 @@ function formHistogramURL(histogram_buckets)
        
    html_body += '</body></html>';
    
-   //email_address = Session.getActiveUser().getEmail();
    try
-     {
-     
-       // TODO_AJR - Everywhere else emailing can be disabled in debug mode.
-     
+     {     
        MailApp.sendEmail(email_address, msg_title, "",
                                  {htmlBody: html_body, noReply: true, name: "Assignment Grader"});
-          
-       Browser.msgBox(langstr("FLB_STR_NOTIFICATION"),
-                  langstr("FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION") + ': ' + email_address,
-                  Browser.Buttons.OK);
      }
    catch(exception)
      {

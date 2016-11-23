@@ -183,12 +183,23 @@ function gradeStep1(enough_subm_source)
 // -------------------
 //
 // Event handler for step 1 of the grading UI.
-function gradingStep1SubmitHandler(grading_opts)
+function gradingStep1SubmitHandler(grading_opts, category_names)
 {
   // record the grading options selected in step 1.
   var dp = PropertiesService.getDocumentProperties();
   dp.setProperty(DOC_PROP_UI_GRADING_OPT, grading_opts.toString());
 
+  // record any category names selected in step 1.
+  if (category_names.length)
+    {
+      dp.setProperty(DOC_PROP_UI_CATEGORY_NAMES, category_names.join(FLB_GENERIC_DELIMETER));
+    }
+  else
+    {
+      // perhaps categories were used before, but no longer. delete pre-existing record if any.
+      dp.deleteProperty(DOC_PROP_UI_CATEGORY_NAMES);
+    }
+  
   // from these grading options, construct a Step 2 UI to
   // allow user to select answer key row.
   return UI.showStep2Grading();
@@ -230,8 +241,11 @@ function gradingStep2SubmitHandler(ak_subm_row)
           // incase the row number of the answer key shifts due to google form submit funnyness.
           setAutogradeAnswerKeyValues(sheet, ak_subm_row);
           
+          /*
           app = UI.emailGrades(ss, false);
           ss.show(app);
+          */
+          UI.showShareGrades(ss);
           return STATUS_OK;
         }
         

@@ -7,7 +7,9 @@
 function GradedQuestion(ques_index, full_question_text, full_subm_text, gopt, 
                         help_tips_present, help_tips_val,
                         full_anskey_text, full_anskey_text_lc, 
-                        graded_val, formula, manually_graded_teacher_comment, is_timestamp)
+                        graded_val, formula, manually_graded_teacher_comment,
+                        category_name, is_timestamp
+                        )
 {  
   this.full_question_text = full_question_text;
   this.full_subm_text = full_subm_text;
@@ -20,6 +22,7 @@ function GradedQuestion(ques_index, full_question_text, full_subm_text, gopt,
   this.help_tips_present = help_tips_present;
   this.help_tips_val = help_tips_val;
   this.manually_graded_teacher_comment = manually_graded_teacher_comment;
+  this.category_name = category_name;
   
   // This ties the question back to the GradedSubmission it originates from, in which all
   // information about questions are stored in linear arrays. This is the index into that array.
@@ -101,4 +104,9 @@ GradedQuestion.prototype.getHelpTip = function()
 GradedQuestion.prototype.getGradedTeacherComment = function()
 {
   return this.manually_graded_teacher_comment;
+}
+
+GradedQuestion.prototype.getCategoryName = function()
+{
+  return this.category_name;
 }

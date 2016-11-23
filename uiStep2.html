@@ -18,15 +18,15 @@
     
     <div id="s2_mw_alert" class="error" style="display:none;"></div>
 
-    <div class="vspacer"></div>
+    <div class="vspacer_full"></div>
         
     <div id="s2_mw_sel">
-    Loading...
+    <?=langstr('FLB_STR_LOADING')?>
     </div>
     
     <div style="float:right;margin-top:20px;">
     <table border="0" id="s2_mw_continue"><tr>
-    <td><img id="s2_mw_working" src="<?= FLUBAROO_WORKING_IMG_URL ?>" style="display:none;"></td>
+    <td><img id="s2_mw_working" src="<?= FLUBAROO_WORKING_IMG_BAR_URL ?>" style="display:none;"></td>
     <td width="35px"></td>
     <td><input type="button" class="action" value="Continue" onclick="step2Continue()" /></td>
     </tr></table>

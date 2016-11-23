@@ -25,6 +25,7 @@ function createFlubarooMenu()
   var sui = SpreadsheetApp.getUi();
   var menu = sui.createMenu(gbl_menu_name);
   var grades_sheet = getSheetWithGrades(ss);
+  var category_names_sheet = getSheetWithCategories(ss);
   
   // DAA TODO: 5/10/16: Commented out this new check due to hanging b/c checkForOnSubmitTrigger() not returning. 
   //Autograde.checkAndCorrectState();  
@@ -61,7 +62,12 @@ function createFlubarooMenu()
       menu.addItem(langstr("FLB_STR_MENU_SHARE_GRADES"), "menuShareGrades");
       
       menu.addItem(langstr("FLB_STR_MENU_VIEW_REPORT"), "viewReport");
-            
+      
+      if (category_names_sheet)
+        {
+          menu.addItem(langstr("FLB_STR_MENU_VIEW_CATEGORY_REPORT"), "runCategoriesReport");
+        }
+      
       menu.addSeparator(); // line break
 
       if (helpTipsHidden())
@@ -158,19 +164,6 @@ function createFlubarooMenu()
 // can't read properties, etc). Setup a simple English menu, since we can't lookup their lang.
 function createNonAuthMenu()
 {   
-  /*
-  var menuEntries = [];
-    
-  var ui = SpreadsheetApp.getUi();
-  var menu = ui.createMenu(gbl_menu_name);
-  
-  menu.addItem(langstr_en("FLB_STR_MENU_GRADE_ASSIGNMENT"), "gradeStep1");
-  menu.addSeparator(); // line break
-  menu.addItem(langstr_en("FLB_STR_MENU_SET_LANGUAGE"), "setLanguage");
-  menu.addItem(langstr_en("FLB_STR_MENU_ABOUT"), "aboutFlubaroo");
-  menu.addToUi();
-  */
-  
   var ui = SpreadsheetApp.getUi();
   var menu = ui.createMenu(gbl_menu_name);
   
@@ -218,55 +211,11 @@ function displayUIMenu()
   
 } // displayUIMenu()
 
-// TODO_AJR - Move to ui.gas
-
 function aboutFlubaroo()
 {  
-   var ss = SpreadsheetApp.getActiveSpreadsheet();
-   var app = UiApp.createApplication()
-                      .setTitle(langstr("FLB_STR_MENU_ABOUT"))
-                      .setWidth("500").setHeight("200");
-  
-   // create the main panel to hold all content in the UI for this step,
-   var main_panel = app.createVerticalPanel()
-                       .setStyleAttribute('border-spacing', '10px');
-   app.add(main_panel);
- 
-   var hpanel_main = app.createHorizontalPanel()
-                .setStyleAttribute('border-spacing', '10px');
-   var vpanel1 = app.createVerticalPanel()
-                .setStyleAttribute('border-spacing', '10px');
-   
-   // add a top level hpanel for instructions and picture
-   var vpanel1 = app.createVerticalPanel()
-       .setStyleAttribute('border-spacing', '10px')
-       .add(app.createImage(FLUBAROO_WELCOME_IMG_URL));
-   
-   
-   var vpanel2 = app.createVerticalPanel()
-                .setStyleAttribute('border-spacing', '10px');
-   
-   var hpanel_r_top = app.createHorizontalPanel()
-                         .setStyleAttribute('border-spacing', '3px')
-                         .add(app.createLabel("Flubaroo - " + gbl_version_str));
-   var hpanel_r_mid = app.createHorizontalPanel()
-                         .setStyleAttribute('border-spacing', '3px')
-                         .add(app.createLabel(langstr("FLB_STR_ABOUT_FLUBAROO_MSG1")));
-   var hpanel_r_bot = app.createHorizontalPanel()
-                         .setStyleAttribute('border-spacing', '3px')
-                         .add(app.createLabel(langstr("FLB_STR_ABOUT_FLUBAROO_MSG2")));
-   vpanel2.add(hpanel_r_top);
-   vpanel2.add(hpanel_r_mid);
-   vpanel2.add(hpanel_r_bot);
-    
-     
-   hpanel_main.add(vpanel1);
-   hpanel_main.add(vpanel2);
- 
-   main_panel.add(hpanel_main);
- 
-   ss.show(app);
-   
+   var msg = langstr("FLB_STR_ABOUT_FLUBAROO_MSG1") + "<br><br>" + langstr("FLB_STR_ABOUT_FLUBAROO_MSG2");
+   UI.showMessageBox(langstr("FLB_STR_MENU_ABOUT"), msg);
+
    logAboutFlubaroo();
   
    dumpConfig();
@@ -285,9 +234,10 @@ function menuGradeStep1()
 
 function menuAdvancedOptions()
 {
-  var html = UI.advancedOptions();
+  var html = UI.advancedOptions(); 
+  
   SpreadsheetApp.getUi()
-                  .showModalDialog(html, langstr("FLB_STR_ADV_OPTIONS_WINDOW_TITLE"));
+                  .showModalDialog(html, langstr("FLB_STR_ADV_OPTIONS_WINDOW_TITLE"))
   
   return;
 }

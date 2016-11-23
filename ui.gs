@@ -124,7 +124,7 @@ function UIClass()
     
     var hpanel_r_bot = app.createHorizontalPanel()
                           .setStyleAttribute('border-spacing', '10px')
-                          .add(app.createImage(FLUBAROO_WORKING_IMG_URL));
+                          .add(app.createImage(FLUBAROO_WORKING_IMG_BAR_URL));
     
     vpanel2.add(hpanel_r_top);
     vpanel2.add(hpanel_r_bot); 
@@ -146,7 +146,7 @@ function UIClass()
   {
     var html = HtmlService.createTemplateFromFile('uiStep1')
       .evaluate()
-      .setWidth(UI_STEP1_WIDTH) 
+      .setWidth(getUIStep1Width()) 
       .setHeight(UI_STEP1_HEIGHT)
       .setSandboxMode(HtmlService.SandboxMode.IFRAME);
     
@@ -170,303 +170,44 @@ function UIClass()
     SpreadsheetApp.getUi()
                   .showModalDialog(html, langstr("FLB_STR_GRADE_STEP2_WINDOW_TITLE"));
   }
-  
-  // gradingResults()
-  // ----------------
-  
-  this.gradingResults = function()
-  {
-    Debug.info("UIClass.gradingResults()");
-  
-    var app = UiApp.createApplication()
-                   .setTitle(langstr("FLB_STR_GRADING_COMPLETE_TITLE"))
-                   .setWidth("500").setHeight("380");
-    
-    var handler = app.createServerClickHandler('gradingResultsEventHandler');
-    
-    // create the main panel to hold all content in the UI for this step,
-    var main_panel = app.createVerticalPanel()
-                        .setStyleAttribute('border-spacing', '10px');
-    
-    var form = app.createFormPanel()
-                  .setId('form')
-                  .setEncoding('multipart/form-data');
-                  
-    form.add(main_panel);   
-    
-    app.add(form);
-    
-    // add a top level hpanel for instructions and picture
-    var hpanel = app.createHorizontalPanel()
-                    .setStyleAttribute('border-spacing', '10px')
-                    .add(app.createImage(FLUBAROO_WELCOME_IMG_URL))
-                    .add(app.createLabel(langstr("FLB_STR_RESULTS_MSG1"))
-                    .setStyleAttribute('margin-top', '10px'));
-                    
-    var hpanel2 = app.createHorizontalPanel()
-                     .add(app.createLabel(langstr("FLB_STR_RESULTS_MSG2"))
-                     .setStyleAttribute('margin-left', '10px'));
-    
-    main_panel.add(hpanel);
-    main_panel.add(hpanel2);
-    
-    // add the button at the bottom.
-    var btnGrid = app.createGrid(1, 1).setStyleAttribute('float', 'right');
-    var btnSubmit = app.createButton(langstr("FLB_STR_GRADE_BUTTON_VIEW_GRADES"), handler)
-                       .setId('VIEW GRADES');
-    
-    btnGrid.setWidget(0,0,btnSubmit);
-    
-    main_panel.add(btnGrid);
-    
-    // Refresh the menu to make sure that the 'Email Grades' option is shown.
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    createFlubarooMenu();
-    
-    return app;
-    
-  } // UIClass.gradingResults()
-  
-  // emailGrades()
+      
+  // showShareGrades()
   // -------------
   //
-  // Display the UI used for emailing the grades.
-  // Flag 'just_printing_grades' tells function that "Print Grades" was selected from the
-  // menu, which uses a subset of the "Email Grades" UI.
-  
-  this.emailGrades = function(sheet, just_printing_grades)
+  this.showShareGrades = function(sheet)
   {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var dp = PropertiesService.getDocumentProperties(); 
+    dp.setProperty(DOC_PROP_SHARE_OR_PRINT_GRADES, "share");
+    
+    var html = HtmlService.createTemplateFromFile('uiPrintOrShareGrades.html')
+                  .evaluate()
+                  .setWidth(UI_SHARE_GRADES_WIDTH) 
+                  .setHeight(UI_SHARE_GRADES_HEIGHT)
+                  .setSandboxMode(HtmlService.SandboxMode.IFRAME);
+    
+    SpreadsheetApp.getUi()
+                  .showModalDialog(html, langstr("FLB_STR_SHARE_GRADES_WINDOW_TITLE"));
+  }
+
+  // showPrintGrades()
+  // -------------
+  //
+  this.showPrintGrades = function(sheet)
+  {
     var dp = PropertiesService.getDocumentProperties();
-    var up = PropertiesService.getUserProperties();
+    dp.setProperty(DOC_PROP_SHARE_OR_PRINT_GRADES, UI_PRINT_DIALOGUE_MODE);
+        
+    var html = HtmlService.createTemplateFromFile('uiPrintOrShareGrades.html')
+                  .evaluate()
+                  .setWidth(UI_PRINT_GRADES_WIDTH) 
+                  .setHeight(UI_PRINT_GRADES_HEIGHT)
+                  .setSandboxMode(HtmlService.SandboxMode.IFRAME);
     
-    Debug.info("UIClass.emailGrades");
+    SpreadsheetApp.getUi()
+                  .showModalDialog(html, langstr("FLB_STR_PRINT_GRADES_WINDOW_TITLE"));
+
+  }
   
-    var title = langstr("FLB_STR_EMAIL_GRADES_WINDOW_TITLE");
-    var height = "555";
-    
-    if (just_printing_grades)
-      {
-        title = langstr("FLB_STR_PRINT_GRADES_WINDOW_TITLE");
-        height = "455";
-      }
-    else
-      {
-        title = langstr("FLB_STR_SHARE_GRADES_WINDOW_TITLE");
-      }
-    
-    var app = UiApp.createApplication().setTitle(title)
-                                       .setWidth("450")
-                                       .setHeight(height);
-    
-    var gws;
-    
-    // Declare the handler that will be called when the 'Continue' or 'Cancel'
-    // buttons are clicked.
-    var handler = app.createServerClickHandler('emailGradesHandler');
-    var click_handler = app.createServerClickHandler('continueButtonClickHandler');
-    var show_questions_value_change_handler = app.createServerChangeHandler('showQuestionsValueChangeHandler');
-    
-    var email_addr = Session.getEffectiveUser().getEmail();
-    var email_addr_field = app.createHidden("email_addr", email_addr)
-                              .setId("email_addr")
-                              .setName("email_addr");
-
-    var just_printing_field = app.createHidden("just_printing_grades", just_printing_grades)
-                                 .setId("just_printing_grades").setName("just_printing_grades");
-    
-    var hidden_vars = app.createVerticalPanel().setVisible(false);
-    hidden_vars.add(email_addr_field);
-    hidden_vars.add(just_printing_field);
-    handler.addCallbackElement(email_addr_field);
-    handler.addCallbackElement(just_printing_field);
-    
-    // Create the main panel to hold all content in the UI for this step.
-    var main_panel = app.createVerticalPanel()
-                        .setStyleAttribute('border-spacing', '10px');
-    
-    // Add a top level hpanel for instructions and picture.
-    var instr = langstr("FLB_STR_EMAIL_GRADES_INSTR");
-
-    if (just_printing_grades)
-      {
-        instr = langstr("FLB_STR_PRINT_GRADES_INSTR");
-      }
-    else
-      {
-        instr = langstr("FLB_STR_SHARE_GRADES_INSTR");
-      }
-
-    var hpanel = app.createHorizontalPanel()
-                    .setStyleAttribute('border-spacing', '10px')
-                    .add(app.createImage(FLUBAROO_WELCOME_IMG_URL))
-                    .add(app.createLabel(instr)
-                    .setStyleAttribute('margin-top', '5px'));
-    
-    main_panel.add(hpanel);
-    
-    if (!just_printing_grades)
-      {
-        // Create a pull-down box containing all the questions which identify a
-        // student. 
-        var lbox_name = "email_ques_index";
-        var lbox = app.createListBox(false).setId(lbox_name).setName(lbox_name);
-        var position = -1;
-    
-        var sheet = getSheetWithSubmissions(ss);
-        
-        // Grab the list of questions, so the user can select which contains
-        // the email. Note: we don't use a GradesWorksheet object as this
-        // function could be getting invoked from AutoGrade setup, where
-        // no submissions or grades yet exist.
-        var questions_full_text = getQuestionValsFromSubmissions(sheet);
-
-        // grading options guaranteed to be set at this point.    
-        var grade_opt_str = dp.getProperty(DOC_PROP_UI_GRADING_OPT);
-        var grading_options = grade_opt_str.split(",");
-    
-        for (var q_index = 0; q_index < questions_full_text.length; q_index++)
-          {
-            var ques_val = questions_full_text[q_index];
-            var gopt = grading_options[q_index];
-        
-            if (gopt === GRADING_OPT_STUD_ID)
-              {
-                var ques_val_orig = ques_val;
- 
-                if (ques_val.length > 40)
-                  {
-                    ques_val = ques_val.substring(0, 35) + "..."; 
-                  } 
-          
-                lbox.addItem(ques_val, ques_val_orig);
-                position++;
-                    
-                if (quesContainsEmail(ques_val_orig))
-                  {       
-                    lbox.setSelectedIndex(position); 
-                  }
-              }
-          }
- 
-        var hpanel2 = app.createHorizontalPanel()
-                         .setStyleAttribute('border-spacing', '6px')
-                         .add(app.createLabel(langstr("FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL")))
-                         .add(lbox);
-
-        main_panel.add(hpanel2);
-   
-        // add a pull down with options for Drive sharing
-        var lbox_share_name = "share_ques_index";
-        var lbox_share = app.createListBox(false).setId(lbox_share_name).setName(lbox_share_name);
-        lbox_share.addItem(langstr("FLB_STR_GRADES_SHARE_EMAIL"), "0");
-        lbox_share.addItem(langstr("FLB_STR_GRADES_SHARE_DRIVE"), "1");
-        lbox_share.addItem(langstr("FLB_STR_GRADES_SHARE_BOTH"), "2");
-        
-        var share_prev_selected = dp.getProperty(DOC_PROP_EMAIL_SHARE_OPTION);
-        
-        if ((share_prev_selected != 'undefined') && (share_prev_selected != null))
-          {
-            lbox_share.setSelectedIndex(Number(share_prev_selected));
-          }
-
-        var hpanel2_5 = app.createHorizontalPanel()
-                         .setStyleAttribute('border-spacing', '6px')
-                         .add(app.createLabel(langstr("FLB_STR_GRADES_SHARE_LABEL")))
-                         .add(lbox_share);
-
-        main_panel.add(hpanel2_5);
-
-      }
-    
-    var cbox_name = "show_questions";
-    var cbox = app.createCheckBox()
-                  .setId(cbox_name)
-                  .setName(cbox_name)
-                  .setValue(true)
-                  .addValueChangeHandler(show_questions_value_change_handler);
-                  
-    var hpanel3 = app.createHorizontalPanel()
-                     .setStyleAttribute('border-spacing', '6px')
-                     .add(app.createLabel(langstr("FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES")))
-                     .add(cbox);
-                      
-    main_panel.add(hpanel3);
-    
-    // Depends on above being checked.
-    var cbox2_name = "show_answers";
-    var cbox2 = app.createCheckBox().setId(cbox2_name).setName(cbox2_name);
-    var hpanel4 = app.createHorizontalPanel()
-                     .setStyleAttribute('border-spacing', '6px')
-                     .add(app.createLabel(langstr("FLB_STR_EMAIL_GRADES_ANSWER_KEY")))
-                     .add(cbox2);
-                     
-    main_panel.add(hpanel4);
-    
-    var textbox_name = "instructor_message";
-    var tbox = app.createTextArea()
-                  .setId(textbox_name)
-                  .setName(textbox_name)
-                  .setWidth('350')
-                  .setHeight('100');
-                  
-    var hpanel4 = app.createHorizontalPanel()
-                     .setStyleAttribute('border-spacing', '6px')
-                     .add(app.createLabel(langstr("FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE")))
-    
-    main_panel.add(hpanel4);
-    
-    var hpanel5 = app.createHorizontalPanel()
-                     .setStyleAttribute('border-spacing', '6px')
-                     .add(tbox);
-    
-    main_panel.add(hpanel5);
-    
-    // Make selections available in handler.
-    if (!just_printing_grades)
-      {
-        handler.addCallbackElement(lbox);
-        handler.addCallbackElement(lbox_share);
-      }
-    
-    handler.addCallbackElement(cbox);
-    handler.addCallbackElement(cbox2);
-    handler.addCallbackElement(tbox);
-    
-    // Add the Continue and Cancel buttons at the bottom.
-    var btnGrid = app.createGrid(1, 3).setStyleAttribute('float', 'right');
-    var btnSubmit = app.createButton(langstr("FLB_STR_BUTTON_CONTINUE"),handler)
-                       .setId('CONTINUE')
-                       .addClickHandler(click_handler);
-    
-    btnGrid.setWidget(0,1,btnSubmit);
-    //btnGrid.setWidget(0,2,app.createButton('Cancel',handler).setId('CANCEL'));
-    btnGrid.setWidget(0,0,app.createImage(FLUBAROO_WORKING_IMG_URL).setVisible(false).setId('working'));
-    
-    main_panel.add(btnGrid);
-    app.add(main_panel);    
-
-    return app;
-    
-    // Private functions.
-    
-    function quesContainsEmail(ques_txt)
-    {
-      ques_txt = ques_txt.toLowerCase();
-      
-      if (ques_txt.indexOf('email') != -1 ||
-          ques_txt.indexOf('e-mail') != -1 ||
-          ques_txt.indexOf('correo') != -1)
-        {
-          return true;
-        }
-      
-      return false;
-      
-    } // UIClass.emailGrades.quesContainsEmail()
-    
-  } // UIClass.emailGrades()
-      
   // gradingResults()
   // -------------
   //
@@ -574,10 +315,10 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
     
     //var h = "<html><body>";
     h = '<!DOCTYPE html><link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">';
-    h += '<img style="padding:10px;" src="' + FLUBAROO_WELCOME_IMG_URL + '"><br>';
-    h += '<div style="font-face:Roboto,Arial;font-family:Sans-Serif;font-size:14px;padding:10px;">';      
+    h += '<img style="padding:10px 10px 0px 10px;" src="' + FLUBAROO_MARQUEE_IMG_URL + '"><br>';
+    h += '<div style="font-face:Roboto,Arial;font-family:Sans-Serif;font-size:14px;padding:0px 10px; 0px; 10px;">';      
     
-    h += '<p style="padding-top:0px;margin-top:0px;">' + msg + "</p>";
+    h += '<p style="padding-top:0px;margin-top:0px;padding-top:0px;margin-bottom:0px;">' + msg + "</p>";
  
     h += '</div>';
     
@@ -609,6 +350,9 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
     
     // grab the current saved values for the options.
     var edit_link = dp.getProperty(DOC_PROP_ADV_OPTION_EMAIL_EDIT_LINK);
+    
+    var clear_grades = dp.getProperty(DOC_PROP_CLEAR_VS_DELETE_GRADES_SHEET);
+    
     var no_noreply = up.getProperty(USER_PROP_ADV_OPTION_NO_NOREPLY);
     
     var extra_credit = up.getProperty(USER_PROP_ADV_OPTION_EXTRA_CREDIT);
@@ -618,30 +362,34 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
     var mgr_adv_by_question = up.getProperty(USER_PROP_ADV_OPTION_MGR_ADVANCE_BY_QUESTION);
 
     var autograde_do_full_regrade = Autograde.getDoFullRegrade();
+
+    var share_score_type = up.getProperty(USER_PROP_ADV_OPTION_SHARE_GRADE_SCORE_TYPE);
+    
+    var email_send_name = up.getProperty(USER_PROP_ADV_OPTION_EMAIL_SEND_NAME);
+    
+    var show_anskey_for_mgr_ques = up.getProperty(USER_PROP_ADV_OPTION_SHOW_ANSKEY_FOR_MGR_QUES);
+    
+    var max_pts_str = up.getProperty(USER_PROP_ADV_OPTION_MAX_QUESTION_POINTS);
+    if (!max_pts_str || isNaN(max_pts_str))
+      {
+        max_pts_str = MAX_QUESTION_POINTS_DEFAULT.toString();
+      }
     
     var checked;
     
-    var html = HtmlService.createHtmlOutput()
-                          .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-                          .setWidth(700)
-                          .setHeight(400);
+    var h = "<!DOCTYPE html>";
 
-    html.setTitle(langstr("FLB_STR_ADV_OPTIONS_WINDOW_TITLE"))
-    
-    var h = "<html><body>";
-    h += '<div style="font-family:Sans-Serif;font-size:14px;">';
-    h += '<b>' + langstr("FLB_STR_ADV_OPTIONS_NOTICE") + ' (<a href="http://flubaroo.com/hc">flubaroo.com/hc</a>).</b><br><br>';
-    
+    h += "<?!= HtmlService.createHtmlOutputFromFile('uiStyle').getContent(); ?>";
+    h += '<div id="adv_opt_mw" style="font-family:Sans-Serif;font-size:14px;">';
+    h += '<b>' + langstr("FLB_STR_ADV_OPTIONS_NOTICE") + ' (<a target="_blank" href="http://flubaroo.com/hc">flubaroo.com/hc</a>).</b><br><br>';
+
+    h += '<div id="adv_opt_selections">';    
     h += '<form id ="adv_options_form" action="">';
+    
+    // --------------- Options below are for this spreadsheet only ---------------    
     h += '<br>Options for this spreadsheet only:<br>';
     
     h += '<p style="padding-left:25px;">'
-    
-    // removing for now until I work out how to do it
-    /*
-    checked = edit_link ? "checked" : "";
-    h += '<input type="checkbox" name="edit_link" ' + checked + '>' + langstr("FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK") + '<br><br>';
-    */
  
     var rates = new Array("0.50", "0.55", "0.60", "0.65", "0.70", "0.75", "0.80", "0.85", "0.90", "0.95", "1.00");
     var selected = [];
@@ -670,49 +418,83 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
       {
         h += '<option value="' + rates[i] + '" ' + selected[i] + '>' + (Number(rates[i]) * 100).toFixed(1) + "%" + '</option>';
       }
-    h += '</select>';
+    h += '</select><br><br>';
     
-    h += '<p style="padding-left:25px;">'
     checked = autograde_do_full_regrade ? "checked" : "";
-    h += '<input type="checkbox" name="autograde_do_full_regrade" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY") + '<br>';
-
-    h += '</p>';
+    h += '<input type="checkbox" name="autograde_do_full_regrade" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY") + '<br><br>';
     
+    checked = clear_grades ? "checked" : "";
+    h += '<input type="checkbox" name="clear_grades" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_CLEAR_GRADES") + '<br>';
+    
+    h += '</p>';
+
+    // --------------- Options below are for ALL spreadsheets where Flubaroo is installed ----------------
     h += "<hr><br>";
     h += 'Options for all spreadsheets where Flubaroo is installed:<br>';
 
-    h += '<p style="padding-left:25px;">'
+    h += '<p style="padding-left:25px;">';
+    
+    h += langstr("FLB_STR_ADV_OPTIONS_MAX_QUESTION_POINTS") + ': <input type="text" name="max_ques_points" value="' + max_pts_str + '" size=2 maxlength=2><br><br>';
+    
     checked = extra_credit ? "checked" : "";
-    h += '<input type="checkbox" name="extra_credit" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_EXTRA_CREDIT") + '<br>';
+    h += '<input type="checkbox" name="extra_credit" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_EXTRA_CREDIT") + '<br><br>';
     
-    h += '<p style="padding-left:25px;">'
     checked = additional_gopts ? "checked" : "";
-    h += '<input type="checkbox" name="additional_gopts" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS") + '<br>';
+    h += '<input type="checkbox" name="additional_gopts" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS") + '<br><br>';
 
-    h += '<p style="padding-left:25px;">'
     checked = mgr_adv_by_question ? "checked" : "";
-    h += '<input type="checkbox" name="mgr_adv_by_question" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION") + '<br>';
+    h += '<input type="checkbox" name="mgr_adv_by_question" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION") + '<br><br>';
+  
+    checked = show_anskey_for_mgr_ques ? "checked" : "";
+    h += '<input type="checkbox" name="show_anskey_for_mgr_ques" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_INCLUDE_ANSKEY_FOR_MGR_QUESTIONS") + '<br><br>';
     
-    h += '<p style="padding-left:25px;">'
+    selected = ["", "", ""];
+    if (!share_score_type)
+      {
+        share_score_type = GRADE_SHARE_SHOW_POINTS_AND_PERCENT; // 0
+      }
+    selected[ Number(share_score_type) ] = "selected";
+    
+    h += langstr("FLB_STR_ADV_OPTIONS_SHARE_SCORE_TYPE") + ": ";
+    h += '<select name="share_score_type">';
+    h += '<option value="<?!= GRADE_SHARE_SHOW_POINTS_AND_PERCENT ?>" ' + selected[0] + '><?!= langstr("FLB_STR_GRADE_SHARE_SHOW_POINTS_AND_PERCENT") ?></option>';
+    h += '<option value="<?!= GRADE_SHARE_SHOW_POINTS_ONLY ?>" ' + selected[1] + '><?!= langstr("FLB_STR_GRADE_SHARE_SHOW_POINTS_ONLY") ?></option>';
+    h += '<option value="<?!= GRADE_SCORE_SHOW_NEITHER ?>" ' + selected[2] + '><?!= langstr("FLB_STR_GRADE_SHARE_SHOW_NEITHER") ?></option>';
+    h += '</select><br><br>';
+    
     checked = no_noreply ? "checked" : "";
     h += '<input type="checkbox" name="no_noreply" ' + checked + '> ' + langstr("FLB_STR_ADV_OPTIONS_NO_NOREPLY") + '<br><br>';
     
+    if (email_send_name === null)
+      {
+        email_send_name = EMAIL_SEND_NAME_DEFAULT;
+      }
+    
+    h += langstr("FLB_STR_ADV_OPTIONS_EMAIL_SENDER_NAME_QUESTION") + ': <input type="text" name="email_send_name" value="' + email_send_name + '" size=25><br><br>';
+    
     h += '</p>';
-    
-    var onclick="google.script.run.withSuccessHandler(aoCloseWindow).processAdvOptionsForm(this.parentNode)";
-    
-    h += '<br><input type="button" value="Submit" onclick="' + onclick + '" />';
-   
-    h += '</form>';
+    h += '</div>'; // #adv_opt_selections
+
+    h += '<div style="position: absolute;right:0;bottom:0;margin-top:20px;">'
+    var onclick="google.script.run.withSuccessHandler(aoCloseWindow).processAdvOptionsForm($('#adv_options_form')[0])";
+    h += '<input type="button" class="action" value="Submit" onclick="' + onclick + '" />';
     h += '</div>';
+
+    h += '</form>';    
+    h += '</div>'; // #adv_opt_mw
     
     h += "<script>function aoCloseWindow() { google.script.host.close(); }</script>";
+    h += '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>';
+  
+    var html = HtmlService.createTemplate(h);
+
+    var output = html.evaluate()
+                     .setSandboxMode(HtmlService.SandboxMode.IFRAME)
+                     .setTitle(langstr("FLB_STR_ADV_OPTIONS_WINDOW_TITLE"))
+                     .setWidth(UI_ADV_OPT_WIDTH)
+                     .setHeight(UI_ADV_OPT_HEIGHT);
     
-    h += "</body></html>";
-    
-    html.append(h);
-    
-    return html;
+    return output;
   }
   
   // showManuallyGradedQuestions()
@@ -878,80 +660,85 @@ function showQuestionsValueChangeHandler(e)
   
 } // showQuestionsValueChangeHandler()
 
-// emailGradesHandler()
+// processShareorPrintSubmit()
 // --------------------
-
-function emailGradesHandler(e)
+function processShareorPrintSubmit(form_obj)
 {
   var dp = PropertiesService.getDocumentProperties();
-  Debug.info("emailGradesHandler()");
+  var mode = dp.getProperty(DOC_PROP_SHARE_OR_PRINT_GRADES);
 
-  // TODO_AJR - I don't think cancel is used.
-  
-  var dp = PropertiesService.getDocumentProperties();
-   
-  var app = UiApp.getActiveApplication();
-  var source = e.parameter.source;
-  var just_printing_grades = false;
-  
-  if (source === 'CANCEL')
-  {
-    app.close();
-    return app;
-  }
-  
-  if (e.parameter.just_printing_grades === 'true')
-    {
-      just_printing_grades = true;
-    }
-  
-  // Get the user's selections from the event and and store them.
-  
-  if (!just_printing_grades)
+  if (mode !== UI_PRINT_DIALOGUE_MODE)
     {
       dp.setProperty(DOC_PROP_EMAIL_ADDRESS_QUESTION, 
-                                   e.parameter.email_ques_index);
+                                   form_obj.email_ques);
   
       dp.setProperty(DOC_PROP_EMAIL_SHARE_OPTION,
-                                   e.parameter.share_ques_index);
+                                   form_obj.sharing_method);
     }
   
-  dp.setProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_SCORES, 
-                               e.parameter.show_questions);
+  if (!form_obj.include_ques)
+    {
+      dp.deleteProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_SCORES);
+    }
+  else
+    {
+      dp.setProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_SCORES, "true");
+    }
+    
+  dp.setProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_TYPE,
+                               form_obj.include_ques_type);
   
-  dp.setProperty(DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY, 
-                               e.parameter.show_answers);
   
+  if (!form_obj.include_stud_response)
+    {
+      dp.deleteProperty(DOC_PROP_EMAIL_INCLUDE_STUD_RESP);
+    }
+  else
+    {
+      dp.setProperty(DOC_PROP_EMAIL_INCLUDE_STUD_RESP, "true");
+    }
+    
+  if (!form_obj.include_anskey)
+    {
+      dp.deleteProperty(DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY);
+    }
+  else
+    {
+      dp.setProperty(DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY, "true");
+    }
+   
   dp.setProperty(DOC_PROP_EMAIL_INSTRUCTOR_MESSAGE, 
-                               e.parameter.instructor_message);
+                               form_obj.instr_message);
   
   dp.setProperty(DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS, 
-                               e.parameter.email_addr);
+                               Session.getEffectiveUser().getEmail());
   
+  // let's form populator know that properties have been set atleast once
+  dp.setProperty(DOC_PROP_EMAIL_FIRST_PROPERTIES_SET, "true");
   
   // If we're just gathering or updating options for autograde 
   // then don't actually send any emails.
   if (Autograde.isGatheringOptions())
-  {
-    Autograde.finalizeOn();
-    Autograde.clearGatheringOptions();
-    app.close();
-    return app;
-  }
-  
-  if (just_printing_grades)
     {
-      doPrintGrades();
-    } 
-  else
+      Autograde.finalizeOn();
+      Autograde.clearGatheringOptions();
+      return;
+    }
+  
+  if (mode !== UI_PRINT_DIALOGUE_MODE)
     {
       doShareGrades();
     }
+  else
+    {
+      doPrintGrades();
+    }
   
-  return app;
+  Debug.writeToFieldLogSheet();
   
-} // emailGradesHandler()
-
+  return;
+  
+}
 
 function processAdvOptionsForm(formObject)
 {
@@ -973,6 +760,15 @@ function processAdvOptionsForm(formObject)
       dp.setProperty(DOC_PROP_ADV_OPTION_EMAIL_EDIT_LINK, "true");
     }
    */
+  
+  if (formObject.max_ques_points)
+    {
+      if (formObject.max_ques_points != "" 
+          && !isNaN(formObject.max_ques_points) && (Number(formObject.max_ques_points) > 0))
+        {
+          up.setProperty(USER_PROP_ADV_OPTION_MAX_QUESTION_POINTS, formObject.max_ques_points);
+        }
+    }
   
   if (!formObject.no_noreply)
     {
@@ -1010,6 +806,15 @@ function processAdvOptionsForm(formObject)
       up.setProperty(USER_PROP_ADV_OPTION_MGR_ADVANCE_BY_QUESTION, "true");
     }
   
+  if (!formObject.show_anskey_for_mgr_ques)
+    {
+      up.deleteProperty(USER_PROP_ADV_OPTION_SHOW_ANSKEY_FOR_MGR_QUES);
+    }
+  else
+    {
+      up.setProperty(USER_PROP_ADV_OPTION_SHOW_ANSKEY_FOR_MGR_QUES, "true");
+    }
+  
   if (!formObject.autograde_do_full_regrade)
     {
       Debug.info("calling Autograde.setDoFullRegrade(false)");
@@ -1021,12 +826,30 @@ function processAdvOptionsForm(formObject)
       Autograde.setDoFullRegrade(true);
     }
   
+  if (!formObject.clear_grades)
+    {
+      dp.deleteProperty(DOC_PROP_CLEAR_VS_DELETE_GRADES_SHEET);
+    }
+  else
+    {
+      dp.setProperty(DOC_PROP_CLEAR_VS_DELETE_GRADES_SHEET, "true");
+    }
+  
+  if (formObject.share_score_type)
+    {
+      up.setProperty(USER_PROP_ADV_OPTION_SHARE_GRADE_SCORE_TYPE, formObject.share_score_type);
+    }
   
   var pass_rate = formObject.pass_rate;
 
   if (pass_rate && !isNaN(pass_rate))
     {
       dp.setProperty(DOC_PROP_ADV_OPTION_PASS_RATE, pass_rate);
+    }
+  
+  if (formObject.email_send_name)
+    {
+      up.setProperty(USER_PROP_ADV_OPTION_EMAIL_SEND_NAME, formObject.email_send_name);
     }
   
   // update the menu incase any changes in options will affect it.
@@ -1126,7 +949,8 @@ function uiStep1GetQuestionData()
     {
       // possible grading options to display to user
       possible_gopts_disp : [langstr('FLB_STR_GRADING_OPT_STUD_ID'), langstr('FLB_STR_GRADING_OPT_SKIP_GRADING'), 
-                             langstr('FLB_STR_GRADING_OPT_NORMAL_GRADING'), langstr('FLB_STR_GRADING_OPT_MANUAL_GRADING')],
+                             langstr('FLB_STR_GRADING_OPT_NORMAL_GRADING'),
+                             langstr('FLB_STR_GRADING_OPT_MANUAL_GRADING')],
      
       // corresponding grading option strings (used internally)
       possible_gopts : [GRADING_OPT_STUD_ID, GRADING_OPT_SKIP, GRADING_OPT_NORMAL, GRADING_OPT_MANUAL],
@@ -1134,8 +958,8 @@ function uiStep1GetQuestionData()
       // whether or not to show "extra credit" column. false by default unless advanced option is set.
       show_extra_credit: false,
             
-      // possible point values to display
-      possible_pts : ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+      // possible point values to display and set
+      possible_pts : [],
       
       // list of question (summaries) to show
       ques_vals : [],
@@ -1150,6 +974,27 @@ function uiStep1GetQuestionData()
       
       // default value for extra credit checkboxes on each question. either false (unchecked) or true (checked).
       default_extra_credit : [],
+      
+      // list of category names, pulled from the 'Categories' sheet (if present). Could be empty.
+      category_names: [],
+      
+      // defaults for list of category names, based on possible previous selections
+      default_categories: [],
+    }
+  
+  // Check if user has changed the max number of points assignable to a question.
+  // Use the default of 10 if not, or if their value isn't a number.
+  var max_pts_str = up.getProperty(USER_PROP_ADV_OPTION_MAX_QUESTION_POINTS);
+  var max_pts = MAX_QUESTION_POINTS_DEFAULT; // 10
+  if (max_pts_str && !isNaN(max_pts_str))
+    {
+      max_pts = Number(max_pts_str);
+    }
+  
+  // setup the possible assignable points for each question.
+  for (var p=1; p <= max_pts; p++)
+    {
+      qdata.possible_pts.push(p.toString());
     }
   
   var show_additional_gopts = up.getProperty(USER_PROP_ADV_OPTION_SHOW_ADDITIONAL_GOPTS);
@@ -1177,6 +1022,12 @@ function uiStep1GetQuestionData()
       existing_gopts = existing_gopts.split(",");
     }
   
+  var existing_category_names = dp.getProperty(DOC_PROP_UI_CATEGORY_NAMES);
+  if (existing_category_names)
+    {
+      existing_category_names = existing_category_names.split(FLB_GENERIC_DELIMETER);
+    }
+  
   var show_extra_credit = up.getProperty(USER_PROP_ADV_OPTION_EXTRA_CREDIT);
   
   if (show_extra_credit === 'true')
@@ -1191,6 +1042,7 @@ function uiStep1GetQuestionData()
       var default_gopt_sel;
       var default_pt_sel = 0; // default to "1" point.
       var ex_cb = false;
+      var default_cat_sel = 0; // default to first item in list.
 
       qdata.ques_vals.push(qd);
       
@@ -1250,15 +1102,47 @@ function uiStep1GetQuestionData()
             }
         }
       
-       qdata.default_extra_credit.push(ex_cb);
-       qdata.default_gopts.push(default_gopt_sel);
-       qdata.default_pts.push(default_pt_sel);
+      // restore category selection.
+      if (existing_category_names && (existing_gopts.length == num_questions))
+        {
+          default_cat_sel = existing_category_names[i];
+        }
       
+      qdata.default_extra_credit.push(ex_cb);
+      qdata.default_gopts.push(default_gopt_sel);
+      qdata.default_pts.push(default_pt_sel);
+      qdata.default_categories.push(default_cat_sel);
+
     } // for each question.
-    
-   return qdata;
+
+  Logger.log(qdata.default_categories);
+  
+  // populate optional list of categories, if present  
+  var cat_sheet = getSheetWithCategories(ss);
+  if (cat_sheet)
+    { 
+      var cat_names = cat_sheet.getRange(1, 1, cat_sheet.getLastRow(), 1).getValues();     
+      for (var i=0; i < cat_names.length; i++)
+        {
+          qdata.category_names.push(cat_names[i][0]);
+        }
+    }
+   
+  return qdata;
 }
 
+function getUIStep1Width()
+{
+  // we may need to increase the width if Categories are present to select.
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var window_width = UI_STEP1_WIDTH;
+  if (getSheetWithCategories(ss))
+    {
+      window_width += 300;
+    }
+ 
+  return window_width;
+}
 
 // uiStep2GetAnswerKeyData()
 // --------------------
@@ -1405,5 +1289,361 @@ function uiStep2GetAnswerKeyData()
     }
   
   return ak_data;
+}
+
+function uiPrintOrShareScriptlet_getHeight()
+{
+  var dp = PropertiesService.getDocumentProperties();
+  
+  // property DOC_PROP_SHARE_OR_PRINT_GRADES is set in UI.showShareGrades() and/or
+  // UI.showPrintGrades()
+  var mode = dp.getProperty(DOC_PROP_SHARE_OR_PRINT_GRADES);
+  var instr = "";
+  
+  if (mode === UI_PRINT_DIALOGUE_MODE)
+    {
+      instr = UI_PRINT_GRADES_HEIGHT;
+    }
+  else
+    {
+      instr = UI_SHARE_GRADES_HEIGHT;
+    }
+  
+  return instr;
+}
+
+function uiPrintOrShareScriptlet_getWidth()
+{
+  var dp = PropertiesService.getDocumentProperties();
+  
+  // property DOC_PROP_SHARE_OR_PRINT_GRADES is set in UI.showShareGrades() and/or
+  // UI.showPrintGrades()
+  var mode = dp.getProperty(DOC_PROP_SHARE_OR_PRINT_GRADES);
+  var instr = "";
+  
+  if (mode === UI_PRINT_DIALOGUE_MODE)
+    {
+      instr = UI_PRINT_GRADES_WIDTH;
+    }
+  else
+    {
+      instr = UI_SHARE_GRADES_WIDTH;
+    }
+  
+  return instr;
+}
+
+function uiPrintOrShareScriplet_includeIfShareMode(include_str)
+{
+  var rv = "";
+  var dp = PropertiesService.getDocumentProperties();
+  
+  // property DOC_PROP_SHARE_OR_PRINT_GRADES is set in UI.showShareGrades() and/or
+  // UI.showPrintGrades()
+  var mode = dp.getProperty(DOC_PROP_SHARE_OR_PRINT_GRADES);
+  
+  if (mode !== UI_PRINT_DIALOGUE_MODE)
+    {
+      // must be share mode
+      rv = include_str;
+    }
+  
+  Logger.log("returning rv: " + rv);
+
+  return rv;
+}
+
+function uiPrintOrShareScriplet_includeIfPrintMode(include_str)
+{
+  var rv = "";
+  var dp = PropertiesService.getDocumentProperties();
+  
+  // property DOC_PROP_SHARE_OR_PRINT_GRADES is set in UI.showShareGrades() and/or
+  // UI.showPrintGrades()
+  var mode = dp.getProperty(DOC_PROP_SHARE_OR_PRINT_GRADES);
+  
+  if (mode === UI_PRINT_DIALOGUE_MODE)
+    {
+      // must be share mode
+      rv = include_str;
+    }
+  
+  Logger.log("returning rv: " + rv);
+  return rv;
+}
+
+function uiShareGradesGetFormData()
+{  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = getSheetWithSubmissions(ss);
+
+  var dp = PropertiesService.getDocumentProperties();
+  var action = dp.getProperty(DOC_PROP_SHARE_OR_PRINT_GRADES);
+  
+  var props_set = dp.getProperty(DOC_PROP_EMAIL_FIRST_PROPERTIES_SET);
+  
+  // Setup the data structure that will be returned, including some default values.
+  var fd = 
+      {
+        'mode': action,
+        'stud_ident_ques_trunc' : [],
+        'stud_ident_ques_full' : [],
+        'selected_stud_ident_index' : -1,
+        'selected_share_option' : GRADE_SHARE_METHOD_EMAIL.toString(), // form & properties use strings
+        'include_questions_checked' : true,
+        'selected_include_ques_type' : QUESTIONS_SHARE_ALL.toString(), // form & properties use strings
+        'include_anskey_checked': false,
+        'include_student_resp_checked' : true,
+        'teacher_message' : "",
+        'sticker_enabled': false,
+        'chosen_sticker_fid' : "",
+      };
+
+  // Lookup any selections previously made  
+  var email_question = dp.getProperty(DOC_PROP_EMAIL_ADDRESS_QUESTION); 
+  var share_option = dp.getProperty(DOC_PROP_EMAIL_SHARE_OPTION);
+  var show_answers = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY);
+  var instructor_message = dp.getProperty(DOC_PROP_EMAIL_INSTRUCTOR_MESSAGE);
+  var show_questions = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_SCORES);
+  var show_questions_type = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_TYPE);
+  var show_student_response = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_STUD_RESP);
+  var chosen_sticker_fid = dp.getProperty(DOC_PROP_STICKER_FILE_ID);
+  var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
+ 
+  if (share_option)
+    {
+      fd.selected_share_option = share_option;
+    }
+  if (props_set && !show_questions)
+    {
+      fd.include_questions_checked = false; 
+    }
+  if (show_questions_type)
+    {
+      fd.selected_include_ques_type = show_questions_type;
+    }
+  if (show_answers)
+    {
+      fd.include_anskey_checked = true;
+    }
+  if (props_set && !show_student_response)
+    {
+      fd.include_student_resp_checked = false;
+    }
+  
+  if (instructor_message)
+    {
+      fd.teacher_message = instructor_message;
+    }
+  
+  if (sticker_enabled)
+    {
+      fd.sticker_enabled = sticker_enabled;
+    }
+  
+  if (chosen_sticker_fid)
+    {
+      fd.chosen_sticker_fid = chosen_sticker_fid;
+    }
+
+  // Grab the list of questions, so the user can select which contains
+  // the email. Note: we don't use a GradesWorksheet object as this
+  // function could be getting invoked from AutoGrade setup, where
+  // no submissions or grades yet exist.
+  var questions_full_text = getQuestionValsFromSubmissions(sheet);   
+        
+  // grading options guaranteed to be set at this point.    
+  var grade_opt_str = dp.getProperty(DOC_PROP_UI_GRADING_OPT);
+  var grading_options = grade_opt_str.split(",");
+  var position = -1;
+    
+  for (var q_index = 0; q_index < questions_full_text.length; q_index++)
+    {
+      var ques_val = questions_full_text[q_index];
+      var gopt = grading_options[q_index];
+        
+      if (gopt === GRADING_OPT_STUD_ID)
+        {
+          var ques_val_orig = ques_val;
+ 
+          if (ques_val.length > 40)
+            {
+              ques_val = ques_val.substring(0, 35) + "..."; 
+            } 
+          
+          position++;
+          fd.stud_ident_ques_trunc.push(ques_val);
+          fd.stud_ident_ques_full.push(ques_val_orig);
+          
+          if (!email_question)
+            {
+              // no previous selection. guess which question collected email addresses.
+              if (quesContainsEmail(ques_val_orig))
+                {       
+                  fd.selected_stud_ident_index = position;
+                }
+            }
+          else
+            {
+              if (email_question === ques_val_orig)
+                {
+                  fd.selected_stud_ident_index = position;
+                }
+            }
+        }
+    }
+  
+    // Private functions.
+    function quesContainsEmail(ques_txt)
+      {
+        ques_txt = ques_txt.toLowerCase();
+      
+        if (ques_txt.indexOf('email') != -1 ||
+            ques_txt.indexOf('e-mail') != -1 ||
+            ques_txt.indexOf('correo') != -1)
+            {
+              return true;
+            }
+      
+        return false;    
+      }
+  
+  return fd;
+}
+
+function uiShareGradesSaveSticker(sticker_enabled, drive_file_id, sticker_percent)
+{
+  var dp = PropertiesService.getDocumentProperties();
+  
+  if (!sticker_enabled)
+    {
+      Debug.info("User opted not to send a sticker");
+      dp.deleteProperty(DOC_PROP_STICKER_ENABLED);
+    }
+  else
+    {
+      Debug.info("User has chosen to send a sticker");
+      dp.setProperty(DOC_PROP_STICKER_ENABLED, "true");
+    }
+                     
+  // check that a valid percentage was set
+  if (sticker_percent != "" && !isNaN(sticker_percent) && (Number(sticker_percent) >= 0))
+    {
+      // valid percentage threshold. record it.
+      dp.setProperty(DOC_PROP_STICKER_THRESHOLD1, sticker_percent);
+      
+      // check if a file was selected. if so, record which one.
+      if (drive_file_id !== "")
+        {
+          // record the drive file id
+          dp.setProperty(DOC_PROP_STICKER_FILE_ID, drive_file_id);
+        }
+      else
+        {
+          dp.deleteProperty(DOC_PROP_STICKER_FILE_ID);
+        }
+      
+      Debug.info("User opted to include sticker (id=" + drive_file_id + ") when sharing grades and score >= " + sticker_percent + "%");
+    }
+  else
+    {
+      dp.deleteProperty(DOC_PROP_STICKER_THRESHOLD1);
+    } 
+
+  return;
+}
+
+
+function uiShareGradesLoadStickerList()
+{
+  var dp = PropertiesService.getDocumentProperties();
+
+  var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
+  var sticker_file_id = dp.getProperty(DOC_PROP_STICKER_FILE_ID);
+  var sticker_percent = dp.getProperty(DOC_PROP_STICKER_THRESHOLD1);
+  
+  var sd = 
+    {
+      'sticker_enabled' : false,
+      'sticker_file_id' : "",
+      'sticker_percent' : "",
+      ids: [],
+      names : [],
+    };
+   
+  if (sticker_enabled)
+    {
+      sd.sticker_enabled = true;
+    }
+  if (sticker_file_id)
+    {
+      sd.sticker_file_id = sticker_file_id;
+    }
+  if (sticker_percent)
+    {
+      sd.sticker_percent = sticker_percent;
+    }
+    
+  // Pull in list of free/public stickers
+  var public_stickers_folder = DriveApp.getFolderById("0B3gmIDjKT36hSXRPdmp3ZDBSN28");
+  var public_stickers = public_stickers_folder.getFiles();
+  
+  while (public_stickers.hasNext())
+    {
+      var sticker = public_stickers.next();
+      
+      var fname = sticker.getName();
+      var clean_name = fname.substr(0, fname.lastIndexOf('.')) || fname;
+      var ext_name = fname.substr(fname.lastIndexOf('.') + 1).toLowerCase();
+      
+      if (ext_name === "jpg" || ext_name === "png")
+        {
+          sd.names.push(clean_name);
+          sd.ids.push(sticker.getId());
+        }
+    }
+  
+  
+  // Pull in this user's own stickers, from "Flubaroo - Stickers" in their My Drive
+  var status = unzipStickers();
+  
+  if (status)
+    {
+      // something went worng unzipping. let user know.
+      throw "Unable to complete unzip successfully";
+    }
+  
+  //var folders = DriveApp.getFoldersByName(MY_FLUBAROO_STICKERS_FOLDER);
+  var folders = DriveApp.searchFolders("title = '" + MY_FLUBAROO_STICKERS_FOLDER + "' and 'me' in owners");
+  var my_stickers_folder = null;
+  if (folders.hasNext())
+    {
+      my_stickers_folder = folders.next();
+    }
+    
+  if (my_stickers_folder)
+    {      
+      // ensure permission is set to be viewable for folks with link
+      my_stickers_folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      
+      var my_stickers = my_stickers_folder.getFiles();
+      
+      while (my_stickers.hasNext())
+        {
+          var sticker = my_stickers.next();
+      
+          var fname = sticker.getName();
+          var clean_name = fname.substr(0, fname.lastIndexOf('.')) || fname;
+          var ext_name = fname.substr(fname.lastIndexOf('.') + 1).toLowerCase();
+          
+          if (ext_name === "jpg" || ext_name === "png")
+            {
+              sd.names.push(clean_name);
+              sd.ids.push(sticker.getId());
+            }
+        }
+    }
+  
+  return sd;
 }
 

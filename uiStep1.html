@@ -18,15 +18,15 @@
     
     <div id="s1_mw_alert" class="error" style="display:none;"></div>
 
-    <div class="vspacer"></div>
+    <!-- <div class="vspacer_full"></div> -->
         
     <div id="s1_mw_sel">
-    Loading...
+    <?=langstr('FLB_STR_LOADING')?>
     </div>
     
     <div style="float:right;margin-top:20px;">
     <table border="0" id="s1_mw_continue"><tr>
-    <td><img id="s1_mw_working" src="<?= FLUBAROO_WORKING_IMG_URL ?>" style="display:none;"></td>
+    <td><img id="s1_mw_working" src="<?= FLUBAROO_WORKING_IMG_BAR_URL ?>" style="display:none;"></td>
     <td width="35px"></td>
     <td><input type="button" class="action" value="Continue" onclick="step1Continue()" /></td>
     </tr></table>
@@ -51,7 +51,8 @@ function populateQuestionData(qdata)
   h += '<tr><td><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION") ?></b></td>';
   
   var show_ec_arg = "false";
-  
+  var show_categories = qdata.category_names.length > 0;
+
   if (qdata.show_extra_credit)
     {
       h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADING_OPT_EXTRA_CREDIT") ?></b></td>';
@@ -59,6 +60,12 @@ function populateQuestionData(qdata)
     }
   
   h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_POINTS") ?></b></td>';
+  
+  if (show_categories)
+    {
+      h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_CATEGORY") ?></b></td>';
+    }
+  
   h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_QUESTION") ?></b></td>';
   h += '</tr>'
   
@@ -70,10 +77,11 @@ function populateQuestionData(qdata)
       var default_gopt_val = qdata.possible_gopts[default_gopt_index];
       var default_point_index = qdata.default_pts[i];
       var default_extra_credit_checked = qdata.default_extra_credit[i];
-            
+      var default_category = qdata.default_categories[i];
+
       // for each question, list possible grading options
       h += '<tr><td><div class="block form-group">';
-      h += '<select name="g_opts" id="g_opt_id_' + i + '" onchange="selectChange(\'' + i + '\',' + show_ec_arg + ')">';
+      h += '<select name="g_opts" id="g_opt_id_' + i + '" onchange="selectChange(\'' + i + '\',' + show_ec_arg + ',' + show_categories + ')">';
       for (var j=0; j < qdata.possible_gopts.length; j++)
         {
           var gopt_val = qdata.possible_gopts[j];
@@ -118,7 +126,7 @@ function populateQuestionData(qdata)
           d = " disabled ";
         }       
       
-      h += '<select class="s1_mw_sel_pts" name="g_pts" id="g_pts_id_' + i + '" ' + d + '>'
+      h += '<select class="s1_mw_sel_pts" name="g_pts" id="g_pts_id_' + i + '" ' + d + '>';
       for (var j=0; j < qdata.possible_pts.length; j++)
         {
           var pt = qdata.possible_pts[j];
@@ -132,6 +140,35 @@ function populateQuestionData(qdata)
         }
       h += '</select></div>';
       
+      // if applicable, show a drop-down of category names
+      if (show_categories)
+        {
+          h += '<td class="s1_mw_sel_table_hspacer"><div class="block form-group">';     
+          h += '<select class="s1_mw_sel_category" name="g_category" id="g_category_id_' + i + '" ' + d + '>';
+          
+          // show blank as the first option, meaning no category selected.
+          h += '<option value="" ';
+          if (d !== "")
+            {
+              h += 'selected';
+            }
+          h += '></option>';
+          
+          for (var j=0; j < qdata.category_names.length; j++)
+            {
+              var cat = qdata.category_names[j];
+              h += '<option value="' + cat + '" ';
+              if (d === "" && (qdata.category_names[j] === default_category))
+                {
+                  h += 'selected';
+                }
+                           
+              h += '>' + cat + '</option>';
+            }
+            
+          h += '</select></div>';
+        }
+      
       // for each question, list the question itself
       h += '<td class="s1_mw_sel_table_hspacer">';
       h += q;
@@ -143,11 +180,12 @@ function populateQuestionData(qdata)
   $('#s1_mw_sel').html(h);
 }
 
-function selectChange(id_num, show_extra_credit)
+function selectChange(id_num, show_extra_credit, show_categories)
 {
   var gopt_elem_id = "#g_opt_id_" + id_num;
   var pts_elem_id = "#g_pts_id_" + id_num;
   var pts_extra_credit_id = "#g_ec_id_" + id_num;
+  var category_name_id = "#g_category_id_" + id_num;
   
   var gopt_val = $(gopt_elem_id).val();
   
@@ -160,6 +198,12 @@ function selectChange(id_num, show_extra_credit)
         {
           $(pts_extra_credit_id).prop('disabled', true);
         }
+        
+      if (show_categories)
+        {
+          $(category_name_id).prop('disabled', true);
+          $(category_name_id).val("");
+        }
     }
   else
     {
@@ -169,6 +213,10 @@ function selectChange(id_num, show_extra_credit)
         {
           $(pts_extra_credit_id).prop('disabled', false);
         }
+      if (show_categories)
+        {
+          $(category_name_id).prop('disabled', false);
+        }
     }
     
 }
@@ -177,6 +225,7 @@ function selectChange(id_num, show_extra_credit)
 function step1Continue()
 {
   var server_gopts = [];
+  var server_category_names = [];
   var iden_student = false; // at least one student identifier?
   var gradeable_ques = false;
   
@@ -185,6 +234,15 @@ function step1Continue()
   // always add a first option of "skip" for the timestamp question
   server_gopts.push("<?=GRADING_OPT_SKIP?>");
   
+  var g_cat = document.getElementsByName('g_category');
+
+  if (g_cat)
+    {
+      // if recording categories, put the one for the timestamp as blank
+      // (will be ignored).
+      server_category_names.push("");
+    }
+     
   // Parse all HTML form data into an array of grading options
   // that can be passed to the server.
   var g_opts = document.getElementsByName('g_opts');
@@ -239,12 +297,21 @@ function step1Continue()
       showAlert('<?=langstr("FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR")?>');
       return;
     }
+    
+  // Process category names
+  if (g_cat)
+    {
+      for (var i=0; i < g_cat.length; i++)
+        {
+          server_category_names.push(g_cat[i].value);
+        }
+    }
   
   // show the animation next to the continue button
   $('#s1_mw_working').show();
   
   // call server-side function, passing it the grading options
-  google.script.run.gradingStep1SubmitHandler(server_gopts);
+  google.script.run.gradingStep1SubmitHandler(server_gopts, server_category_names);
 }
 
 function showAlert(alert)

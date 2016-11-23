@@ -21,7 +21,7 @@ FIELD_LOG_DEFAULT_RATE = 25;
 FIELD_LOG_WRAP_AROUND = 50000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 54";
+gbl_version_str = "Version 55";
                   
 // NOTE: Update version in README.gas                  
 
@@ -51,6 +51,8 @@ gbl_num_metrics_cols = 6; // score, percent,
                           // already emailed, student feedback,
                           // subm copy row index
 
+MAX_QUESTION_POINTS_DEFAULT = 10; // max number of points possible to assign to a question in Step 1.
+
 PALE_YELLOW = "#ffffcc";
 PALE_RED = "#e05252";
 
@@ -69,13 +71,25 @@ GRADES_SUMMARY_PTS_POSSIBLE_ROW_NUM  = 3; // row where "Points Possible" appears
 GRADES_SUMMARY_AVG_PTS_ROW_NUM       = 4; // row where "Average Points" appears at the top of the Grades sheet.
 GRADES_SUMMARY_COUNTED_SUBM_ROW_NUM  = 5; // row where "Counted Submissions" appears at the top of the Grades sheet.
 GRADES_SUMMARY_LOW_SCORE_ROW_NUM     = 6; // row where "Number of Low Scoring Questions" appears at the top of the Grades sheet.
+GRADES_CATEGORY_NAMES_ROW_NUM        = 7; // row where (optional) category names are stored
 
 FLUBAROO_WELCOME_IMG_URL =
   'https://flubaroo2.appspot.com/flubaroo_128x128_no_padding.png';
-FLUBAROO_WORKING_IMG_URL =
+FLUBAROO_WORKING_IMG_BAR_URL =
   'https://flubaroo2.appspot.com/flubaroo_working.gif';
+FLUBAROO_WORKING_IMG_SPIN_URL =
+  'https://flubaroo2.appspot.com/loading-spinner.gif';
 FLUBAROO_TIP_IMG_URL =
   'https://flubaroo2.appspot.com/tips.png';
+FLUBAROO_CERT_IMG_URL =
+  'https://flubaroo2.appspot.com/cert30x30.png';
+FLUBAROO_MARQUEE_IMG_URL =
+  'https://flubaroo2.appspot.com/flubaroo_marquee_280.png';
+
+DRIVE_EMBED_IMAGE_URL = 
+  'https://docs.google.com/uc?id=';
+
+FLUBAROO_SAMPLE_STICKER_ICON_URL = DRIVE_EMBED_IMAGE_URL + "0B3gmIDjKT36hdXl0c3ZvcWlTNW8";
 
 FLB_AUTOGRADE_SELECT_MODE_URL = "http://www.flubaroo.com/hc/selecting-an-autograde-mode";
 
@@ -115,6 +129,7 @@ GRADES_OUTPUT_ROW_TYPE_GRADING_OPT = 4;
 GRADES_OUTPUT_ROW_TYPE_SUBMISSION_VALS = 5;
 GRADES_OUTPUT_ROW_TYPE_HELP_TIPS = 6;
 GRADES_OUTPUT_ROW_TYPE_MANUALLY_GRADED_COMMENTS = 7;
+GRADES_OUTPUT_ROW_TYPE_CATEGORY_NAMES = 8;
 
 gbl_num_hidden_rows = 4;       // number of hidden rows at the bottom of the Grades sheet,
                                 // not including the copies of the original submissions or manually graded question comments.
@@ -145,6 +160,7 @@ STATUS_OK = 0
 STATUS_NOT_FOUND = 1
 STATUS_NO_EFFECT = 2
 STATUS_CANNOT_CONTINUE = 3
+STATUS_FILE_ERROR = 4
 
 // ENOUGH_SUBM_SOURCE definitions
 ENOUGH_SUBM_SOURCE_USER_FROM_MENU         = 0   // user selects "Grade Assignment" from menu 
@@ -157,10 +173,25 @@ GRADE_SHARE_METHOD_EMAIL  = 0
 GRADE_SHARE_METHOD_DRIVE  = 1
 GRADE_SHARE_METHOD_BOTH   = 2
 
+// Definition of if/how questions are shared
+QUESTIONS_SHARE_ALL       = 0
+QUESTIONS_SHARE_CORRECT   = 1
+QUESTIONS_SHARE_INCORRECT = 2
+
+// Definitions of if/how overall scores are shown when grades are shared
+GRADE_SHARE_SHOW_POINTS_AND_PERCENT = 0 // default, typical behavior
+GRADE_SHARE_SHOW_POINTS_ONLY = 1
+GRADE_SCORE_SHOW_NEITHER = 2
+
+// Defines which mode the Share Grades / Print Grades dialogue is being used in
+UI_SHARE_DIALOGUE_MODE = "share";
+UI_PRINT_DIALOGUE_MODE = "print";
+
 // Script and user properties
 DOC_PROP_HISTOGRAM_URL = "flubaroo_histogram_url";
 DOC_PROP_NUM_GRADED_SUBM = "flubaroo_num_graded_subm";
 DOC_PROP_UI_GRADING_OPT = "flubaroo_ui_grading_opt2"; // v28 changed _opt to _opt2 to handle changes in grading options.
+DOC_PROP_UI_CATEGORY_NAMES = "flubaroo_ui_category_names";
 DOC_PROP_ANSWER_KEY_ROW_NUM = "flubaroo_anskey_row_num";
 DOC_PROP_STUDENT_FEEDBACK_HIDDEN = "flubaroo_student_feedback_hidden";
 DOC_PROP_HELP_TIPS_HIDDEN = "flubaroo_help_tips_hidden";
@@ -174,9 +205,12 @@ DOC_PROP_NUM_COLS_IN_GRADES = "flubaroo_num_cols_in_grades";
 DOC_PROP_EMAIL_ADDRESS_QUESTION = "flubaroo_email_address_question";
 DOC_PROP_EMAIL_SHARE_OPTION = "flubaroo_email_share_option";
 DOC_PROP_EMAIL_INCLUDE_QUESTIONS_SCORES = "flubaroo_email_include_quesions_scores";
+DOC_PROP_EMAIL_INCLUDE_QUESTIONS_TYPE = "flubaroo_email_include_questions_types"; // set to QUESTIONS_SHARE_*
+DOC_PROP_EMAIL_INCLUDE_STUD_RESP = "flubaroo_email_include_student_responses";
 DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY = "flubaroo_email_include_answer_key";
 DOC_PROP_EMAIL_INSTRUCTOR_MESSAGE = "flubaroo_email_instructor_message";
 DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS = "flubaroo_email_instructor_address";
+DOC_PROP_EMAIL_FIRST_PROPERTIES_SET = "flubaroo_email_first_properties_set";
 
 DOC_PROP_AUTOGRADE_SUBMIT_TRIGGER_ID = "flubaroo_auto_grade_submit_trigger_id";
 DOC_PROP_AUTOGRADE_ENABLED = "flubaroo_auto_grade_enabled";
@@ -184,6 +218,7 @@ DOC_PROP_AUTOGRADE_GATHERING_OPTIONS = "flubaroo_auto_grade_gathering_options";
 DOC_PROP_AUTOGRADE_RUNNING = "flubaroo_auto_grade_running";
 DOC_PROP_AUTOGRADE_DO_FULL_REGRADE = "flubaroo_auto_grade_do_full_regrade";
 DOC_PROP_AUTOGRADE_ANSWER_VALUES = "flubaroo_auto_grade_anskey_values";
+DOC_PROP_CLEAR_VS_DELETE_GRADES_SHEET = "flubaroo_clear_vs_delete_grades_sheet";
 
 USER_PROP_NEXT_TIP_NUMBER = "flubaroo_next_tip_number";
 
@@ -192,9 +227,20 @@ DOC_PROP_MGR_STORED_METADATA = "flubaroo_mgr_stored_metadata";
 DOC_PROP_UI_OFF = "flubaroo_ui_off"; // Default - if not set - is on.
 DOC_PROP_UI_WAS_OFF = "flubaroo_ui_was_off"; // The UI state before the last autograde transition.
 
+DOC_PROP_STICKER_ENABLED = "flubaroo_sticker_enabled";
+DOC_PROP_STICKER_FILE_ID = "flubaroo_sticker_file_id";
+DOC_PROP_STICKER_THRESHOLD1 = "flubaroo_sticker_threshold1";
+
+EMAIL_SEND_NAME_DEFAULT = "Flubaroo Grader"; // Used if noreply@ is off, and no name set by user.
+
 // FLB_AUTOGRADE_AK_DELIMITER: Used to delimit answers to questions when we store the 
 // entire answer key row as a property for autograding.
 FLB_AUTOGRADE_AK_DELIMITER = "%%FLB_AG_AK_DELIMITER%%";
+
+// FLB_GENERIC_DELIMETER: Used for generic delimitering, such as in property strings.
+FLB_GENERIC_DELIMETER = "%%FLB_DELIM%%";
+
+MY_FLUBAROO_STICKERS_FOLDER = "Flubaroo - Stickers";
 
 /* Properties to store Advanced Options.
    For the true/false properties, they exist if true, and don't exist if false.
@@ -205,6 +251,10 @@ USER_PROP_ADV_OPTION_NO_NOREPLY = "flubaroo_adv_option_no_noreply";
 USER_PROP_ADV_OPTION_EXTRA_CREDIT = "flubaroo_adv_option_extra_credit";
 USER_PROP_ADV_OPTION_SHOW_ADDITIONAL_GOPTS = "flubaroo_adv_option_show_additonal_gopts";
 USER_PROP_ADV_OPTION_MGR_ADVANCE_BY_QUESTION = "flubaroo_adv_option_mgr_advance_by_question";
+USER_PROP_ADV_OPTION_SHARE_GRADE_SCORE_TYPE = "flubaroo_adv_option_share_grade_score_type";
+USER_PROP_ADV_OPTION_EMAIL_SEND_NAME = "flubaroo_adv_option_email_send_name";
+USER_PROP_ADV_OPTION_SHOW_ANSKEY_FOR_MGR_QUES = "flubaroo_adv_option_show_anskey_for_mgr_ques";
+USER_PROP_ADV_OPTION_MAX_QUESTION_POINTS = "flubaroo_adv_option_max_question_points";
 
 DOC_PROP_FORM_SUBMIT_TRIGGER_ID = "flubaroo_form_submit_trigger_id";
 
@@ -223,19 +273,31 @@ USER_PROP_UPDATE_NOTICE_DATE = "update_notice_date";
 // Set when/if the welcome message is shown on first install.
 USER_PROP_FIRST_TIME_WELCOME_SHOWN = "flubaroo_welcome_message_shown";
 
-// window height & width for UIs
+DOC_PROP_SHARE_OR_PRINT_GRADES = "flubaroo_share_or_print_grades";
+
+// Window height & width for UIs
 UI_STEP1_WIDTH = 600;
-UI_STEP1_HEIGHT = 550;
+UI_STEP1_HEIGHT = 525;
 UI_STEP2_WIDTH = 700;
 UI_STEP2_HEIGHT = 505;
 UI_MGR_WIDTH = 820;
-UI_MGR_HEIGHT = 600;
+UI_MGR_HEIGHT = 565;
+UI_SHARE_GRADES_WIDTH = 575;
+UI_SHARE_GRADES_HEIGHT = 560;
+UI_PRINT_GRADES_WIDTH = 575;
+UI_PRINT_GRADES_HEIGHT = 565;
+UI_ADV_OPT_WIDTH = 750;
+UI_ADV_OPT_HEIGHT = 450;
+
+// List of support Zip MIME types for unzipping stickers
+ZIP_TYPES_ARRAY = ['application/zip', 'application/x-zip-compressed', 'application/x-zip', 'application/octet-stream'];
 
 // special answer key operators
 ANSKEY_OPERATOR_OR = " %or ";
 ANSKEY_OPERATOR_NUMERIC_RANGE = " %to ";
 ANSKEY_OPERATOR_CASE_SENSITIVE = "%cs";
-ANSKEY_OPERATOR_CHECKBOX = "%cb"; // also hard-coded in a regex in gradedSubmssion.js
+ANSKEY_OPERATOR_CHECKBOX = "%cb"; // also hard-coded in a regex in gradedSubmssion.gs and email.gs
+ANSKEY_OPERATOR_PLUSMINUS = "%pm";
 
 // TODO_AJR - Make this optional.
 // The certificate template. 
@@ -260,11 +322,14 @@ FLB_COLFORMAT_WRAP_TEXT = "<<FLB_COLFORMAT_WRAP_TEXT>>";
 // is installed. Be sure to update the notice date when you want to show a new message,
 // as Flubaroo will only show a message for that same date one time.
 // TODO: How do we localize this for other languages? For now, we don't.
-gbl_update_notice_date  = '5/17/16';
-gbl_update_notice_title = 'Important Flubaroo Announcement!';
-gbl_update_notice_msg   = '<p><b>Six Things New With Flubaroo!</b>\
-                           <br><p>Stay up-to-date! Read the latest <a href="https://goo.gl/TYLkl6" target="_blank">post</a> to learn about awesome new additions to Flubaroo that just launched today!</p>\
-                           <p>And be sure to tell your school\'s edtech coordinator that Flubaroo just launched in the \
-                              <a href="https://apps.google.co.uk/marketplace/app/mjkbmijfpphoabkogbdmdkolcnaenaia" target="_blank">Google Apps Marketplace</a>. It can now be \
-                              whitelisted and installed school-wide with just a few clicks!</p>\
+gbl_update_notice_date  = '11/29/16';
+gbl_update_notice_title = 'Flubaroo Holiday Release!';
+gbl_update_notice_msg   = '<p>So many things are new in Flubaroo for the holidays! Now you can greatly <b>customize how grades are shared with students</b>, \
+                           and even include stickers/badges! Several professionaly designed stickers are already included for your use!<br>\
+                           <div style="display:block;margin-left:auto;margin-right:auto;">\
+                           <img src="https://flubaroo2.appspot.com/sticker_lineup.png" width="240"></div>\
+                           <br>Other long-awaited features have been added too, including increasing the number of points past 10. \
+                           Read the latest \
+                           <b><u><a href="https://goo.gl/hDQnaU" target="_blank">here</a></u></b> to learn all about these awesome new additions\
+                           to Flubaroo!</p>\
                            <p>Thank You!<br>The Flubaroo Team</p>';

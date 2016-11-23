@@ -294,11 +294,22 @@ GradesWorksheet.prototype.processSubmissionsSheet = function()
   
   var grade_opt_str = dp.getProperty(DOC_PROP_UI_GRADING_OPT);
   
+  var category_names_str = dp.getProperty(DOC_PROP_UI_CATEGORY_NAMES);
+  
   Debug.info(func_name + "grade_opt_str:" + grade_opt_str);
   
   Debug.assert(grade_opt_str !== null, func_name + "grading options not set");
   
   this.grading_options = grade_opt_str.split(",");
+  
+  if (category_names_str)
+    {
+      this.category_names = category_names_str.split(FLB_GENERIC_DELIMETER);
+    }
+  else
+    {
+      this.category_names = [];
+    }
 
   // Get the questions
   // -----------------
@@ -431,6 +442,7 @@ GradesWorksheet.prototype.processSubmissionsSheet = function()
                                                  help_tips_present, 
                                                  help_tips_vals,
                                                  this.grading_options, 
+                                                 this.category_names,
                                                  this.points_possible,
                                                  answer_key_vals, 
                                                  answer_key_vals_lc, 
@@ -512,6 +524,16 @@ GradesWorksheet.prototype.processGradesSheet = function()
                                            "",
                                            numb_graded_submissions);
   
+  // Read in any category names for the questions (will often be blank if no categories being used)
+  if (getSheetWithCategories(this.spreadsheet))
+    {
+      this.category_names = singleRowToArray(this.grades_sheet, GRADES_CATEGORY_NAMES_ROW_NUM, -1, false);
+    }
+  else
+    {
+      this.category_names = [];
+    }
+  
   Debug.assert(this.grading_options[0] !== "", 
          "GradesWorksheet.processGradesSheet() - Can't find grading options");
   
@@ -536,7 +558,6 @@ GradesWorksheet.prototype.processGradesSheet = function()
   this.processGradingOptions();
  
   // Pull in some info from the summary table at the top.
-  
   var summary_range = this.grades_sheet.getRange(GRADES_SUMMARY_PTS_POSSIBLE_ROW_NUM, 2, gbl_num_summary_rows, 1);
   var summary_col = summary_range.getValues();
   this.avg_subm_score = Number(summary_col[1]);
@@ -619,6 +640,7 @@ GradesWorksheet.prototype.processGradesSheet = function()
                                                  help_tips_present, 
                                                  help_tips_vals,
                                                  this.grading_options, 
+                                                 this.category_names,
                                                  this.points_possible,
                                                  answer_key_vals, 
                                                  answer_key_vals,
@@ -684,14 +706,27 @@ GradesWorksheet.prototype.processGradingOptions = function()
 GradesWorksheet.prototype.prepNewGradesSheet = function()
 {
   Debug.info("GradesWorksheet.prepNewGradesSheet()");
-
+  
+  var dp = PropertiesService.getDocumentProperties();
+  
+  var clear_experiment = dp.getProperty(DOC_PROP_CLEAR_VS_DELETE_GRADES_SHEET);
+  
   // Start by creating the 'Grades' sheet. If it already exists, then
   // delete it (instructor was already warned before in Step 1).
   if (this.grades_sheet)
     {
       // Present, so delete it.
       this.spreadsheet.setActiveSheet(this.grades_sheet);
-      this.spreadsheet.deleteActiveSheet();
+      
+      if (clear_experiment)
+        {
+          // To be tested by Joe. Sept 2016. Made the default if it all checks out.
+          this.grades_sheet.getDataRange().clear();
+        }
+      else
+        {
+          this.spreadsheet.deleteActiveSheet();
+        }
         
       // To avoid a bug in which 'Grades' get deleted, but appears to
       // stick around, switch to another sheet after deleting it.
@@ -700,21 +735,24 @@ GradesWorksheet.prototype.prepNewGradesSheet = function()
       this.spreadsheet.setActiveSheet(switch_to_sheet);  
     }
   
-  // Next, create a blank sheet for the grades.
-  this.grades_sheet = this.spreadsheet.insertSheet(langstr("FLB_STR_SHEETNAME_GRADES"));
-    
-  // Enter enough blank rows into the new Grades sheet. It
-  // starts with 100, but we may need more. Not having enough
-  // causes an error when trying to write to non-existent rows.
-  var num_blank_rows_needed = gbl_grades_start_row_num + 1 
-                              + (3 * this.submissions_sheet.getLastRow()) // grades, copies of submissions, and question comments
-                              + gbl_num_space_before_hidden 
-                              + gbl_num_hidden_rows 
-                              + 10; // extra 10 for good measure
-  
-  if (num_blank_rows_needed > 100)
+  if (!clear_experiment)
     {
-      this.grades_sheet.insertRows(1, num_blank_rows_needed - 100);
+      // Next, create a blank sheet for the grades.
+      this.grades_sheet = this.spreadsheet.insertSheet(langstr("FLB_STR_SHEETNAME_GRADES"));
+    
+      // Enter enough blank rows into the new Grades sheet. It
+      // starts with 100, but we may need more. Not having enough
+      // causes an error when trying to write to non-existent rows.
+      var num_blank_rows_needed = gbl_grades_start_row_num + 1 
+                                  + (3 * this.submissions_sheet.getLastRow()) // grades, copies of submissions, and question comments
+                                  + gbl_num_space_before_hidden 
+                                  + gbl_num_hidden_rows 
+                                  + 10; // extra 10 for good measure
+  
+      if (num_blank_rows_needed > 100)
+        {
+          this.grades_sheet.insertRows(1, num_blank_rows_needed - 100);
+        }
     }
   
   // Write a simple message to the top-left cell, so users know
@@ -868,9 +906,16 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
     // This is needed to locate the hidden rows, and is better than a static calculation
     // which would break if the user deleted some rows in the Grades sheet (which happens often).
     gwsInsertHiddenRowLocatorFormula(self.grades_sheet);
-        
-    Debug.info("writeHeader - creating questions header. first_graded_subm = " + first_graded_subm);
     
+    if (first_graded_subm.hasCategories())
+      {
+        var categories_row = first_graded_subm.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_CATEGORY_NAMES,
+                                                                       GRADES_CATEGORY_NAMES_ROW_NUM); 
+        writeArrayToRow(self.grades_sheet, GRADES_CATEGORY_NAMES_ROW_NUM, 1, categories_row, "italic", "");
+      }
+
+    Debug.info("writeHeader - creating questions header. first_graded_subm = " + first_graded_subm);
+
     var headers = first_graded_subm.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_QUESTIONS_HEADER,
                                                             gbl_grades_start_row_num);       
     
@@ -881,8 +926,8 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
     var rg;
     var cols_to_format = gwsCheckForFormattedCellsInRow(headers);
     Debug.info(cols_to_format);
-    
-    writeArrayToRow(self.grades_sheet, gbl_grades_start_row_num, 1, headers, true, "");
+        
+    writeArrayToRow(self.grades_sheet, gbl_grades_start_row_num, 1, headers, "bold", "");
     
     // apply special formatting to any columns in 'cols_to_format'
     for (var c=0; c < cols_to_format.length; c++)
@@ -946,7 +991,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
                     next_footer_row, 
                     1, 
                     first_graded_subm.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_GRADING_OPT, next_footer_row++), 
-                    false, 
+                    "", 
                     "");
         
     Debug.info("writeFooter - creating footer for GRADES_OUTPUT_ROW_TYPE_HELP_TIPS.");
@@ -954,7 +999,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
                     next_footer_row, 
                     1, 
                     first_graded_subm.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_HELP_TIPS, next_footer_row++), 
-                    false, 
+                    "", 
                     "");
         
     Debug.info("writeFooter - creating footer for GRADES_OUTPUT_ROW_TYPE_ANSWER_KEY.");
@@ -962,7 +1007,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
                     next_footer_row, 
                     1, 
                     first_graded_subm.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_ANSWER_KEY, next_footer_row++), 
-                    false, 
+                    "", 
                     "");
         
     Debug.info("writeFooter - creating footer for GRADES_OUTPUT_ROW_TYPE_QUESTIONS_FULL.");
@@ -970,7 +1015,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
                     next_footer_row, 
                     1, 
                     first_graded_subm.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_QUESTIONS_FULL, next_footer_row++), 
-                    false, 
+                    "", 
                     "");
       
     Debug.info("writeFooter - done creating footer.");
@@ -1171,7 +1216,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
                         next_footer_row,
                         1, 
                         gs.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_SUBMISSION_VALS, next_footer_row), 
-                        false, 
+                        "", 
                         "");
             
         last_row_written = next_footer_row;
@@ -1185,7 +1230,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
                             1, 
                             gs.createRowForGradesSheet(GRADES_OUTPUT_ROW_TYPE_MANUALLY_GRADED_COMMENTS,
                                                        hrow_num), 
-                            false, 
+                            "", 
                             "");
                 
             last_row_written = hrow_num;

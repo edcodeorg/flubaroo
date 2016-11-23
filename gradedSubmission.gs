@@ -20,6 +20,7 @@ function GradedSubmission(gws,
                           help_tips_present, 
                           help_tips_vals,
                           grading_options, 
+                          category_names,
                           points_possible,
                           answer_key_vals, 
                           answer_key_vals_lc, 
@@ -45,6 +46,7 @@ function GradedSubmission(gws,
   this.answer_key_vals_lc = answer_key_vals_lc;
   
   this.grading_options = grading_options;
+  this.category_names = category_names;
   this.points_possible = points_possible;
   this.question_vals = question_vals;
   this.num_gradeable_questions = num_gradeable_ques;
@@ -132,7 +134,7 @@ GradedSubmission.prototype.initGSVars = function()
       // No comments since no Grades sheet exists yet. Initialize to "".
       this.manually_graded_comments = newArrayWithValue(num_questions, "");
       this.manually_graded_comments[0] = "comments row"; // need something non-blank in the row.
-
+      
       // Perform the actual grading!
       this.gradeIt();
     }
@@ -193,7 +195,7 @@ GradedSubmission.prototype.initGSVars = function()
           this.manually_graded_comments = newArrayWithValue(this.submission_vals.length, "");
           this.manually_graded_comments[0] = "comments row"; // need something non-blank in the row.
         }
-      
+            
       // Calculate total points and percent. This is done in gradeIt() for INIT_TYPE_SUBM
       this.score_points = 0;
       this.score_percent = 0.0;
@@ -379,6 +381,15 @@ GradedSubmission.prototype.gradeSubmission = function(q)
               found_to = true;
             }
         }
+      else if (key.search(ANSKEY_OPERATOR_PLUSMINUS) != -1)
+        {
+          key_list = this.processPlusMinusInKey(key);
+          
+          if (key_list.length == 2)
+            {
+              found_to = true;
+            }
+        }
       else if (key.search(ANSKEY_OPERATOR_OR) != -1)
         {          
           // Found '%or' operator.
@@ -484,7 +495,18 @@ GradedSubmission.prototype.gradeSubmission = function(q)
       for (var i = 0; i < key_list.length; i++)
         {
           //Debug.info("gradeSubmission(): comparing " + submission + " (type " + typeof submission + ") to " + key_list[i] + "(type " + typeof key_list[i] + ")");
-          if (submission == key_list[i])
+          if (submission === "" || key_list[i] === "")
+            {
+              // Handle this case specially since otherwise it will eval to "false" when compared to a Boolean type below,
+              // and could lead to questions being scored wrong. I could also fix by making the comparator below strict (===),
+              // but it's been abstract (==) since the launch of Flubaroo, and changing it could lead to unintended consequences.
+              if (submission === key_list[i])
+                {
+                  grade_val = getPointsWorth(q.getGradingOption());
+                  break;
+                }
+            }
+          else if (submission == key_list[i])
             {
               // Correct answer!
               //Debug.info("gradeSubmission(): match!");
@@ -542,6 +564,59 @@ GradedSubmission.prototype.processToInKey = function(key)
   return rv_key_list;
   
 } // processToInKey ()
+
+// processPlusMinusInKey: Helper function to process an answer key 
+// with the %pm operator in it and if the syntax is correct
+// return a two value array describing the range, otherwise
+// a single value array containing the whole key.
+GradedSubmission.prototype.processPlusMinusInKey = function(key) 
+{
+  // Seperate the values defined in the range.
+  var parsed_key_list = key.split(ANSKEY_OPERATOR_PLUSMINUS);
+  var rv_key_list;
+  
+  switch (parsed_key_list.length)
+    {
+  
+    case 0:
+    case 1:
+       
+        // Less than two range values specified so 
+        // just return the key.
+        rv_key_list = [key];
+        
+    case 2:
+    default:
+         
+        // If two or more values just take the first two and 
+        // convert these string values into numbers.
+        var num1 = parseFloat(parsed_key_list[0]);
+        
+        // remove percent-sign at end of second number, if user included one (optional)
+        parsed_key_list[1] = parsed_key_list[1].replace("%", "");
+        var num2 = parseFloat(parsed_key_list[1]);        
+        
+        if (isNaN(num1) || isNaN(num2)) 
+          {
+            // One of the range values isn't a number so just 
+            // return the key.
+            rv_key_list = [key];
+          }
+        else
+          {
+            // Found a number range.
+            // Treat second number as a percent (i.e. 1.5 = 1.5%).
+            var pm_percent = num2 /= 100;
+            var r1 = num1 * (1 - pm_percent);
+            var r2 = num1 * (1 + pm_percent);
+            rv_key_list = [r1, r2];
+          }
+      }
+  
+  return rv_key_list;
+  
+} // processToInKey ()
+
 
 // processOrSubmission: Help function to process an answer key containing
 // the %or operator. Returns an array of values.
@@ -727,6 +802,7 @@ GradedSubmission.prototype.getQuestionByIndex = function(ques_index)
                                   this.graded_vals[ques_index],
                                   this.formulas[ques_index],
                                   this.manually_graded_comments[ques_index],
+                                  this.category_names[ques_index],
                                   is_timestamp);
   
   return g_ques;
@@ -799,14 +875,17 @@ GradedSubmission.prototype.setGradedQuestionFormulaByIndex = function(q_index, q
 // the first column. The argument indicates the type of row to be written.
 // Valid values for output_row_type are:
 //
-//    GRADES_OUTPUT_ROW_TYPE_GRADED_VALS:      Student Identifiers, Metrics, Grades (most prolific)
-//    GRADES_OUTPUT_ROW_TYPE_QUESTIONS_HEADER: Header row with summaries of each question
-//    GRADES_OUTPUT_ROW_TYPE_QUESTIONS_FULL:   Full text of each question (hidden row)
-//    GRADES_OUTPUT_ROW_TYPE_SUBMISSION_VALS:  Original submissions made by the student (hidden row)
-//    GRADES_OUTPUT_ROW_TYPE_ANSWER_KEY:       Full answers from the answer key submission (hidden row)
-//    GRADES_OUTPUT_ROW_TYPE_GRADING_OPT:      Grading options for each question (hidden row)
-//    GRADES_OUTPUT_ROW_TYPE_HELP_TIPS:        Optional help tips, copied over from 
-//                                             the Student Submissions sheet (hidden row).
+//    GRADES_OUTPUT_ROW_TYPE_GRADED_VALS:              Student Identifiers, Metrics, Grades (most prolific)
+//    GRADES_OUTPUT_ROW_TYPE_QUESTIONS_HEADER:         Header row with summaries of each question
+//    GRADES_OUTPUT_ROW_TYPE_QUESTIONS_FULL:           Full text of each question (hidden row)
+//    GRADES_OUTPUT_ROW_TYPE_SUBMISSION_VALS:          Original submissions made by the student (hidden row)
+//    GRADES_OUTPUT_ROW_TYPE_ANSWER_KEY:               Full answers from the answer key submission (hidden row)
+//    GRADES_OUTPUT_ROW_TYPE_GRADING_OPT:              Grading options for each question (hidden row)
+//    GRADES_OUTPUT_ROW_TYPE_HELP_TIPS:                Optional help tips, copied over from 
+//                                                     the Student Submissions sheet (hidden row).
+//    GRADES_OUTPUT_ROW_TYPE_MANUALLY_GRADED_COMMENTS  Any comments made by teacher when grading by hand.
+//    GRADES_OUTPUT_ROW_TYPE_CATEGORY_NAMES            List of category names. Goes in row GRADES_CATEGORY_NAMES_ROW_NUM.
+//
 //
 // The function also takes an output_row_num, which is needed when generating equations for
 // the Grades sheet.
@@ -856,6 +935,10 @@ GradedSubmission.prototype.createRowForGradesSheet = function(output_row_type, o
   else if (output_row_type == GRADES_OUTPUT_ROW_TYPE_MANUALLY_GRADED_COMMENTS)
     {
       data_vals = this.manually_graded_comments;
+    }
+  else if (output_row_type == GRADES_OUTPUT_ROW_TYPE_CATEGORY_NAMES)
+    {
+      data_vals = this.category_names;
     }
   else if (output_row_type == GRADES_OUTPUT_ROW_TYPE_HELP_TIPS)
     {
@@ -1045,4 +1128,9 @@ GradedSubmission.prototype.recordEmailSentInGradesSheet = function()
   var metric_start_col = 2 + this.num_student_identifiers;
   var col_num = metric_start_col + METRIC_EMAILED_GRADE;
   setCellValue(this.grades_sheet, this.grades_row_num, col_num, "x");
+}
+
+GradedSubmission.prototype.hasCategories = function()
+{
+  return (this.category_names.length > 0);
 }

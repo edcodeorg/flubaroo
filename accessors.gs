@@ -150,3 +150,13 @@ function gotSheetWithGrades(ss)
   return getSheetWithGrades(ss) !== null;
   
 } // gotSheetWithGrades()
+
+
+function getSheetWithCategories(ss)
+{
+  var category_sheet_name = langstr("FLB_STR_CATEGORIES_SHEET_NAME");
+
+  var sheet = ss.getSheetByName(category_sheet_name);
+  
+  return sheet; // null if not present.
+}
