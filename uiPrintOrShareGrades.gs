@@ -146,7 +146,7 @@
     </div>
     
     <div style="position: absolute;left:0;bottom:0;margin-top:20px;margin-bottom:15px;margin-left:10px;">
-      <a href="https://sites.google.com/a/flubaroo.com/welcome-to-flubaroo/hc/including-stickers" target="_blank"><b><?= langstr("FLB_STR_GRADE_SHARE_STICKER_ADD_MORE") ?></b></a>
+      <a href="https://sites.google.com/a/flubaroo.com/welcome-to-flubaroo/hc/add-more-stickers" target="_blank"><b><?= langstr("FLB_STR_GRADE_SHARE_STICKER_ADD_MORE") ?></b></a>
     </div>
     </div>
     
