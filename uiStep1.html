@@ -48,25 +48,26 @@ $(function() {
 function populateQuestionData(qdata)
 {
   var h = '<table id="s1_mw_sel_table">';
-  h += '<tr><td><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION") ?></b></td>';
+  h += '<tr><td style="white-space:nowrap;"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION") ?></b></td>';
   
   var show_ec_arg = "false";
   var show_categories = qdata.category_names.length > 0;
 
   if (qdata.show_extra_credit)
     {
-      h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADING_OPT_EXTRA_CREDIT") ?></b></td>';
+      h += '<td class="s1_mw_sel_table_hspacer" style="white-space:nowrap;"><b><?= langstr("FLB_STR_GRADING_OPT_EXTRA_CREDIT") ?></b></td>';
       show_ec_arg = "true";
     }
   
-  h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_POINTS") ?></b></td>';
+  h += '<td class="s1_mw_sel_table_hspacer" style="white-space:nowrap;"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_POINTS") ?></b></td>';
   
   if (show_categories)
     {
-      h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_CATEGORY") ?></b></td>';
+      h += '<td class="s1_mw_sel_table_hspacer" style="white-space:nowrap;"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_CATEGORY") ?></b></td>';
     }
   
-  h += '<td class="s1_mw_sel_table_hspacer"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_QUESTION") ?></b></td>';
+  // add column for question. have it take up the remaining horizontal space.
+  h += '<td class="s1_mw_sel_table_hspacer" width="99%"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_QUESTION") ?></b></td>';
   h += '</tr>'
   
   // iterate through each question

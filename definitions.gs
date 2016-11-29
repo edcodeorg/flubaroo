@@ -283,7 +283,7 @@ UI_STEP2_HEIGHT = 505;
 UI_MGR_WIDTH = 820;
 UI_MGR_HEIGHT = 565;
 UI_SHARE_GRADES_WIDTH = 575;
-UI_SHARE_GRADES_HEIGHT = 560;
+UI_SHARE_GRADES_HEIGHT = 565;
 UI_PRINT_GRADES_WIDTH = 575;
 UI_PRINT_GRADES_HEIGHT = 565;
 UI_ADV_OPT_WIDTH = 750;
@@ -323,13 +323,12 @@ FLB_COLFORMAT_WRAP_TEXT = "<<FLB_COLFORMAT_WRAP_TEXT>>";
 // as Flubaroo will only show a message for that same date one time.
 // TODO: How do we localize this for other languages? For now, we don't.
 gbl_update_notice_date  = '11/29/16';
-gbl_update_notice_title = 'Flubaroo Holiday Release!';
-gbl_update_notice_msg   = '<p>So many things are new in Flubaroo for the holidays! Now you can greatly <b>customize how grades are shared with students</b>, \
-                           and even include stickers/badges! Several professionaly designed stickers are already included for your use!<br>\
+gbl_update_notice_title = 'Send Stickers & Badges with Flubaroo!';
+gbl_update_notice_msg   = '<font size=+1><p>Surprise and delight your students by including stickers or badges in their graded assignments and assessments!</p>\
+                           <p>Several \
+                           professionaly designed stickers are already included for you to get started with. Or you can upload your own!<br>\
                            <div style="display:block;margin-left:auto;margin-right:auto;">\
-                           <img src="https://flubaroo2.appspot.com/sticker_lineup.png" width="240"></div>\
-                           <br>Other long-awaited features have been added too, including increasing the number of points past 10. \
-                           Read the latest \
-                           <b><u><a href="https://goo.gl/hDQnaU" target="_blank">here</a></u></b> to learn all about these awesome new additions\
-                           to Flubaroo!</p>\
-                           <p>Thank You!<br>The Flubaroo Team</p>';
+                           <img src="https://flubaroo2.appspot.com/sticker_lineup.png" width="270"></div>\
+                           <br><a href="https://goo.gl/LCXEcC" target="_blank">Read all about this new feature!</a>  \
+                           </p>\
+                           <p>-- The Flubaroo Team</p></font>';

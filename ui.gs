@@ -1114,8 +1114,6 @@ function uiStep1GetQuestionData()
       qdata.default_categories.push(default_cat_sel);
 
     } // for each question.
-
-  Logger.log(qdata.default_categories);
   
   // populate optional list of categories, if present  
   var cat_sheet = getSheetWithCategories(ss);
@@ -1348,8 +1346,6 @@ function uiPrintOrShareScriplet_includeIfShareMode(include_str)
       rv = include_str;
     }
   
-  Logger.log("returning rv: " + rv);
-
   return rv;
 }
 
@@ -1368,7 +1364,6 @@ function uiPrintOrShareScriplet_includeIfPrintMode(include_str)
       rv = include_str;
     }
   
-  Logger.log("returning rv: " + rv);
   return rv;
 }
 
@@ -1418,6 +1413,7 @@ function uiShareGradesGetFormData()
     {
       fd.include_questions_checked = false; 
     }
+  
   if (show_questions_type)
     {
       fd.selected_include_ques_type = show_questions_type;
@@ -1430,6 +1426,10 @@ function uiShareGradesGetFormData()
     {
       fd.include_student_resp_checked = false;
     }
+  
+  Debug.info("uiShareGradesGetFormData(): props_set=" + props_set 
+              + ", show_student_response=" + show_student_response 
+              + ", fd.include_student_resp_checked = " + fd.include_student_resp_checked);
   
   if (instructor_message)
     {

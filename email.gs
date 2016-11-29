@@ -60,6 +60,13 @@ function doShareGrades()
   
   // Include a copy of the student's own response?
   var show_student_response = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_STUD_RESP);
+  var props_set = dp.getProperty(DOC_PROP_EMAIL_FIRST_PROPERTIES_SET);
+  if (props_set === null)
+    {
+      // likely an autograde spreadsheet that got upgraded without the user
+      // re-configuring the sharing options.
+      show_student_response = true; // default, consistent with previous Flubaroo bhvr.
+    }
   
   // The email address of the instructor.
   var user_email_addr = dp.getProperty(DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS);
@@ -241,6 +248,11 @@ function doShareGrades()
       if ((grade_share_option == GRADE_SHARE_METHOD_DRIVE) || (grade_share_option == GRADE_SHARE_METHOD_BOTH))
         {
           logSharedGradesViaDrive();
+        }
+      
+      if (sticker_enabled)
+        {
+          logStickerIncluded();
         }
     }
   
@@ -1055,6 +1067,7 @@ function doPrintGrades()
   var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
   var sticker_threshold_percent = dp.getProperty(DOC_PROP_STICKER_THRESHOLD1);
   var img_file = null;
+  var sticker_blob_name = "";
   
   // ensure a valid file and percent are set before allowing stickers to be sent out.
   // should never happen given how UI works, but just as a safeguard.
@@ -1067,6 +1080,8 @@ function doPrintGrades()
   else if (sticker_enabled)
     {
       sticker_threshold_percent /= 100;
+      sticker_blob_name = "stickerBlob-" + sticker_file_id;
+
       try
         {
           img_file = DriveApp.getFileById(sticker_file_id);
@@ -1141,6 +1156,7 @@ function doPrintGrades()
         }
 
       Debug.info("doPrintGrades(): appending next student's grades to printable document");
+      
       try 
         {             
           writeContentsOfGradeDocument(pr_doc,

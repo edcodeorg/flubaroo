@@ -386,7 +386,7 @@ function loadListOfStickersPost(data)
     {
       if (data.ids[i] !== "0")
         {
-          picker_div.innerHTML += '<td><img id="' + data.ids[i] + '" src="<?!=DRIVE_EMBED_IMAGE_URL?>' + data.ids[i] + '" height=108 onclick="handleStickerSelect(\'' + data.ids[i] + '\')"></td>';
+          picker_div.innerHTML += '<td><img id="' + data.ids[i] + '" src="<?!=DRIVE_EMBED_IMAGE_URL?>' + data.ids[i] + '" height=90 onclick="handleStickerSelect(\'' + data.ids[i] + '\')"></td>';
         }
     }
   picker_div.innerHTML += '</tr></table>';

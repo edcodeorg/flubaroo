@@ -219,9 +219,9 @@ function createGACookie()
   return utmcc;
 }
 
-function logGrading(ss_name)
+function logGrading(ss)
 {
-  if (ss_name.indexOf('Geography 10 - Quiz #2') == -1)
+  if (ss.getName().indexOf('Geography 10 - Quiz #2') == -1)
     {
       // probably not the "try it now" sample. so anonymously record that another
       // assignment was graded!
@@ -238,7 +238,14 @@ function logGrading(ss_name)
           var response = UrlFetchApp.fetch(ga_url);
         }
       
-      // if manual grading enabled, track that.
+      var subm_sheet = getSheetWithSubmissions(ss);
+      var subm_mod = Math.floor(subm_sheet.getLastRow() / 25) * 25;
+      
+      ga_url = createGATrackingUrl("Number%20Submission%20Tracker%2F" + subm_mod);
+      if (ga_url)
+        {
+          var response = UrlFetchApp.fetch(ga_url);
+        }     
       
     }
   else // sample assignment
@@ -325,6 +332,24 @@ function logActiveUserGrading()
 function logEmail()
 {
   var ga_url = createGATrackingUrl("Emailed%20Grades");
+  if (ga_url)
+    {
+      var response = UrlFetchApp.fetch(ga_url);
+    }
+}
+
+function logFlubarooUpdateNotice()
+{
+  var ga_url = createGATrackingUrl("Flubaroo%20Update%20Notice");
+  if (ga_url)
+    {
+      var response = UrlFetchApp.fetch(ga_url);
+    }
+}
+
+function logStickerIncluded()
+{
+  var ga_url = createGATrackingUrl("Sticker%20Included");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
@@ -934,6 +959,8 @@ function showUpdateNotice()
           
           // record that we've shown this message
           up.setProperty(USER_PROP_UPDATE_NOTICE_DATE, gbl_update_notice_date);
+          
+          logFlubarooUpdateNotice();
         }      
     }  
 
@@ -1330,3 +1357,10 @@ function checkIfZipFilePresent()
   return false;
 }
 
+
+function unHideAllRowsAndColumns(sheet)
+{
+  var fullSheetRange = sheet.getRange(1, 1, sheet.getMaxRows(), sheet.getMaxColumns() )  
+  sheet.unhideColumn(fullSheetRange);
+  sheet.unhideRow(fullSheetRange) ;   
+}  
