@@ -102,4 +102,5 @@
 //   Version 55: 11/29/16: Large update with many improvements to sending emails, including ability to select which questions to
 //                         include, whether to show student's own response, ability to customize if/how summary of points is shown
 //                         at top of shared doc/email, and ability to include stickers. Also ability to customize "Flubaroo Grader" field,
-//                         ability to include answer key with Grade by Hand questions (adv option), and set upper limit on # points.:wq
+//                         ability to include answer key with Grade by Hand questions (adv option), and set upper limit on # points.
+//   Version 56: 12/14/16: Reduced width of sticker from 200 to 150px in Drive doc (and hence height) so it wouldn't cover the grades table.

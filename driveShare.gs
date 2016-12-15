@@ -238,11 +238,11 @@ function writeContentsOfGradeDocument(grades_doc,
       var pi = par.addPositionedImage(blob);
       pi.setLayout( DocumentApp.PositionedLayout.WRAP_TEXT);
    
-      // to format properly in the doc, all sticker images should be 200px wide. rescale if needed.
-      var ratio = 200 / pi.getWidth();
+      // to format properly in the doc, all sticker images should be 150px wide. rescale if needed.
+      var ratio = 150 / pi.getWidth();
       pi.setWidth( pi.getWidth() * ratio );
       pi.setHeight( pi.getHeight() * ratio );
-      pi.setLeftOffset(560);
+      pi.setLeftOffset(610);
     }   
   
   var style = {};
