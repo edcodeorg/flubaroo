@@ -219,6 +219,15 @@ function createGACookie()
   return utmcc;
 }
 
+function logInvalidGradeSheet(reason_str)
+{
+  var ga_url = createGATrackingUrl("Invalid%20Grades%20Sheet%2F" + encodeURIComponent(reason_str));
+  if (ga_url)
+    {
+      var response = UrlFetchApp.fetch(ga_url);
+    }  
+}
+
 function logGrading(ss)
 {
   if (ss.getName().indexOf('Geography 10 - Quiz #2') == -1)
@@ -1259,8 +1268,14 @@ function unzipStickers()
                   // set so anyone with link can view. makes access from web page (ui) more reliable if user
                   // is logged-in with other accounts.
                   Debug.info("unzipStickers: setting sharing permissions on file " + i + " ...");
-                  new_file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-                  
+                  try
+                    {
+                      new_file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+                    }
+                  catch (e)
+                    {
+                      Debug.info("unzipStickers: Unable to set permission to VIEW for ANYONE_WITH_LINK on sticker");
+                    }
                   // success. quit retry loop.
                   break;
                 }
@@ -1269,6 +1284,7 @@ function unzipStickers()
                   Debug.info("Unable to create or change permissions on zip file. Retry=" + retry + ": " + e);
                   if (retry === (max_retries - 1))
                     {
+                      Debug.writeToFieldLogSheet();
                       return STATUS_FILE_ERROR;
                     }
                   else
@@ -1306,6 +1322,7 @@ function unzipStickers()
               Debug.info("Unable to remove zip file. Retry=" + retry + ": " + e);
               if (retry === (max_retries - 1))
                 {
+                  Debug.writeToFieldLogSheet();
                   return STATUS_FILE_ERROR;
                 }
               else
@@ -1319,6 +1336,7 @@ function unzipStickers()
         }
     }
   
+  Debug.writeToFieldLogSheet();
   return 0;
 }
 

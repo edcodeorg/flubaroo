@@ -423,6 +423,8 @@ function dumpConfig()
       Debug.info("trigger id [" + i + "]: " + t.getUniqueId() + ", event type: " + t.getEventType() + ", handler: " + t.getHandlerFunction());
     }
   
+  dumpAllDocumentProperties();
+  
   Debug.writeToFieldLogSheet();
   
 } // dumpConfig()
@@ -540,3 +542,21 @@ function toggleEmailSending()
     
 } // toggleEmailSending()
 
+
+// dumpAllDocumentProperties()
+// --------------------
+
+function dumpAllDocumentProperties()
+{
+  var dp = PropertiesService.getDocumentProperties();
+  
+  Debug.info("dumpAllDocumentProperties()");
+  var props = dp.getProperties();
+  var prop_names = Object.keys(props);
+  
+  for (var i=0; i < prop_names.length; i++)
+    {
+      var p_name = prop_names[i];
+      Debug.info("dumpAllDocumentProperties(): " + p_name + ": " + props[p_name]);
+    }
+}

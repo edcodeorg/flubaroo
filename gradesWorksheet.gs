@@ -720,7 +720,10 @@ GradesWorksheet.prototype.prepNewGradesSheet = function()
       
       if (clear_experiment)
         {
-          // To be tested by Joe. Sept 2016. Made the default if it all checks out.
+          // To be tested by Joe. Sept 2016. Made the default if it all checks out.'
+          unHideAllRowsAndColumns(this.grades_sheet);
+          this.grades_sheet.setFrozenColumns(0);
+          this.grades_sheet.setFrozenRows(0);
           this.grades_sheet.getDataRange().clear();
         }
       else
@@ -905,7 +908,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
     // Add a formula in cell A1 that determines where the hidden rows start.
     // This is needed to locate the hidden rows, and is better than a static calculation
     // which would break if the user deleted some rows in the Grades sheet (which happens often).
-    gwsInsertHiddenRowLocatorFormula(self.grades_sheet);
+    gwsInsertHiddenRowLocatorFormula(self.grades_sheet, self.num_student_identifiers);
     
     if (first_graded_subm.hasCategories())
       {
@@ -1404,7 +1407,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
     logActiveUserGrading();
     if (!Autograde.isOn())
       {
-        logGrading(self.spreadsheet.getName()); 
+        logGrading(self.spreadsheet); 
       }
 
     // record the number of columns in the Grades sheet, for comparison later
@@ -1423,6 +1426,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
     function writePercentageEquations()
     {     
       var eqn_array = [];
+      var gopt_array = [];
       var no_perc = "---"; // show for manually graded questions
       
       // First row into which to write grades
@@ -1452,15 +1456,20 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
       
           else // gradeable question
             {
-              if (isNormallyGraded(gopt))
+              if (isNormallyGraded(gopt) || isManuallyGraded(gopt))
                 {
-                  // only calculate percentage for normally graded questions (not skipped nor manually graded)
                   var col_ltr = convertColNumToColLetter(percent_correct_start_col + i);
                   var range = col_ltr + subm_start_row + ":" + col_ltr + subm_end_row;
-                  eqn = '=countif(' + range + '; ">0") / $B$' + GRADES_SUMMARY_COUNTED_SUBM_ROW_NUM;
+                  
+                  // old way:
+                  //eqn = '=countif(' + range + '; ">0") / $B$' + GRADES_SUMMARY_COUNTED_SUBM_ROW_NUM;
+                  
+                  // new formula per joe on 4/21/17
+                  eqn = '=sum(' + range + ') / $B$' + GRADES_SUMMARY_COUNTED_SUBM_ROW_NUM + ' / ' + getPointsWorth(gopt);
                 }
               
               eqn_array.push(eqn);
+              gopt_array.push(gopt);
               i++;
             }                    
         }
@@ -1500,7 +1509,9 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
                                     c_index,
                                     "0.00%");
                                 
-                if (perc < LOWSCORE_QUESTION_PERCENTAGE)
+                // Highlight low-scoring questions in orange. Don't do this for Grade by Hand questions
+                // though, as they haven't actually been scored by the teacher yet.
+                if ((perc < LOWSCORE_QUESTION_PERCENTAGE) && (!isManuallyGraded(gopt_array[i])))
                   {
                     setCellColor(self.grades_sheet, 
                                  gbl_grades_start_row_num, 
@@ -1662,6 +1673,10 @@ function gwsGradesSheetIsValid(grades_sheet)
   // This also handles the update of Grade sheets priod to version 40.
   gwsInsertHiddenForumlaInA1(grades_sheet);
   
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var subm_sheet = getSheetWithSubmissions(ss);
+  var subm_mod = Math.floor(subm_sheet.getLastRow() / 25) * 25;
+  
   // check for a minimum number of rows
   var min_rows = gbl_grades_start_row_num
                  + 1 // at least one graded submission
@@ -1675,6 +1690,8 @@ function gwsGradesSheetIsValid(grades_sheet)
     {
       gbl_invalid_grades_sheet_error = "Invalid Grades sheet: Less than minimum required number of rows";
       Debug.info(gbl_invalid_grades_sheet_error);
+      logInvalidGradeSheet("Too Few Rows/" + num_rows);
+      logInvalidGradeSheet("Subm Rows/" + subm_mod);
       return false;
     }
   
@@ -1686,6 +1703,8 @@ function gwsGradesSheetIsValid(grades_sheet)
     {
       gbl_invalid_grades_sheet_error = "Invalid Grades sheet: No points in grades summary"
       Debug.info(gbl_invalid_grades_sheet_error);
+      logInvalidGradeSheet("No Points");
+      logInvalidGradeSheet("Subm Rows/" + subm_mod);
       return false;
     }
   
@@ -1697,6 +1716,7 @@ function gwsGradesSheetIsValid(grades_sheet)
     {
       gbl_invalid_grades_sheet_error = "Invalid Grades sheet: No timestamp column A of first graded submisssion";
       Debug.info(gbl_invalid_grades_sheet_error);
+      logInvalidGradeSheet("No Timestamp");
       return false;
     }
   
@@ -1705,6 +1725,7 @@ function gwsGradesSheetIsValid(grades_sheet)
   if (d === "Invalid Date")
     {
       Debug.info("Invalid Grades sheet: First graded submission doesn't have a valid timestamp");
+      logInvalidGradeSheet("Invalid Timestamp");
       return false;
     }
   
@@ -1738,6 +1759,9 @@ function gwsGradesSheetIsValid(grades_sheet)
 
 function gwsInsertHiddenForumlaInA1(grades_sheet)
 {
+  var dp = PropertiesService.getDocumentProperties();
+  var num_stud_ident = Number(dp.getProperty(DOC_PROP_NUM_STUDENT_IDENTIFIERS));
+  
   // check in cell A1 for formula that identifies hidden row location. if not present (old Grades sheet), insert one.
   // fix in version 41: also check if equation uses commas (doesn't work internationally), and if so update to new
   // formula that ahs semicolons instead (works globally).
@@ -1747,20 +1771,17 @@ function gwsInsertHiddenForumlaInA1(grades_sheet)
     {
       // old Grades sheet with no hidden row A
       grades_sheet.insertRowBefore(1);
-      gwsInsertHiddenRowLocatorFormula(grades_sheet);
+      gwsInsertHiddenRowLocatorFormula(grades_sheet, num_stud_ident);
     }
   else if (a1_cell_formula.indexOf(",") != -1)
     {
       // has hidden row A, but using non-internationalized version of formula from version 40.
-      gwsInsertHiddenRowLocatorFormula(grades_sheet);
+      gwsInsertHiddenRowLocatorFormula(grades_sheet, num_stud_ident);
     }
 }
 
-function gwsInsertHiddenRowLocatorFormula(grades_sheet)
+function gwsInsertHiddenRowLocatorFormula(grades_sheet, num_stud_ident)
 {
-  var dp = PropertiesService.getDocumentProperties();
-  var num_stud_ident = Number(dp.getProperty(DOC_PROP_NUM_STUDENT_IDENTIFIERS));
-
   var a1_cell_range = grades_sheet.getRange(1, 1, 1, 1);
   grades_sheet.hideRow(a1_cell_range);
 

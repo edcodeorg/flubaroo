@@ -21,7 +21,7 @@ FIELD_LOG_DEFAULT_RATE = 25;
 FIELD_LOG_WRAP_AROUND = 50000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 56";
+gbl_version_str = "Version 60";
                   
 // NOTE: Update version in README.gas                  
 
@@ -283,9 +283,9 @@ UI_STEP2_HEIGHT = 505;
 UI_MGR_WIDTH = 820;
 UI_MGR_HEIGHT = 565;
 UI_SHARE_GRADES_WIDTH = 575;
-UI_SHARE_GRADES_HEIGHT = 565;
+UI_SHARE_GRADES_HEIGHT = 585;
 UI_PRINT_GRADES_WIDTH = 575;
-UI_PRINT_GRADES_HEIGHT = 565;
+UI_PRINT_GRADES_HEIGHT = 585;
 UI_ADV_OPT_WIDTH = 750;
 UI_ADV_OPT_HEIGHT = 450;
 
@@ -322,13 +322,9 @@ FLB_COLFORMAT_WRAP_TEXT = "<<FLB_COLFORMAT_WRAP_TEXT>>";
 // is installed. Be sure to update the notice date when you want to show a new message,
 // as Flubaroo will only show a message for that same date one time.
 // TODO: How do we localize this for other languages? For now, we don't.
-gbl_update_notice_date  = '11/29/16';
-gbl_update_notice_title = 'Send Stickers & Badges with Flubaroo!';
-gbl_update_notice_msg   = '<font size=+1><p>Surprise and delight your students by including stickers or badges in their graded assignments and assessments!</p>\
-                           <p>Several \
-                           professionaly designed stickers are already included for you to get started with. Or you can upload your own!<br>\
-                           <div style="display:block;margin-left:auto;margin-right:auto;">\
-                           <img src="https://flubaroo2.appspot.com/sticker_lineup.png" width="270"></div>\
-                           <br><a href="https://goo.gl/LCXEcC" target="_blank">Read all about this new feature!</a>  \
-                           </p>\
+gbl_update_notice_date  = '5/26/17';
+gbl_update_notice_title = 'Flubaroo Update Notice';
+gbl_update_notice_msg   = '<font size=+1><p>Thank You Teachers!</p></font>\
+                           <p>\
+                           Thanks teachers for all you\'ve done this year. Wishing you a terrific summer!</p>\
                            <p>-- The Flubaroo Team</p></font>';

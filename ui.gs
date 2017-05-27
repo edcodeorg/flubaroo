@@ -947,7 +947,7 @@ function uiStep1GetQuestionData()
   
   var qdata = 
     {
-      // possible grading options to display to user
+      // possible grading options to display to user. keep in this order!
       possible_gopts_disp : [langstr('FLB_STR_GRADING_OPT_STUD_ID'), langstr('FLB_STR_GRADING_OPT_SKIP_GRADING'), 
                              langstr('FLB_STR_GRADING_OPT_NORMAL_GRADING'),
                              langstr('FLB_STR_GRADING_OPT_MANUAL_GRADING')],
@@ -980,6 +980,9 @@ function uiStep1GetQuestionData()
       
       // defaults for list of category names, based on possible previous selections
       default_categories: [],
+      
+      // whether or not there already exist grading options (from prior grading)
+      existing_gopts_exist: false,
     }
   
   // Check if user has changed the max number of points assignable to a question.
@@ -1020,6 +1023,7 @@ function uiStep1GetQuestionData()
   if (existing_gopts)
     {
       existing_gopts = existing_gopts.split(",");
+      qdata.existing_gopts_exist = true;
     }
   
   var existing_category_names = dp.getProperty(DOC_PROP_UI_CATEGORY_NAMES);
@@ -1429,7 +1433,7 @@ function uiShareGradesGetFormData()
   
   Debug.info("uiShareGradesGetFormData(): props_set=" + props_set 
               + ", show_student_response=" + show_student_response 
-              + ", fd.include_student_resp_checked = " + fd.include_student_resp_checked);
+              + "fd.include_student_resp_checked = " + fd.include_student_resp_checked);
   
   if (instructor_message)
     {
@@ -1620,11 +1624,22 @@ function uiShareGradesLoadStickerList()
     {
       my_stickers_folder = folders.next();
     }
+  else
+    {
+      Debug.info("uiShareGradesLoadStickerList: No \"Flubaroo - Stickers\" folder found.");
+    }
     
   if (my_stickers_folder)
     {      
       // ensure permission is set to be viewable for folks with link
-      my_stickers_folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      try
+        {
+          my_stickers_folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        }
+      catch (e)
+        {
+          Debug.info("uiShareGradesLoadStickerList: Unable to set sharing permissions to VIEW for ANYONE_WITH_LINK on Flubaroo Stickers folder");
+        }
       
       var my_stickers = my_stickers_folder.getFiles();
       
@@ -1644,6 +1659,9 @@ function uiShareGradesLoadStickerList()
         }
     }
   
+  Debug.info("uiShareGradesLoadStickerList: Returning information about " + sd.ids.length + " stickers");
+  Debug.writeToFieldLogSheet();
+
   return sd;
 }
 

@@ -18,6 +18,10 @@
     
     <div id="s1_mw_alert" class="error" style="display:none;"></div>
 
+    <!-- Alert shadow box -->
+    <div id="light" class="s1_white_content"></div>
+    <div id="fade" class="s1_black_overlay">
+    </div>
     <!-- <div class="vspacer_full"></div> -->
         
     <div id="s1_mw_sel">
@@ -45,6 +49,9 @@ $(function() {
                      .uiStep1GetQuestionData();
 });
 
+var prior_grading_opts_g = null;
+var continue_with_changed_student_idents_g = false;
+
 function populateQuestionData(qdata)
 {
   var h = '<table id="s1_mw_sel_table">';
@@ -52,6 +59,11 @@ function populateQuestionData(qdata)
   
   var show_ec_arg = "false";
   var show_categories = qdata.category_names.length > 0;
+
+  if (qdata.existing_gopts_exist)
+    {
+      prior_grading_opts_g = qdata.default_gopts;
+    }
 
   if (qdata.show_extra_credit)
     {
@@ -179,6 +191,8 @@ function populateQuestionData(qdata)
   h  += '</table>';
 
   $('#s1_mw_sel').html(h);
+  
+  // record (globally) any pre-existing grading options
 }
 
 function selectChange(id_num, show_extra_credit, show_categories)
@@ -287,16 +301,51 @@ function step1Continue()
         }
     }
 
-  // Do client-side checks (at least one stud iden field)
+  // Do client-side checks.
+  // At least one stud iden field
   if (!iden_student)
     {
       showAlert('<?=langstr("FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR")?>');
       return;
     }
+  // At least one gradeable question
   if (!gradeable_ques)
     {
       showAlert('<?=langstr("FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR")?>');
       return;
+    }
+  if (prior_grading_opts_g)
+    {
+      var new_sid_opt_fp = "";
+      var old_sid_opt_fp = "";
+
+      for (var i=1; i < server_gopts.length; i++)
+        {
+          if (server_gopts[i] === "<?=GRADING_OPT_STUD_ID?>")
+            {
+              new_sid_opt_fp += (i-1).toString();
+            }
+        }
+      // assumes that GRADING_OPT_STUD_ID always has index 0 (first)
+      for (var i=0; i < prior_grading_opts_g.length; i++)
+        {
+          if (prior_grading_opts_g[i] === 0)
+            {
+              old_sid_opt_fp+= (i).toString();
+            }
+        }
+        
+      // Check if they've changed student identifying fields
+      if (new_sid_opt_fp !== old_sid_opt_fp)
+        {
+          if (!continue_with_changed_student_idents_g)
+            {
+              //showAlert('<?=langstr("FBL_STR_CHANGING_STUDENT_IDENTIFIERS_WARNINGS")?>');
+              openPopup('<?=langstr("FBL_STR_CHANGING_STUDENT_IDENTIFIERS_WARNINGS")?>');
+              continue_with_changed_student_idents_g = true; // let them through if they hit Continue again
+              return;
+            }
+         }
     }
     
   // Process category names
@@ -327,6 +376,18 @@ function clearAlert()
   $('#s1_mw_alert').hide(200);
 }
 
+function openPopup(msg)
+{
+  $('#light').html(msg);
+  $('#light').show(200);
+  $('#fade').show(200);
+}
+
+function closePopup()
+{
+  $('#light').hide(200);
+  $('#fade').hide(200);
+}
 
 
 </script>
