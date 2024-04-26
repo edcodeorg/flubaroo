@@ -110,7 +110,6 @@ function createGradeDocument(mydrive_folder, assignment_name, assignment_folder,
   
   // share the document with the student
   var new_doc_drive_file = DriveApp.getFileById(new_doc.getId());
-
   Drive.Permissions.insert(
     {
      'role': 'reader',
@@ -189,10 +188,15 @@ function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
   
   var new_doc_drive_file = DriveApp.getFileById(new_doc.getId());
   
-  mydrive_folder.removeFile(new_doc_drive_file);
-  
-  assignment_folder.addFile(new_doc_drive_file);
+  //mydrive_folder.removeFile(new_doc_drive_file);
+  //assignment_folder.addFile(new_doc_drive_file);
 
+  //new_doc_drive_file.moveTo(assignment_folder);
+
+  var patch_resource = {};
+  var optional_args = {addParents:assignment_folder.getId(), enforceSingleParent: true};
+  var status = Drive.Files.patch(patch_resource, new_doc.getId(), optional_args);
+  
   return new_doc;
 }
 
@@ -429,7 +433,7 @@ function writeContentsOfGradeDocument(grades_doc,
       
       if (show_student_response)
         {
-          row_data.push(q.getFullSubmissionText());    
+          row_data.push(q.getFullSubmissionText().toString()); 
         }
 
       if (show_answers === 'true')
@@ -437,7 +441,7 @@ function writeContentsOfGradeDocument(grades_doc,
           if ( (isNormallyGraded(gopt) || (isManuallyGraded(gopt) && show_anskey_for_mgr_ques))
                 && !ak_has_formula )
             {
-              row_data.push(ak_value);
+              row_data.push(ak_value.toString());
             }
           else
             {
@@ -458,7 +462,7 @@ function writeContentsOfGradeDocument(grades_doc,
         }
       
       table_data.push(row_data);
-    }      
+  }      
  
   var question_col_index = 0;
   var your_ans_col_index = 1;
@@ -484,7 +488,7 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       help_tip_col_index--;
     }
-  
+    
   var table_in_doc = body.appendTable(table_data);  
   table_in_doc.getRow(0).setBold(true);
   
@@ -520,7 +524,7 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       table_in_doc.setColumnWidth(mgr_teacher_comment_col_index, in2Pts(2.0));
     }
-  
+
   if (graded_subm.getHelpTipsPresent())
     {
       table_in_doc.setColumnWidth(help_tip_col_index, in2Pts(1.75 + additional_width)); 
@@ -530,6 +534,7 @@ function writeContentsOfGradeDocument(grades_doc,
     {
       body.appendPageBreak();
     }
+
 }
      
 // in2Pts: Converts inches to points.
@@ -538,4 +543,3 @@ function in2Pts(inches)
   var ppi = 72; // points per inch
   return ppi * inches;
 }
-

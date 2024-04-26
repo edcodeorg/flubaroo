@@ -254,6 +254,19 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
   // showMessageBox()
   // -------------
   //
+  // Display a generic UI for messages. Shown with a Flubaroo logo. 
+  this.showInvalidGradesSheetMessage = function()
+  {
+    var msg = langstr("FLB_STR_INVALID_GRADES_SHEET");
+    
+    // add (english only) reason for invalid state. stored in a global.
+    msg += "<b>Reason: </b>" + gbl_invalid_grades_sheet_error;
+    UI.showMessageBox(langstr("FLB_STR_INVALID_GRADE_SHEET_TITLE"), msg);
+  }
+
+  // showMessageBox()
+  // -------------
+  //
   // Display a generic UI for messages. Shown with a Flubaroo logo.
   this.showMessageBox = function(title, msg)
   {
@@ -288,7 +301,7 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
   {
     var html = HtmlService.createHtmlOutput()
                           .setSandboxMode(HtmlService.SandboxMode.IFRAME)
-                          .setWidth(510).setHeight(155);
+                          .setWidth(510).setHeight(180);
 
     html.setTitle(title);
     
@@ -378,6 +391,19 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
     var checked;
     
     var h = "<!DOCTYPE html>";
+    h += "<script> \
+      if (window.trustedTypes && window.trustedTypes.createPolicy) { \
+        window.trustedTypes.createPolicy('default', { \
+          createHTML: string => string, \
+          createScriptURL: string => string, \
+          createScript: string => string, \
+        }); \
+      } \
+      </script>";
+ 
+    h += "<?!= HtmlService.createTemplateFromFile('uiStyle').evaluate().getContent(); ?>";
+
+    h += '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>';
 
     h += "<?!= HtmlService.createHtmlOutputFromFile('uiStyle').getContent(); ?>";
     h += '<div id="adv_opt_mw" style="font-family:Sans-Serif;font-size:14px;">';
@@ -484,7 +510,6 @@ width=60 style="padding-left:10px;padding-right:15px;"><p><br>' + tip_html + "</
     h += '</div>'; // #adv_opt_mw
     
     h += "<script>function aoCloseWindow() { google.script.host.close(); }</script>";
-    h += '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>';
   
     var html = HtmlService.createTemplate(h);
 
@@ -619,8 +644,8 @@ function gradingResultsEventHandler(e)
 
   // Grading complete - do nothing (for now anyway)
   
-  var app = UiApp.getActiveApplication();
-  app.close();
+  //var app = UiApp.getActiveApplication();
+  //app.close();
   
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var grades_sheet = getSheetWithGrades(ss);
@@ -633,7 +658,7 @@ function gradingResultsEventHandler(e)
       Debug.error("gradingResultsEventHandler() - no grades sheet");
     }  
   
-  return app;
+  //return app;
   
 } // gradingResultsEventHandler()
 
@@ -940,11 +965,26 @@ function getFlubarooTipHTML()
 // 
 // Server-side function to return (as JSON object) all information about
 // the questions in Step 1 of grading. Used in uiStep1.html.
-function uiStep1GetQuestionData()
+function uiStep1GetQuestionData(tz, locale)
 {
   var dp = PropertiesService.getDocumentProperties();
   var up = PropertiesService.getUserProperties();
   
+  // Record user's Timezone and Locale (passed here from their browser).
+  // Note: If this was a brand-new Add-on, we'd do this on the first-use of the UI
+  // (i.e. when accepting terms of service, or if a welcome splashs screen were
+  // shown). But for Flubaroo we have many existing users for whom we've never 
+  // recorded timezone or locale, so we're placing this in Step 1 of grading since
+  // that's a common entry point for all users. 
+  if (tz && !up.getProperty(USER_PROP_TIMEZONE))
+    {
+      up.setProperty(USER_PROP_TIMEZONE, tz);
+    }
+  if (locale && !up.getProperty(USER_PROP_LOCALE))
+    {
+      up.setProperty(USER_PROP_LOCALE, locale);
+    }
+
   var qdata = 
     {
       // possible grading options to display to user. keep in this order!
@@ -1138,10 +1178,10 @@ function getUIStep1Width()
   // we may need to increase the width if Categories are present to select.
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var window_width = UI_STEP1_WIDTH;
-  if (getSheetWithCategories(ss))
-    {
-      window_width += 300;
-    }
+  //if (getSheetWithCategories(ss))
+  //  {
+  //    window_width += 300;
+  //  }
  
   return window_width;
 }
@@ -1396,6 +1436,7 @@ function uiShareGradesGetFormData()
         'teacher_message' : "",
         'sticker_enabled': false,
         'chosen_sticker_fid' : "",
+        'chosen_sticker_resource_key' : "",
       };
 
   // Lookup any selections previously made  
@@ -1407,6 +1448,8 @@ function uiShareGradesGetFormData()
   var show_questions_type = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_QUESTIONS_TYPE);
   var show_student_response = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_STUD_RESP);
   var chosen_sticker_fid = dp.getProperty(DOC_PROP_STICKER_FILE_ID);
+  var chosen_sticker_resource_key = dp.getProperty(DOC_PROP_STICKER_RESOURCE_KEY);
+
   var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
  
   if (share_option)
@@ -1448,6 +1491,7 @@ function uiShareGradesGetFormData()
   if (chosen_sticker_fid)
     {
       fd.chosen_sticker_fid = chosen_sticker_fid;
+      fd.chosen_sticker_resource_key = chosen_sticker_resource_key;
     }
 
   // Grab the list of questions, so the user can select which contains
@@ -1515,7 +1559,7 @@ function uiShareGradesGetFormData()
   return fd;
 }
 
-function uiShareGradesSaveSticker(sticker_enabled, drive_file_id, sticker_percent)
+function uiShareGradesSaveSticker(sticker_enabled, drive_file_id, drive_file_resource_key, sticker_percent)
 {
   var dp = PropertiesService.getDocumentProperties();
   
@@ -1541,13 +1585,15 @@ function uiShareGradesSaveSticker(sticker_enabled, drive_file_id, sticker_percen
         {
           // record the drive file id
           dp.setProperty(DOC_PROP_STICKER_FILE_ID, drive_file_id);
+          dp.setProperty(DOC_PROP_STICKER_RESOURCE_KEY, drive_file_resource_key);
         }
       else
         {
           dp.deleteProperty(DOC_PROP_STICKER_FILE_ID);
+          dp.deleteProperty(DOC_PROP_STICKER_RESOURCE_KEY);
         }
       
-      Debug.info("User opted to include sticker (id=" + drive_file_id + ") when sharing grades and score >= " + sticker_percent + "%");
+      Debug.info("User opted to include sticker (id=" + drive_file_id + ", resource_key=" + drive_file_resource_key + ") when sharing grades and score >= " + sticker_percent + "%");
     }
   else
     {
@@ -1555,8 +1601,7 @@ function uiShareGradesSaveSticker(sticker_enabled, drive_file_id, sticker_percen
     } 
 
   return;
-}
-
+} 
 
 function uiShareGradesLoadStickerList()
 {
@@ -1564,14 +1609,26 @@ function uiShareGradesLoadStickerList()
 
   var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
   var sticker_file_id = dp.getProperty(DOC_PROP_STICKER_FILE_ID);
+  var sticker_file_resource_key = dp.getProperty(DOC_PROP_STICKER_RESOURCE_KEY);
+  
+  if (!sticker_file_resource_key)
+    {
+      // may have never been set b/c sticker was selected prior to Drive API change. just blank
+      // (will be ignored) vs having as null or undefined which will cause issued if I try to 
+      // save it back to properties later.
+      sticker_file_resource_key = "";
+    }
+  
   var sticker_percent = dp.getProperty(DOC_PROP_STICKER_THRESHOLD1);
   
   var sd = 
     {
       'sticker_enabled' : false,
       'sticker_file_id' : "",
+      'sticker_file_resource_key' : "",
       'sticker_percent' : "",
       ids: [],
+      resource_keys: [], 
       names : [],
     };
    
@@ -1582,6 +1639,7 @@ function uiShareGradesLoadStickerList()
   if (sticker_file_id)
     {
       sd.sticker_file_id = sticker_file_id;
+      sd.sticker_file_resource_key = sticker_file_resource_key;
     }
   if (sticker_percent)
     {
@@ -1589,7 +1647,8 @@ function uiShareGradesLoadStickerList()
     }
     
   // Pull in list of free/public stickers
-  var public_stickers_folder = DriveApp.getFolderById("0B3gmIDjKT36hSXRPdmp3ZDBSN28");
+  //var public_stickers_folder = DriveApp.getFolderById("0B3gmIDjKT36hSXRPdmp3ZDBSN28");
+  var public_stickers_folder = DriveApp.getFolderByIdAndResourceKey("0B3gmIDjKT36hSXRPdmp3ZDBSN28", "0-PX71bl0BeAkpsmJMyyPIhA");
   var public_stickers = public_stickers_folder.getFiles();
   
   while (public_stickers.hasNext())
@@ -1604,6 +1663,7 @@ function uiShareGradesLoadStickerList()
         {
           sd.names.push(clean_name);
           sd.ids.push(sticker.getId());
+          sd.resource_keys.push(sticker.getResourceKey());
         }
     }
   
@@ -1655,6 +1715,7 @@ function uiShareGradesLoadStickerList()
             {
               sd.names.push(clean_name);
               sd.ids.push(sticker.getId());
+              sd.resource_keys.push(sticker.getResourceKey());
             }
         }
     }
@@ -1664,4 +1725,3 @@ function uiShareGradesLoadStickerList()
 
   return sd;
 }
-

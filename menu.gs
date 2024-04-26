@@ -132,6 +132,9 @@ function createFlubarooMenu()
   submenu.addItem(langstr("FLB_STR_MENU_SHOW_EMAIL_QUOTA"), "showEmailQuota");
   submenu.addItem(langstr("FLB_STR_MENU_EXPAND_FORMULAS"), "expandFormulaTokensInRange");
 
+  // daa test triggers
+  //submenu.addItem("test add trigger", "daaTestAddTrigger");
+
   menu.addSubMenu(submenu);
 
   menu.addSeparator(); // line break
@@ -157,6 +160,50 @@ function createFlubarooMenu()
 
   return;
 }
+
+/*
+function daaTestAddTrigger()
+{
+  var dp = PropertiesService.getDocumentProperties();
+
+  try
+    {
+      var hour = dp.getProperty("daatriggerhour");
+      if (!hour)
+        {
+          hour = 5;
+        }
+      else
+        {
+          hour = Number(hour) + 1;
+        }
+
+      var monitor_trigger = ScriptApp.newTrigger("daaDoNothing")
+                                          .timeBased().atHour(5).everyDays(1)
+                                          //.everyHours(1)
+                                          .create();
+
+      dp.setProperty("daatriggerhour", hour.toString());
+
+    }
+  catch (e)
+    {
+      Browser.msgBox("can't create trigger: " + e.message);
+      console.log("can't create trigger: " + e.message)
+      return;
+    }
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();  
+  var all_triggers = ScriptApp.getUserTriggers(ss);
+  Browser.msgBox("new trigger added for hour  " + hour + ". " + all_triggers.length + " total triggers");
+  console.log("new trigger added for hour  " + hour + ". " + all_triggers.length + " total triggers");
+}
+
+function daaDoNothing()
+{
+
+}
+*/
 
 // createNonAuthMenu:
 // We're in the case when this Add-On hasn't yet been used in the sheet, even though

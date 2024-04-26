@@ -18,10 +18,10 @@ LOG_SHEET_NAME = "log";
 FIELD_LOG_SHEET_NAME = "fieldlog";
 FIELD_RESET_SHEET_NAME = "fieldreset";
 FIELD_LOG_DEFAULT_RATE = 25;
-FIELD_LOG_WRAP_AROUND = 50000;
+FIELD_LOG_WRAP_AROUND = 20000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 60";
+gbl_version_str = "Version 75";
                   
 // NOTE: Update version in README.gas                  
 
@@ -74,20 +74,23 @@ GRADES_SUMMARY_LOW_SCORE_ROW_NUM     = 6; // row where "Number of Low Scoring Qu
 GRADES_CATEGORY_NAMES_ROW_NUM        = 7; // row where (optional) category names are stored
 
 FLUBAROO_WELCOME_IMG_URL =
-  'https://flubaroo2.appspot.com/flubaroo_128x128_no_padding.png';
+  'https://scooper.gleeda.net/flubaroo/flubaroo_128x128_no_padding.png';
 FLUBAROO_WORKING_IMG_BAR_URL =
-  'https://flubaroo2.appspot.com/flubaroo_working.gif';
+  'https://scooper.gleeda.net/flubaroo/flubaroo_working.gif';
 FLUBAROO_WORKING_IMG_SPIN_URL =
-  'https://flubaroo2.appspot.com/loading-spinner.gif';
+  'https://scooper.gleeda.net/flubaroo/loading-spinner.gif';
 FLUBAROO_TIP_IMG_URL =
-  'https://flubaroo2.appspot.com/tips.png';
+  'https://scooper.gleeda.net/flubaroo/tips.png';
 FLUBAROO_CERT_IMG_URL =
-  'https://flubaroo2.appspot.com/cert30x30.png';
+  'https://scooper.gleeda.net/flubaroo/cert30x30.png';
 FLUBAROO_MARQUEE_IMG_URL =
-  'https://flubaroo2.appspot.com/flubaroo_marquee_280.png';
+  'https://scooper.gleeda.net/flubaroo/flubaroo_marquee_280.png';
+
+// DRIVE_EMBED_IMAGE_URL = 
+//   'https://docs.google.com/uc?id=';
 
 DRIVE_EMBED_IMAGE_URL = 
-  'https://docs.google.com/uc?id=';
+  'https://drive.google.com/thumbnail?id=';
 
 FLUBAROO_SAMPLE_STICKER_ICON_URL = DRIVE_EMBED_IMAGE_URL + "0B3gmIDjKT36hdXl0c3ZvcWlTNW8";
 
@@ -110,7 +113,7 @@ INIT_TYPE_SUBM = 0;             // initialies from the Student Submissions works
 INIT_TYPE_GRADED_FULL = 1;      // initializes from the Grades worksheet. Reads in everything.
 INIT_TYPE_GRADED_META = 2;      // same as INIT_TYPE_GRADED_FULL, but only reads in meta info (headers, grading_opt), and 
                                 // doesn't read-in all of the actual graded submissions, or original submisions.
-INIT_TYPE_GRADED_PARTIAL = 3;   // same as INIT_TYPE_GRADED_FULL, but only skips reading in all of the original submissions
+INIT_TYPE_GRADED_PARTIAL = 3;   // same as INIT_TYPE_GRADED_FULL, but skips reading in all of the original submissions
                                 // in the hidden rows. Used when reading in an existing Grades sheet when re-grading.
 INIT_TYPE_SUBM_ONLY_LATEST = 4; // same as INIT_TYPE_SUBM, but only pulls in latest submissions that haven't been graded yet
                                 // (for use with autograde).
@@ -213,6 +216,7 @@ DOC_PROP_EMAIL_INSTRUCTOR_ADDRESS = "flubaroo_email_instructor_address";
 DOC_PROP_EMAIL_FIRST_PROPERTIES_SET = "flubaroo_email_first_properties_set";
 
 DOC_PROP_AUTOGRADE_SUBMIT_TRIGGER_ID = "flubaroo_auto_grade_submit_trigger_id";
+DOC_PROP_AUTOGRADE_MONITOR_TRIGGER_ID = "flubaroo_auto_grade_monitor_trigger_id";
 DOC_PROP_AUTOGRADE_ENABLED = "flubaroo_auto_grade_enabled";
 DOC_PROP_AUTOGRADE_GATHERING_OPTIONS = "flubaroo_auto_grade_gathering_options";
 DOC_PROP_AUTOGRADE_RUNNING = "flubaroo_auto_grade_running";
@@ -229,6 +233,8 @@ DOC_PROP_UI_WAS_OFF = "flubaroo_ui_was_off"; // The UI state before the last aut
 
 DOC_PROP_STICKER_ENABLED = "flubaroo_sticker_enabled";
 DOC_PROP_STICKER_FILE_ID = "flubaroo_sticker_file_id";
+DOC_PROP_STICKER_RESOURCE_KEY = "flubaroo_sticker_resource_key";
+
 DOC_PROP_STICKER_THRESHOLD1 = "flubaroo_sticker_threshold1";
 
 EMAIL_SEND_NAME_DEFAULT = "Flubaroo Grader"; // Used if noreply@ is off, and no name set by user.
@@ -273,7 +279,12 @@ USER_PROP_UPDATE_NOTICE_DATE = "update_notice_date";
 // Set when/if the welcome message is shown on first install.
 USER_PROP_FIRST_TIME_WELCOME_SHOWN = "flubaroo_welcome_message_shown";
 
+USER_PROP_LAST_DAILY_PING = "user_prop_last_daily_ping";
+
 DOC_PROP_SHARE_OR_PRINT_GRADES = "flubaroo_share_or_print_grades";
+
+USER_PROP_TIMEZONE = "flubaroo_user_timezone";
+USER_PROP_LOCALE = "flubaroo_user_locale";
 
 // Window height & width for UIs
 UI_STEP1_WIDTH = 600;
@@ -281,7 +292,7 @@ UI_STEP1_HEIGHT = 525;
 UI_STEP2_WIDTH = 700;
 UI_STEP2_HEIGHT = 505;
 UI_MGR_WIDTH = 820;
-UI_MGR_HEIGHT = 565;
+UI_MGR_HEIGHT = 570;
 UI_SHARE_GRADES_WIDTH = 575;
 UI_SHARE_GRADES_HEIGHT = 585;
 UI_PRINT_GRADES_WIDTH = 575;
@@ -315,6 +326,9 @@ FLB_COLFORMAT_GREY_ITALIC_TEXT = "<<FLB_COLFORMAT_GREY_ITALIC_TEXT>>";
 FLB_COLFORMAT_HIDDEN = "<<FLB_COLFORMAT_HIDDEN>>";
 FLB_COLFORMAT_WRAP_TEXT = "<<FLB_COLFORMAT_WRAP_TEXT>>";
 
+// EVENT NAMES FOR EVENT LOGGING:
+FLB_EVENT_ASSIGNMENT_GRADED = 'FLB_EVENT_ASSIGNMENT_GRADED';
+FLB_EVENT_FIRST_INSTALL = 'FLB_EVENT_FIRST_INSTALL';
 
 // Flubaroo Updates:
 // The next 3 lines control when an update message is shown to the user in Flubaroo.
@@ -322,9 +336,35 @@ FLB_COLFORMAT_WRAP_TEXT = "<<FLB_COLFORMAT_WRAP_TEXT>>";
 // is installed. Be sure to update the notice date when you want to show a new message,
 // as Flubaroo will only show a message for that same date one time.
 // TODO: How do we localize this for other languages? For now, we don't.
-gbl_update_notice_date  = '5/26/17';
+gbl_update_notice_date  = '4/25/24';
 gbl_update_notice_title = 'Flubaroo Update Notice';
-gbl_update_notice_msg   = '<font size=+1><p>Thank You Teachers!</p></font>\
-                           <p>\
-                           Thanks teachers for all you\'ve done this year. Wishing you a terrific summer!</p>\
-                           <p>-- The Flubaroo Team</p></font>';
+gbl_update_notice_msg   = '';
+
+INCLUDED_STICKER_BASE_IMG_URL = 'https://flubaroo2.appspot.com/stickers/';
+INCLUDED_STICKERS = [
+  'Baseball.png',
+  'ChocolateBar.png',
+  'Notepad.png',
+  'Robot-RedLight.png',
+  'Star-SuperJob.png',
+  'Basketball.png',
+  'Flower.png',
+  'Pizza.png',
+  'Smiley-Awesome.png',
+  'Sun.png',
+  'Book.png',
+  'Football.png',
+  'Ribbon.png',
+  'Smiley-NiceWork.png',
+  'ThumbsUp.png',
+  'Calculator.png',
+  'Light Bulb.png',
+  'Robot-GreenLight.png',
+  'Star-AmazingWork.png',
+  'Trophy.png',
+  'ChemistryBeaker.png',
+  'Ninja.png',
+  'Robot-OrangeLight.png',
+  'Star-Fabulous.png',
+  'WeightLifter.png'
+];

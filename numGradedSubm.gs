@@ -102,4 +102,3 @@ function NumGradedSubmClass()
   } // NumGradedSubmClass.set()
     
 } // NumGradedSubmClass()
-

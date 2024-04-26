@@ -37,4 +37,4 @@
 //  Stein Arnold Kristiansen    stein.kristiansen@outlook.com                  Language translation for Norsk/Norwegian
 //  Ido Wolf                    idowolf@gmail.com                              Language translation for Hebrew
 //  Dimitris Kostis             dimkostis77@gmail.com                          Language translation for Greek
-
+//  Josu Arotzena               jarotzena@haurtzaro.ikastola.eus               Language translation for Euskara (Basque)

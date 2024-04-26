@@ -25,7 +25,7 @@ function viewReport()
   if (!grades_sheet_is_valid)
     {
       // Existing Grades sheet is invalid! Cannot continue with re-grading.
-      UI.showMessageBox(langstr("FLB_STR_INVALID_GRADE_SHEET_TITLE"), langstr("FLB_STR_INVALID_GRADES_SHEET"));
+      UI.showInvalidGradesSheetMessage();
       return;
     }
   
@@ -53,7 +53,6 @@ function createHistogramBuckets(grades_sheet, points_possible)
   var score_col_ltr = convertColNumToColLetter(score_col_num);
   var col_range = score_col_ltr + ":" + score_col_ltr; // i.e. "D:D"
   
-  
   var scores = grades_sheet.getRange(col_range).getValues();
 
   // determine the max points possible. could be the case if teacher
@@ -66,6 +65,9 @@ function createHistogramBuckets(grades_sheet, points_possible)
           points_possible = s;
         }
     }
+
+  // round down partial credit for the sake of bucketing (i.e. 1.6 -> 1)
+  points_possible = Math.floor(points_possible);
   
   // Track number of submissions had that each possible number 
   // of points for its score. Init all to 0. Ranges from 0 to points_possible.
@@ -195,7 +197,7 @@ function formHistogramURL(histogram_buckets)
  function emailReportHandler()
  {
    var dp = PropertiesService.getDocumentProperties();
-   var app = UiApp.getActiveApplication();
+   //var app = UiApp.getActiveApplication();
    var ss = SpreadsheetApp.getActiveSpreadsheet(); 
    var gws = new GradesWorksheet(ss, INIT_TYPE_GRADED_META, -1);
    var points_possible = gws.getPointsPossible();  

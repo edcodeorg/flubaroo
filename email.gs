@@ -27,8 +27,11 @@ function doShareGrades()
   // The object representing the grades sheet.
   
   // The send emails ui.
-  var app = UiApp.getActiveApplication();
-    
+  //var app = UiApp.getActiveApplication();
+  
+  Debug.info("doShareGrades() 2");
+
+  
   // The zero-offset index of the email question in the submissions.
   var question_index = 0;
     
@@ -86,6 +89,7 @@ function doShareGrades()
   assignment_name = assignment_name.replace(/'/g, "");
   
   var sticker_file_id = dp.getProperty(DOC_PROP_STICKER_FILE_ID);
+  var sticker_resource_key = dp.getProperty(DOC_PROP_STICKER_RESOURCE_KEY);
   var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
   var sticker_threshold_percent = dp.getProperty(DOC_PROP_STICKER_THRESHOLD1);
   var sticker_blob_name = "";
@@ -107,7 +111,15 @@ function doShareGrades()
 
       try
         {
-          img_file = DriveApp.getFileById(sticker_file_id);
+          if (sticker_resource_key)
+            {
+              img_file = DriveApp.getFileByIdAndResourceKey(sticker_file_id, sticker_resource_key);
+            }
+          else
+            {
+              img_file = DriveApp.getFileById(sticker_file_id);
+            }
+          
           img_file.getBlob().setName(sticker_blob_name);
         }
       catch (e)
@@ -260,7 +272,7 @@ function doShareGrades()
   
   notifyNumberEmailsSent();
   
-  return app;
+  //return app;
 
   // Private functions.
 
@@ -949,7 +961,7 @@ function menuShareGrades()
   if (!grades_sheet_is_valid)
     {
       // Existing Grades sheet is invalid! Cannot continue with re-grading.
-      UI.showMessageBox(langstr("FLB_STR_INVALID_GRADE_SHEET_TITLE"), langstr("FLB_STR_INVALID_GRADES_SHEET"));
+      UI.showInvalidGradesSheetMessage();
       return;
     }
   
@@ -1034,7 +1046,7 @@ function doPrintGrades()
   // The object representing the grades sheet.
   
   // The send emails ui.
-  var app = UiApp.getActiveApplication();
+  //var app = UiApp.getActiveApplication();
         
   // Whether to show answers in the student's 
   var show_answers = dp.getProperty(DOC_PROP_EMAIL_INCLUDE_ANSWER_KEY);
@@ -1064,6 +1076,8 @@ function doPrintGrades()
   var show_anskey_for_mgr_ques = up.getProperty(USER_PROP_ADV_OPTION_SHOW_ANSKEY_FOR_MGR_QUES);
   
   var sticker_file_id = dp.getProperty(DOC_PROP_STICKER_FILE_ID);
+  var sticker_resource_key = dp.getProperty(DOC_PROP_STICKER_RESOURCE_KEY);
+
   var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
   var sticker_threshold_percent = dp.getProperty(DOC_PROP_STICKER_THRESHOLD1);
   var img_file = null;
@@ -1084,7 +1098,15 @@ function doPrintGrades()
 
       try
         {
-          img_file = DriveApp.getFileById(sticker_file_id);
+          if (sticker_resource_key)
+            {
+              img_file = DriveApp.getFileByIdAndResourceKey(sticker_file_id, sticker_resource_key);
+            }
+          else
+            {
+              img_file = DriveApp.getFileById(sticker_file_id);
+            }
+          
           img_file.getBlob().setName(sticker_blob_name);
         }
       catch (e)
@@ -1176,7 +1198,7 @@ function doPrintGrades()
         }
     }
   
-  app.close();
+  //app.close();
   
   if (!failed)
     {
@@ -1253,4 +1275,3 @@ function makePrettyAnswerKeyValue(ak_val)
       
   return ak_val;
 }
-

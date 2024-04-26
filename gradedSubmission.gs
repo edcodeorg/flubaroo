@@ -167,7 +167,8 @@ GradedSubmission.prototype.initGSVars = function()
       vindex = metric_start_col + METRIC_SUBM_COPY_ROW_INDEX;
       this.subm_copy_row_index = this.graded_vals[vindex - 1];
       
-      if (this.init_type == INIT_TYPE_GRADED_FULL)
+      if ((this.init_type == INIT_TYPE_GRADED_FULL)
+           || this.init_type == INIT_TYPE_GRADED_ONLY_LATEST)
         {
           // Read in hidden row of orig submissions.
           this.submission_vals = this.gws.getHiddenRow(GRADES_HIDDEN_ROW_TYPE_SUBMISSION_VALS,
@@ -609,6 +610,16 @@ GradedSubmission.prototype.processPlusMinusInKey = function(key)
             var pm_percent = num2 /= 100;
             var r1 = num1 * (1 - pm_percent);
             var r2 = num1 * (1 + pm_percent);
+            
+            // we should always return the smaller number first (r1 < r2). but this
+            // can get reversed if num1 is negative (e.g. -0.75%pm2%).
+            if (r1 > r2)
+              {
+                var swap = r1;
+                r1 = r2;
+                r2 = swap;
+              }
+            
             rv_key_list = [r1, r2];
           }
       }

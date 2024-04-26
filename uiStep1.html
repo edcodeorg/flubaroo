@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 
-<?!= HtmlService.createHtmlOutputFromFile('uiStyle').getContent(); ?>
+<script>
+  if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    window.trustedTypes.createPolicy('default', {
+      createHTML: string => string,
+      createScriptURL: string => string,
+      createScript: string => string,
+    });
+  }
+</script>
+
+<?!= HtmlService.createTemplateFromFile('uiStyle').evaluate().getContent(); ?>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</script>
 
 <div id="s1_mw">
     <div id="s1_mw_instr">
@@ -38,15 +51,23 @@
     
 </div>
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
-</script>
-
 <script>
 
 // run on load
 $(function() {
+  var tz = null;  
+  var locale = null;
+  try
+    {
+      tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    }
+  catch (e)
+    {
+    }
+
     google.script.run.withSuccessHandler(populateQuestionData)
-                     .uiStep1GetQuestionData();
+                     .uiStep1GetQuestionData(tz, locale);
 });
 
 var prior_grading_opts_g = null;

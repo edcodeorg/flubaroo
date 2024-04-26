@@ -52,7 +52,7 @@ function setLanguage()
 function setLanguageHandler(formObject)
  {
    var ss = SpreadsheetApp.getActiveSpreadsheet();
-   var app = UiApp.getActiveApplication();
+   //var app = UiApp.getActiveApplication();
 
    var up = PropertiesService.getUserProperties();
    
@@ -571,6 +571,8 @@ langs = {
         // Label next to the first step in the "Grade by Hand" window, which allows the teacher to select the student.
         "FLB_STR_MANUAL_GRADING_STEP1" : "1. Select Student:",
       
+        "FLB_STR_MANUAL_GRADING_SKIP_TIP" : "Tip: Skip to any student by first clicking their row in the Grades sheet.",
+      
         // Label next to the second step in the "Grade by Hand" window, which allows the teacher to select which question.
         "FLB_STR_MANUAL_GRADING_STEP2" : "2. Select Question:",
       
@@ -808,6 +810,8 @@ langs = {
                                                            <p>Click 'Continue' again to proceed <u>only</u> if you don't care about losing this data. Otherwise, close this window to cancel your changes. \
                                                            See <a target=\"_blank\" href=\"http://www.flubaroo.com/hc/changing-student-identifiers\">this article</a> for more.</p>",
        
+        "FLB_STR_AUTOGRADE_CANNOT_WORK_IN_TEAM_DRIVE" : "Autograde cannot be enabled because this spreadsheet is in a Team Drive. Please move it into a normal Drive folder and try again.",
+      
         // Flubaroo Tips, shown when grading completes.
         "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Tip #1:</b> Flubaroo can accept more than one correct answer.",
         "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Tip #2:</b> Flubaroo can grade numeric ranges for science and math assignments.",
@@ -8805,8 +8809,689 @@ o altri dati dal foglio Valutazioni recentemente?</p>\
    },
    // END GREEK //////////////////////////////////////////////////////////////////////////////////
 
+   
+    
+   // START EUSKARA////////////////////////////////////////////////////////////////////////////////
+   // Thanks to these contributors for the Euskara translation: Argiñe Oiarbide Isasti, Leire Lekuona Azpiazu, Josu Arotzena Muxika. 
+   "eus-eus": {
+
+       // Name to identify language in language selector
+       "FLB_LANG_IDENTIFIER": "Euskara (Basque)",
+
+       // Grading option which identifies a student
+       "FLB_STR_GRADING_OPT_STUD_ID" : "Ikaslea identifikatzen du",
+
+       // Grading option which tells Flubaroo to skip grading on a question
+       "FLB_STR_GRADING_OPT_SKIP_GRADING" : "kalifikatu",
+
+       // Message shown when grading is complete (1 of 2).
+       "FLB_STR_RESULTS_MSG1" : "'Kalifikazioak’ izeneko orri berria sortu da. Bertan ikasle bakoitzaren kalifikazioak eta goiko aldean, kalifikazio guztien laburpena ikus zenezake. Azken lerroan galdera bakoitza asmatu dutenen ehunekoa adierazten da; asmatze kopurua gutxieneko ehunekora (%70ean lehenetsia) iristen ez den kasuetan, galdera laranjaz eta ikaslea gorriz nabarmendua agertzen da.",
+
+       // Message shown when grading is complete (2 of 2).
+       "FLB_STR_RESULTS_MSG2" : "<b>OSO GARRANTZITSUA</b>: ‘Kalifikazioak’ izeneko orria ez dezazula aldatu inola ere, erroreak sor litezke. Aldaketarik egin behar bazenu, kopia bat egin eta kopia hori erabili aldaketak egiteko.",
+
+       // Follows the Flubaroo tip, directing users to read the corresponding article.
+       "FLB_STR_RESULTS_TIP_READ_ARTICLE" : "Gehiago jakiteko egin klik <a target=_blank href=\"%s\">hemen</a>.",
+
+       // Instructions shown on Step 1 of grading.
+       "FBL_STR_STEP1_INSTR" : "Galdera bakoitzeko kalifikatzeko aukera hauta ezazu. Flubaroo aukera bakoitza identifikatzen saiatuko da, baina zerorrek egiaztatu, eta behar den kasuan aldatu, beharko duzu.",
+
+       // Instructions shown on Step 2 of grading.
+       "FBL_STR_STEP2_INSTR" : "Erantzun zuzenak jasotzen dituen lerroa hauta ezazu mesedez. Zuk emaniko erantzunak dira, ohikoena lehen lerroa izatea da. Gainontzeko erantzunak aukeratzen duzun lerro honekin alderatuko ditu Flubarook. Lerro zuzena hautatu duzula ziurtatu.",
+
+       // Message shown if not enough submissions to perform grading.
+       "FBL_STR_GRADE_NOT_ENOUGH_SUBMISSIONS" : "Kalifikatzeko/ kalifikazioa egiteko bi erantzun behar dira gutxienez. Bi erantzun, hau da bi lerro, dituzunean, saiatu berriz.",
+
+       // Please wait" message first shown when Flubaroo is first examining assignment.
+       "FLB_STR_WAIT_INSTR1" : "Flubaroo zure zeregina aztertzen ari da. Itxaron mesedez...",
+
+       // Please wait" message shown after Step 1 and Step 2, while grading is happening.
+       "FLB_STR_WAIT_INSTR2" :  "Zure zeregina kalifikatzen den bitartean itxaron. Prozesuak minutu pare bat iraun dezake.",
+
+       // Asks user if they are sure they want to re-grade, if Grades sheet exists.
+       "FLB_STR_REPLACE_GRADES_PROMPT" : "Kalifikazioak eguneratu egingo dira. Jarraitu nahi duzu?",
+
+       // Window title for "Preparing to grade" window
+       "FLB_STR_PREPARING_TO_GRADE_WINDOW_TITLE" : "Flubaroo - Kalifikatzeko prestatzen",
+
+       // Window title for "Please wait" window while grading occurs
+       "FLB_STR_GRADING_WINDOW_TITLE" : "Flubaroo - Zeregina kalifikatzen",
+
+       // Window title for "Grading Complete" window after grading occurs
+       "FLB_STR_GRADING_COMPLETE_TITLE" : "Flubaroo - Kalifikazioa osatu da",
+
+       // Window title for grading Step 1
+       "FLB_STR_GRADE_STEP1_WINDOW_TITLE" : "Flubaroo - Kalifikazioaren 1. pausoa",
+
+       // Window title for grading Step 2
+       "FLB_STR_GRADE_STEP2_WINDOW_TITLE" : "Flubaroo - Kalifikazioaren 2. pausoa",
+
+       // "Grading Option" label that appears over first column in Step 1 of grading.
+       "FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION" : "Kalifikazio aukerak",
+
+       // "Question" label that appears over third column in Step 1 of grading.
+       "FLB_STR_GRADE_STEP1_LABEL_QUESTION" : "Galdera",
+
+       // "Select" label that appears over radio button in first column of Step 2 of grading.
+       "FLB_STR_GRADE_STEP2_LABEL_SELECT" : "Aukeratu",
+
+       // "Submission Time" label that appears over second column in Step 2 of grading.
+       "FLB_STR_GRADE_STEP2_LABEL_SUBMISSION_TIME" : "Bidalketa eguna",
+
+       // Label for "View Grades" button shown when grading completes.
+       "FLB_STR_GRADE_BUTTON_VIEW_GRADES" : "Kalifikazioak ikusi",
+
+       // Used for "summary" text shown at top of Grades sheet, and in report.
+       "FLB_STR_GRADE_SUMMARY_TEXT_SUMMARY" : "Laburpena",
+
+       // Used for report and report email. Ex: "Report for 'My Test'"
+       "FLB_STR_GRADE_SUMMARY_TEXT_REPORT_FOR" : "Txostenaren gaia:",
+
+       // Points Possible. Used for text shown at top of Grades sheet, and in report.
+       "FLB_STR_GRADE_SUMMARY_TEXT_POINTS_POSSIBLE" : "Gehienezko kalifikazioa",
+
+       // Average Points. Used for text shown at top of Grades sheet, and in report.
+       "FLB_STR_GRADE_SUMMARY_TEXT_AVERAGE_POINTS" : "Batezbesteko kalifikazioa",
+
+       // Counted Submissions. Used for text shown at top of Grades sheet, and in report.
+       "FLB_STR_GRADE_SUMMARY_TEXT_COUNTED_SUBMISSIONS" : "Bidalketa kopurua",
+
+       // Number of Low Scoring Questions. Used for text shown at top of Grades sheet, and in report.
+       "FLB_STR_GRADE_SUMMARY_TEXT_NUM_LOW_SCORING" : "Kalifikazio baxuko galdera kopurua",
+
+       // Name of column in Grades sheet that has total points scored.
+       "FLB_STR_GRADES_SHEET_COLUMN_NAME_TOTAL_POINTS" : "Puntuak guztira",
+
+       // Name of column in Grades sheet that has score as percent.
+       "FLB_STR_GRADES_SHEET_COLUMN_NAME_PERCENT" : "Ehunekoa",
+
+       // Name of column in Grades sheet that has number of times student made a submission.
+       "FLB_STR_GRADES_SHEET_COLUMN_NAME_TIMES_SUBMITTED" : "Bidalketa kopurua",
+
+       // Name of column in Grades sheet that indicates if grade was already emailed out.
+       "FLB_STR_GRADES_SHEET_COLUMN_NAME_EMAILED_GRADE" : "Emaitza postaz bidali da?",
+
+       // Name of column in Grades sheet that allows teacher to enter optional student feedback
+       "FLB_STR_GRADES_SHEET_COLUMN_NAME_STUDENT_FEEDBACK" : "Ikaslearentzako iruzkina (aukerazkoa)",
+
+       // Window title for emailing grades
+       "FLB_STR_EMAIL_GRADES_WINDOW_TITLE" : "Flubaroo - Kalifikazio bidalketa",
+
+       // Instructions on how to email grades
+       "FLB_STR_EMAIL_GRADES_INSTR" : "Flubarook ikasle bakoitzari bere emaitzen txostena eta erantzun zuzenak bidal diezazkioke. Bidalketa egiteko goitibeherako zerrenda ireki eta posta eskatzen duen galdera hauta ezazu. Posta helbiderik ez bada jaso, ezinezkoa da kalifikazioak (postaz?) bidaltzea.",
+
+       // Notice that grades cannot be emailed because the user has exceeded their daily quota.
+       "FLB_STR_EMAIL_DAILY_QUOTA_EXCEEDED" : "Flubarook ezin du kalifikaziorik bidali, Googlek eguneko ezarritako posta kopurua gainditu baituzu. Saia zaitez beranduago.",
+
+       // Message about how many grade emails *have* been sent. This message is preceeded by a number.
+       // Example: "5 grades were successfully emailed"
+       "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_SENT" : "kalifikazio zuzen partekatu dira.",
+
+       // Message about how many grade emails *have NOT* been sent. This message is preceeded by a number.
+       "FLB_STR_VIEW_EMAIL_GRADES_NUMBER_UNSENT" : "kalifikazio ez dira partekatu posta helbidea zuzena ez delako, hutsik dagoelako, dagoeneko partekatuta dagoelako edo eguneko posta kopurua gainditu duzulako..",
+
+       // Message about how many grade emails *have NOT* been sent.
+       "FLB_STR_VIEW_EMAIL_GRADES_NO_EMAILS_SENT" : "Kalifikazioak ez dira partekatu baliozko helbiderik aurkitu ez delako, ikasle guztiek kalifikazioak jaso dituztelako edo eguneko posta kopurua gainditu duzulako.",    
+
+       // Subject of the email students receive. Followed by assignment name.
+       // Example: Here is your grade for "Algebra Quiz #6"
+       "FLB_STR_EMAIL_GRADES_EMAIL_SUBJECT" : "Galdetegi honetarako emaitzen txostena:",
+
+       // First line of email sent to students
+       // Example: This email contains your grade for "Algebra Quiz #6"
+       "FLB_STR_EMAIL_GRADES_EMAIL_BODY_START" : "Posta honetan, galdetegi honetarako, zure kalifikazioen berri duzu: ",
+
+       // Message telling students not to reply to the email with their grades
+       "FLB_STR_EMAIL_GRADES_DO_NOT_REPLY_MSG" : "Ez ezazu posta hau erantzun",
+
+       // Message that preceedes the student's grade
+       "FLB_STR_EMAIL_GRADES_YOUR_GRADE" : "Zure kalifikazioa",
+
+       // Message that preceedes the instructor's (optional) message in the email
+       "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MSG_BELOW" : "Irakasleak gela osoari eginiko iruzkina dago behean.",
+
+       // Message that preceedes the instructor's (optional) feedback for the student in the email
+       "FLB_STR_EMAIL_GRADES_STUDENT_FEEDBACK_BELOW" : "Irakasleak zuri bakarrik egindako iruzkina.",
+
+       // Message that preceedes the summary of the student's information (name, date, etc)
+       "FLB_STR_EMAIL_GRADES_SUBMISSION_SUMMARY" : "Zure bidalketaren laburpena",
+
+       // Message that preceedes the table of the students scores (no answer key sent)
+       "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE" : "Galdera bakoitzeko zure puntuazioa dago behean.",
+
+       // Message that preceedes the table of the students scores, and answer key
+       "FLB_STR_EMAIL_GRADES_BELOW_IS_YOUR_SCORE_AND_THE_ANSWER" : "Galdera bakoitzeko puntuazioa eta erantzun zuzena dituzu behean",
+
+       // Header for the  column in the table of scores in the email which lists the question asked.
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_QUESTION_HEADER" : "Galdera",
+
+       // Header for the  column in the table of scores in the email which lists the student's answer.
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_ANSWER_HEADER" : "Zure erantzuna",
+
+       // Header for the  column in the table of scores in the email which lists the correct answer.
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT_ANSWER_HEADER" : "Erantzun zuzena",
+
+       // Header for the column in the table of scores in the email which lists the student's score (0, 1, 2...)
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_YOUR_SCORE_HEADER" : "Zure puntuazioa",
+
+       // Header for the  column in the table of scores in the email which lists the points possible (e.g. 5).
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS_POSSIBLE_HEADER" : "Gehienezko puntuazioa ",
+
+       // Header for the  column in the table of scores in the email which lists the Help Tip (if provided)
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_HELP_TIP_HEADER" : "Galdera honetarako laguntza",
+
+       // Label for "points" used in the new style email summary of grades
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_POINTS" : "puntu",
+
+       // Label for "Correct" questions in new style email summary of grades
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_CORRECT" : "Zuzena",
+
+       // Label for "Incorrect" questions in new style email summary of grades
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_INCORRECT" : "Okerra",
+
+       // Footer for the email sent to students, advertising Flubaroo.
+       "FLB_STR_EMAIL_GRADES_EMAIL_FOOTER" : "Posta hau Flobaroo ebaluatzeko eta kalifikatzeko doako aplikazioak sortu du",
+
+       // Link at the end of the footer. Leads to www.flubaroo.com
+       "FLB_STR_EMAIL_GRADES_VISIT_FLUBAROO" : "Zoaz flubaroo.com webgunera",
+
+       // Subject of the record email sent to the instructor, when grades are emailed to the class.
+       // Followed by the assignment name.
+       // e.g. Record of grades emailed for Algebra Quiz #6
+       "FLB_STR_EMAIL_RECORD_EMAIL_SUBJECT": "Galdetegi honetarako postaz bidalitako emaitzen txostena: ",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Labels the name of the assignment, in the summary table.
+       "FLB_STR_EMAIL_RECORD_ASSIGNMENT_NAME": "Frogaren izena",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Labels the number of emails sent, in the summary table.
+       "FLB_STR_EMAIL_RECORD_NUM_EMAILS_SENT": "Bidalitako txosten kopurua",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Labels the number of graded submissions, in the summary table
+       "FLB_STR_EMAIL_RECORD_NUM_GRADED_SUBM": "Kalifikatutako froga kopurua",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Labels the average score in points (vs percent), in the summary table
+       "FLB_STR_EMAIL_RECORD_AVERAGE_SCORE": "Batezbesteko puntuazioa",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Labels the points possible, in the summary table
+       "FLB_STR_EMAIL_RECORD_POINTS_POSSIBLE": "Gehienezko puntuazioa",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Indicated if an answer key was provided to the students, in the summary table
+       "FLB_STR_EMAIL_RECORD_ANSWER_KEY_PROVIDED": "Erantzun zuzenak bidali al dira?",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Value in summary table if answer key was NOT sent to students by instructor
+       "FLB_STR_EMAIL_RECORD_ANSWER_KEY_NO": "Ez",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Value in summary table if answer key WAS sent to students by instructor
+       "FLB_STR_EMAIL_RECORD_ANSWER_KEY_YES": "Bai",
+
+       // Used in the record email sent to the instructor after she emails grades.
+       // Message that preceeds what message the instructor email to her students.
+       "FLB_STR_EMAIL_RECORD_INSTRUCTOR_MESSAGE": "Iruzkin hau ere gehitu duzu:",
+
+       // About Flubaroo message (1 of 2)
+       "FLB_STR_ABOUT_FLUBAROO_MSG1" : "Flubaroo denbora aurrezteko tresna librea da, irakasleari online eginiko ariketak arin antolatu eta aztertzen lagunduko diona.",
+
+       // About Flubaroo message (2 of 2)
+       "FLB_STR_ABOUT_FLUBAROO_MSG2" : "Informazio gehiagorako zoaz www.flubaroo webgunera",
+
+       // Message that appears when "Student Submissions" sheet cannot be located.
+       "FLB_STR_CANNOT_FIND_SUBM_MSG" : "Flubarook ezin du ikasleen emaitzak dituen orria aurkitu. Orria bila ezazu eta berrizenda ezazu honela:  ",
+
+       // Message that appears when "Grades" sheet cannot be located.
+       "FLB_STR_CANNOT_FIND_GRADES_MSG" : "Flubarook ezin du ikasleen emaitzak dituen orria aurkitu. Kalifikatu berriro edo aurkitu orria eta berrizenda ezazu horrela:",
+
+       // Menu option to grade assignment.
+       "FLB_STR_MENU_GRADE_ASSIGNMENT" : "Zeregina kalifikatu",
+
+       // Menu option to re-grade assignment.
+       "FLB_STR_MENU_REGRADE_ASSIGNMENT" : "Berriz kalifikatu",
+
+       // Menu option to email grades.
+       "FLB_STR_MENU_EMAIL_GRADES" : "Kalifikazioak bidali",
+
+       // Menu option to hide student feedback (hides the column)
+       "FLB_STR_MENU_HIDE_FEEDBACK" : "Ikasleentzako iruzkinak ezkutatu",
+
+       // Menu option to edit student feedback (unhides the column)
+       "FLB_STR_MENU_EDIT_FEEDBACK" : "Ikasleentzako iruzkinak editatu",
+
+       // Menu option to hide help tips
+       "FLB_STR_MENU_HIDE_HELP_TIPS" : "Laguntza-aholkuak ezkutatu",
+
+       // Menu option to edit help tips
+       "FLB_STR_MENU_EDIT_HELP_TIPS" : "Laguntza-aholkuak editatu",
+
+       // Menu option to view report.
+       "FLB_STR_MENU_VIEW_REPORT" : "Kalifikazioen txostena ikusi",
+
+       // Menu option to learn About Flubaroo.
+       "FLB_STR_MENU_ABOUT" : "Flubaroori buruz",
+
+       // Menu title for "Advanced" sub-menu
+       "FLB_STR_MENU_ADVANCED" : "Aurreratua",
+
+       // Menu title for Advanced > Options
+       "FLB_STR_MENU_ADV_OPTIONS" : "Aukera aurreratuak",
+
+       // Menu option to choose the language.
+       "FLB_STR_MENU_SET_LANGUAGE" : "Hizkuntza ezarri",
+
+       // Menu option to enable autograde.
+       "FLB_STR_MENU_ENABLE_AUTO_GRADE" : "Autokalifikazioa aktibatu",
+
+       // Menu option to disable autograde.
+       "FLB_STR_MENU_DISABLE_AUTO_GRADE" : "Autokalifikazioa desaktibatu",
+
+       // Menu option to see reamining daily email quota
+       "FLB_STR_MENU_SHOW_EMAIL_QUOTA" : "Posta-kuota egiaztatu",
+
+       // Menu option shown to enable Flubaroo in a sheet where it's never been used before
+       "FLB_STR_MENU_ENABLE" : "Aktibatu Flubaroo kalkulu-orri honetan",
+
+       // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
+       "FLB_STR_FLUBAROO_NOW_ENABLED" : "Flubaroo kalkulu-orri honetan gaitu da. Menuan duzu bertarako sarbidea.<br><br>Kalifikatzen hasteko argibideak lortzeko klik egizu <a target=\"_blank\" href=\"http://www.flubaroo.com/#enabled\">hemen</a>.",
+
+       // Word that appears on the "Continue" button in grading and emailing grades.
+       "FLB_STR_BUTTON_CONTINUE" : "Jarraitu",
+
+       // Name of "Student Submissions" sheet
+       "FLB_STR_SHEETNAME_STUD_SUBM" : "Erantzunak",    
+
+       // Name of "Grades" sheet
+       "FLB_STR_SHEETNAME_GRADES" : "Kalifikazioak",
+
+       // Text put in Grades sheet when a question isnt graded.
+       "FLB_STR_NOT_GRADED" : "Kalifikatu gabea",
+
+       // Message that is displayed when a new version of Flubaroo is installed.
+       "FLB_STR_NEW_VERSION_NOTICE" : "Flubaroo bertsio berriagoa instalatu duzu. Bertsio berriaren nobedadeak ezagutzeko bisita ezazu flubaroo.com/blog",
+
+       // Headline for notifications / alerts.
+       "FLB_STR_NOTIFICATION" : "Flubarooren jakinarazpena",
+
+       // For emailing grades, question which asks user to identify email question.
+       "FLB_STR_EMAIL_GRADES_IDENTIFY_EMAIL" : "Posta helbidea jasotzen duen galdera: ", // note the space after ":"
+
+       // For emailing grades, asks user if list of questions and scores should be sent.
+       "FLB_STR_EMAIL_GRADES_QUESTIONS_AND_SCORES" : "Galderen zerrenda eta puntuazioa sartu: ", // note the space after ":"
+
+       // For emailing grades, asks user if answer key should be sent...
+       "FLB_STR_EMAIL_GRADES_ANSWER_KEY" : "Erantzun zuzenen gakoa sartu", // note the space after ":"
+
+       // For emailing grades, appears before text box for optional instructor message.
+       "FLB_STR_EMAIL_GRADES_INSTRUCTOR_MESSAGE" : "Gehitu mezu hau (aukerazkoa): ",
+
+       // Window title for View Report window
+       "FLB_STR_VIEW_REPORT_WINDOW_TITLE" : "Flubaroo - Kalifikazioen txostena",
+
+       // Title of historgram chart in report
+       "FLB_STR_VIEW_REPORT_HISTOGRAM_CHART_TITLE" : "Kalifikazioen histograma",
+
+       // Y-Axis (vertical) title of historgram chart in report
+       "FLB_STR_VIEW_REPORT_HISTOGRAM_Y-AXIS_TITLE" : "Bidalketak",
+
+       // X-Axis (horizontal) title of historgram chart in report
+       "FLB_STR_VIEW_REPORT_HISTOGRAM_X-AXIS_TITLE" : "Erantzun zuzenak",
+
+       // Label of "Email Me Report" button in View Report window
+       "FLB_STR_VIEW_REPORT_BUTTON_EMAIL_ME" : "Bidali txostena nire postara",
+
+       // Notification that tells who the report was emailed to (example: "The report has been emailed to: bob@hi.com")
+       "FLB_STR_VIEW_REPORT_EMAIL_NOTIFICATION" : "Txostena posta helbide honetara bidali da: " ,
+
+       // Message to show the user in the top-left cell of the Grading sheet when grading starts.
+       "FLB_STR_GRADING_CELL_MESSAGE" : "Kalifikatzen...",
+
+       // Message that pops up to notify the user that autograde is on.
+       "FLB_STR_AUTOGRADE_IS_ON" : "Autokalifikazioa gaitua dago. Flubaroo kalifikatzeko erantzun gehiagoren zain dago. Autokalifikazioa desgaitu arte inongo orrietan ez ezazu aldaketarik egin.",
+
+       // Message that pops up to notify the user that autograde is on.
+       "FLB_STR_AUTOGRADE_IS_OFF" : "Autokalifikazioa desgaitua izan da.",
+
+       // Message to ask the user if they want to grade recent, ungraded submissions, before autograde is enabled.
+       "FLB_STR_AUTOGRADE_GRADE_RECENT" : "Zenbait bidalketa, azkenak, ez dira oraindik kalifiaktu. Autokalifikazioa gaitu aurretik Flubarook kalifikatzea nahi zenuke?",
+
+       // Message to tell the user that autograde must gather grading and email settings before being turned on.     
+       "FLB_STR_AUTOGRADE_SETUP" : "Autokalifikazioa gaitu aurretik kalifikazioen ezarpenak eta posta helbidearen doitzea burutu behar duzu.‘OK’egizu jarraitzeko.",
+
+       // Message asking user if they'd like to update their grading and email settings before turning on autograde.
+       "FLB_STR_AUTOGRADE_UPDATE" : "Autokalifikazioa gaitu aurretik kalifikazioen eta posta elektrikoaren ezarpenak eguneratu nahi dituzu?",
+
+       // Title of Advanced Options window
+       "FLB_STR_ADV_OPTIONS_WINDOW_TITLE" : "Aukera aurreratuak",
+
+       // Advanced Options notice that appears at the top of the window, telling the user to read the help center articles.
+       "FLB_STR_ADV_OPTIONS_NOTICE" : "Ezarpen hauek ez itzazu aldatu dagozkion laguntza azalpenak irakurri gabe.",
+
+       // Text for Advanced Options, describing option to not use noreply@ email address when sending grades.     
+       "FLB_STR_ADV_OPTIONS_NO_NOREPLY" : "Kalifikazioak bidaltzerakoan igorle gisa noreply@ helbidea erabili beharrean nire posta helbidea erabili. ",
+
+       // Text for Advanced Options, describing option to send each student a link to edit their response.
+       "FLB_STR_ADV_OPTIONS_EMAIL_EDIT_LINK" : "Ikasle baten erantzuna posta bidez jasotzerakoan, bere erantzuna editatzen utziko dion lotura bidali.",
+
+       // Text for Advanced Options, describing option to change the 70% pass rate.
+       "FLB_STR_ADV_OPTIONS_PASS_RATE" : "Portzentaje honen azpitik, ikaslearen datuak gorritu egingo ditu: ",
+
+       // Message about how many more emails user can send that day. Shown from the Advanced > Check Email Quota menu. 
+       "FLB_STR_EMAIL_QUOTA_MSG" : "Egunera erabilgarri duzun posta kopurua: ",
+
+       // "Points" label that appears over second column in Step 1 of grading.
+       "FLB_STR_GRADE_STEP1_LABEL_POINTS" : "Puntuak",
+
+       // Error message shown in Step 1 of grading if no fields selected with "Identifies Student"
+       "FBL_STR_GRADE_STEP1_STUD_IDENT_ERROR" : "Jarraitu baino lehen, ikaslea identifikatuko duen galdera bat aukeratu behar duzu gutxienez.",
+
+       // Error message shown in Step 1 of grading if no fields selected that are gradeable
+       "FBL_STR_GRADE_STEP1_NO_GRADEABLE_ERROR" : "Gutxienez kalifikatzeko galdera bat aukeratu behar duzu.",
+
+       // Error message shown in Step 2 of grading if no answer key selected.
+       "FBL_STR_GRADE_STEP2_NO_AK_SELECTED" : "Jarraitu baino lehen erantzunen gakoa aukeratu behar duzu.",
+
+       // Grading option which indicates Normal Grading (for display only in Step 1)
+       "FLB_STR_GRADING_OPT_NORMAL_GRADING" : "Kalifikazio arrunta",
+
+       // Grading option which indicates Manual Grading (for display only in Step 1)
+       "FLB_STR_GRADING_OPT_MANUAL_GRADING" : "Eskuzko kalifikazioa",
+
+       // Message shown if user tries to enable autograde when a question is set for Manual Grading.
+       "FLB_STR_AUTOGRADE_NO_MANUAL_QUESTIONS" : "Autokalifikazioa ezin da gaitu. Galderaren bat eskuz kalifikatzeko prestatu da eta.",
+
+       // Message shown if some questions are identical. All questions must be unique for Flubaroo to grade properly.
+       "FBL_STR_GRADE_NON_UNIQUE_QUESTIONS" : "Eskuz kalifikatzeko galderaren bat hautatu duzu. Galdera horietako batzuk izen bera dutelako kalifikazioak ezin du jarraitu. \"Galdera\" izeneko bi galdera bazenitu, izen desberdina izan dezaten, lehen lerroan duten izena alda ezazu, ( \"1 galdera\" y \"2 galdera\"), eta berrriz ere kalifikazioa burutzen saia zaitez.",
+
+       // Label for manually graded questions in new style email summary of grades
+       "FLB_STR_EMAIL_GRADES_SCORE_TABLE_MANUAL" : "Eskuz kalifikatua",
+
+       // Instructions that show-up in window when manual grading is selected.     
+       "FBL_STR_MANUAL_GRADING_INSTR" : "Eskuz kalifikatzeko behe aldeko kontrolak erabili. Aukera hau baliagarria izango da ezarpenaren lehen pausuan era honetara kalifikatzeko aukera egin duzun galderentzako \"Eskuz kalifikatzeko\"",
+
+       // Menu option to open window for manual (by hand) grading of questions.
+       "FLB_STR_MENU_MANUALLY_GRADE_QUESTIONS" : "Eskuz kalifikaturiko galderak",
+
+       // Message shown in email to students if manually graded question wasn't assigned any points.
+       "FLB_STR_EMAIL_GRADES_SCORE_NO_POINTS_ASSIGNED" : "Puntuaziorik gabea",
+
+       // Header for the column in the table of scores in the email which lists the Help Tip (if provided)
+       "FLB_STR_EMAIL_GRADES_MANUALLY_GRADE_TEACHER_COMMENT_HEADER" : "Irakaslearen iruzkinak",
+
+       // Title for the "Grade by Hand" window     
+       "FLB_STR_MANUALLY_GRADE_QUESTIONS_WINDOW_TITLE" : "Flubaroo - Eskuz kalifikatuak",
+
+       // Label next to the first step in the "Grade by Hand" window, which allows the teacher to select the student.
+       "FLB_STR_MANUAL_GRADING_STEP1" : "1. ikaslea hautatu:",
+
+       // Label next to the second step in the "Grade by Hand" window, which allows the teacher to select which question.
+       "FLB_STR_MANUAL_GRADING_STEP2" : "2. galdera hautatu:",
+
+       // Label next to the third step in the "Grade by Hand" window, which allows the teacher to read the submission.
+       "FLB_STR_MANUAL_GRADING_STEP3" : "3. ikaslearen erantzuna irakurri:",
+
+       // Label next to the fourth step in the "Grade by Hand" window, which allows the teacher to enter notes.
+       "FLB_STR_MANUAL_GRADING_STEP4" : "4. Ikaslearentzako iruzkina idatzi (postaz bidaliko da):",
+
+       // Label next to the fifth step in the "Grade by Hand" window, which allows the teacher to enter points.
+       "FLB_STR_MANUAL_GRADING_STEP5" : "5. Puntuazioa ezarri:",
+
+       // Text for the link that shows the teacher's answer key / rubric in the "Grade by Hand" window.
+       "FLB_STR_MANUAL_GRADING_REVIEW_ANSWER_KEY" : "Erantzunen gakoa ikusi",
+
+       // Text for the button that is used to set the grade in the "Grade by Hand" window.
+       "FLB_STR_MANUAL_GRADING_BUTTON_SET_GRADE" : "Gorde",
+
+       // Text that appears in the button while the grade is being applied in the "Grade by Hand" window.
+       "FLB_STR_MANUAL_GRADING_BUTTON_WORKING" : "Lanean",
+
+       // Message that appears at the top of the "Grade by Hand" window after the grade has been successfully applied.
+       "FLB_STR_MANUAL_GRADING_GRADE_APPLIED" : "Kalifikazioa ezarri da.",
+
+       // Message that appears at the top of the "Grade by Hand" window if the teacher doesn't enter a valid score in the box.
+       "FLB_STR_MANUAL_GRADING_ENTER_VALID_GRADE" : "Mesedez, baliozko kalifizioa ezarri.",
+
+       // Message that appears at the top of the "Grade by Hand" window if an error occurs while setting the grade.
+       "FLB_STR_MANUAL_GRADING_ERROR_OCCURED" : "Erroreren bat gertatu da.",
+
+       // Text for "Close X" link that allows the teacher to close the pop-up window that contains the answer key in the "Grade by Hand" window.
+       "FLB_STR_MANUAL_GRADING_CLOSE_POPUP" : "Itxi",
+
+       // Message that appears if a teacher tries to disable autograde while grading is in process.
+       "FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW" : "Autokalifikazio lanetan ari da, ezin da desgaitu. Beranduago saia zaitez.",
+
+       // Message that is shown to the user if grading cannot complete because no valid submissions were found in the submissions sheet (i.e. oinly blank rows).
+       "FLB_STR_NO_VALID_SUBMISSIONS" : "Ikasle bidalketarik aurkitu ez denez ez da kalkulu-orririk sortu.",
+
+       // Title of the window that informs the user that their Grades sheet is corrupted (badly formed).
+       "FLB_STR_INVALID_GRADE_SHEET_TITLE": "Kalifikazio-orria hondatua dago. Ezin da jarraitu",
+
+       // Message shown in the "Corrupted Grades Sheet" window.
+       "FLB_STR_INVALID_GRADES_SHEET" : "<p>Flubarook ezin du jarraitu, kalifikazio orria hondatua dago. Baliteke zutabe, lerro edo daturen bat kalifikazio burutu ondoren ezabatu izana? </p>\ <p>Laguntza lortzeko <a href=\"http://www.flubaroo.com/hc/corrupted-grades-sheet\" target=\"_blank\">artikulu hau</a> kontsulta ezazu.</p>",
+
+       // Short message that is included at the top of the Grades sheet in bold, instructing users not to modify the Grades sheet.
+       "FLB_STR_DO_NOT_DELETE_MSG" : "FLUBAROOREN FUNTZIONAMENDU ZUZENA BERMATZEKO ORRIALDE HONETAKO LERRO EDO ZUTABERIK EZ EZAZU EZABA.",
+
+       // Label for the "Share Grades" window, which asks the user how they would like to share the grades (email, drive, or both).
+       "FLB_STR_GRADES_SHARE_LABEL" : "Kalifikazioa banatzeko modua:",
+
+       // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via email.
+       "FLB_STR_GRADES_SHARE_EMAIL" :  "Posta elektroniko bidez banatu", // always at index 0
+
+       // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via Google Drive.
+       "FLB_STR_GRADES_SHARE_DRIVE" :  "Google Drive bidez banatu",  // always at index 1
+
+       // Pull-down menu selection for the "Share Grades" window which specifies grades should be shared via both email and Drive.
+       "FLB_STR_GRADES_SHARE_BOTH" :   "Posta zein Drivez banatu", // always at index 2
+
+       // Name of the folder where shared and printed grades get put in the teacher's My Drive.
+       "FLB_STR_DRIVE_SHARE_FOLDER_NAME" : "Flubaroo - Kalifikazioak banatutu dira",
+
+       // Text that begins the shared Google Document. Example: "Grade for dave@edcode.org - Exam #2"
+       "FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE" : "Kalifikazio honetarako informea",
+
+       // Text/Link that is included in the emails to students if the "both" method of grade sharing was selected by the teacger.
+       "FLB_STR_EMAIL_GRADES_DRIVE_SHARE_MSG" : "Google Driven kalifikazio informea ikusteko klik egizu",
+
+       // Title for window that allows teachers to print the grades.
+       "FLB_STR_PRINT_GRADES_WINDOW_TITLE" : "Flubaroo - Kalifikazioak inprimatu",
+
+       // Instructions for the "Print Grades" window
+       "FLB_STR_PRINT_GRADES_INSTR" : "Inprimatu eta ikasle bakoitzari banatzeko Google dokumentua sortuko du Flubarook. Dokumentu bakoitzerako iruzkina eta galderak edo/eta erantzunak txertatu nahi dituzun erabaki zenezake.",
+
+       // Title for the "Share Grades" window.
+       "FLB_STR_SHARE_GRADES_WINDOW_TITLE" : "Flubaroo - Kalifikazioan banatu",
+
+       // Instructions for the "Share Grades" window.
+       "FLB_STR_SHARE_GRADES_INSTR" : "Flubarook zuk ezarritako kalifikazioa ikasle bakoitzarekin postaz, Drivez edo bi aukerez bana dezake. Ikaslearen posta jasotzen duen galdera adierazteko menu zabalgarria erabil ezazu. Postarik jaso ez bada ezin da kalifikaziorik banatu.",
+
+       // Success message shown after grades have been printed. Followed by a link to the printable document.
+       "FBL_STR_PRINT_GRADES_SUCCESS" : "Ikasleen kalifikazioak biltzen dituen txostena sortu da Google dokumentuetan. Artxiboaren izenaren gainean klik egizu irekitzeko. Dokumentua inprimatu eta ikasle bakoitzari bere txostena ematerik baduzu hala nahi bazenu.",
+
+       // Text that begins the name of the Google Document containing the printable grades. Example: "Printable grades for: Exam #2"
+       "FBL_STR_PRINT_GRADES_TITLE_PRE": "Kalifikazio hauek inprimatu:",
+
+       // Menu option to share grades.
+       "FLB_STR_MENU_SHARE_GRADES" : "Kalifikazioak partekatu",
+
+       // Menu option to print grades.
+       "FLB_STR_MENU_PRINT_GRADES" : "Kalifikazioak inprimatu",
+
+       // Grading option for "Extra Credit" on questions.
+       "FLB_STR_GRADING_OPT_EXTRA_CREDIT": "Puntuazioa gehigarria",
+
+        // Text for Advanced Options, describing option to allow extra credit.     
+       "FLB_STR_ADV_OPTIONS_EXTRA_CREDIT" : "Galderen puntuazioa ezartzerakoan puntuazio gehigarria baimendu",
+
+       // Text for Advanced Options, asking if user wants to show some additional options in the pull-down menu in Step 1 of grading.
+       "FLB_STR_ADV_OPTIONS_ADDITIONAL_GOPTS" : "1. pausoan kalifikazio gehigarrien aukerak erakutsi (baztertu, erreferentzia kopia egin, etab)",
+   
+       // Notice for Grades sheet (shown at top) if Autograde is enabled. Tells the user that grading isn't only considering a student's most recent submission.
+       "FLB_STR_AUTOGRADE_NOT_SUMMARIZED" : "EBALUAZIO AUTOMATIKOAREN DOIKUNTZAK DIRELA ETA, ORRI HONEK IKASLEKO NOTA BAT BAINO GEHIAGO EDUKI DEZAKE",
+
+       // Text for Advanced Options, letting user decide if they want Autograde to grade only a student's most recent submission (if checked).
+       "FLB_STR_ADV_OPTIONS_AG_WITH_SUMMARY" : "Ebaluazio automatikoa ikasleak eginiko azken bidalketarekin soilik funtzionatuko du (Ikus <a target=\"_blank\" href=\"" + FLB_AUTOGRADE_SELECT_MODE_URL + "\">artikulu hau</a>).",
+
+       // Text for Advanced Options, asking user if when using the "Grade Questions by Hand" tool, if it should auto advance to the next question when
+
+       // a score is set (versus the next student).
+       "FLB_STR_ADV_OPTIONS_MGR_ADV_QUESTION" : "”Galderak eskuz ebaluatu” \aukera egiterakoan\ hurrengo galderara jo (hurrengo ikaslera jo beharrean)",
+
+       // Advanced menu option that will expand the special tokens in formulas written by the teacher in the Grades sheet.
+       "FLB_STR_MENU_EXPAND_FORMULAS" : "Irakaslearen formulak zabaldu",
+
+        // Grading option which ignores a question
+       "FLB_STR_GRADING_OPT_IGNORE" : "Baztertu",
+
+        // Grading option which copies a column for reference to the Grades sheet
+       "FLB_STR_GRADING_OPT_COPY_FOR_REFERENCE" : "Erreferentziarako kopia",
+
+       // Message shown in sidebar for Flubaroo update announcements
+       "FLB_STR_EMAIL_ME_THIS_ANNOUCNEMENT" : "Bidali ohar hau nire postara",
+
+       // Message to show when menu option for FLB_STR_MENU_ENABLE is chosen
+       "FLB_STR_FLUBAROO_NOW_INSTALLED" : "<b>Ongi etorri!</b><p>Flubaroo instalatu eta beren ikasleen hezkuntza hobetu nahi duen milaka hezitzaileengana batzeagatik eskerria asko.</p><p>Lehen pauso hauetarako laguntza  eta bideo tutoriala ikusteko bisita ezazu <a target=\"_blank\" href=\"http://www.flubaroo.com/#firstinstall\">flubaroo.com</a>.</p><p>>Kalifikazioen adubideak topa zenitzake <a target=\"_blank\" href=\"https://goo.gl/0e9ut6\">hemen</a>, Flubaroo frogatzeko orri honetara kopiatu eta itsatsi zenitzakeenak.</p><p>Zorte on eta goza ezazu Flubaroo'z</p><p><b>--Flubaroo Taldea</b></p>",
+
+       // Message shown in the "Share Grades" and "Print Grades" dialogues, that indicates whether the student's own
+
+       // response (answer) to a question should show up in what gets emailed to them.
+       "FLB_STR_EMAIL_GRADES_INCLUDE_STUDENT_RESPONSES" : "Gehitu ikaslearen erantzunak",
+
+       // Link in 'Share Grades' dialouge that reveals the hidden advanced options.
+       "FLB_STR_EMAIL_GRADES_SHOW_ADVANCED" : "Aukera aurreratuak erakutsi (Pegatinak & Beste)",
+
+       // Link in 'Share Grades' dialouge that hides the hidden advanced options.
+       "FLB_STR_EMAIL_GRADES_HIDE_ADVANCED" : "Aukera aurreratuak ezkutatu",
+
+       // Option in 'Share Grades' to say that all questions should be included
+       "FLB_STR_EMAIL_GRADES_INCLUDE_ALL_QUESTIONS" : "Gehitu galdera guztiak",
+
+       // Option in 'Share Grades' to say that only questions with correct answers should be included
+       "FLB_STR_EMAIL_GRADES_INCLUDE_CORRECT_QUESTIONS" : "Zuzen erantzundako galderak soilik txertatu.",
+
+       // Option in 'Share Grades' to say that only questions with incorrect answers should be included
+       "FLB_STR_EMAIL_GRADES_INCLUDE_INCORRECT_QUESTIONS" : "Oker erantzundako galderak soilik txertatu",
+
+       // Generic "Loading..." string used in various places.
+       "FLB_STR_LOADING" : "Kargatzen...",
+
+       // Message shown if only questions with correct answers are included when sharing grades
+       "FLB_STR_EMAIL_GRADES_ONLY_CORRECT" : "Erantzun ZUZENEN laburpena:",
+
+       // Message shown if only questions with incorrect answers are included when sharing grades
+       "FLB_STR_EMAIL_GRADES_ONLY_INCORRECT" : "Erantzun OKERREN laburpena:",
+
+       // Message shown in Advanced Options to select what info is shared about the overall score
+       "FLB_STR_ADV_OPTIONS_SHARE_SCORE_TYPE" : "Kalifikazioak postaz ala Drivez banatzerakoan,kalifikazio totala erakutsi honela",
+
+       // Message shown in Advanced Options to select option for whether to include answer key for "Grade by Hand" questions
+       "FLB_STR_ADV_OPTIONS_INCLUDE_ANSKEY_FOR_MGR_QUESTIONS" : "Eskuz kalifikaturiko galderetan, kalifikazio banaketan erantzun zuzenaren gakoa erakutsi",
+
+       // Message shown in Advanced Options to pick sender name in emails sent
+       "FLB_STR_ADV_OPTIONS_EMAIL_SENDER_NAME_QUESTION" : "Kalifikazioak ikasleei postaz banatzerakoan igorle gisa agertu zaien izena",
+
+       // Message shown in Advanced Options to choose max assignable points per question
+       "FLB_STR_ADV_OPTIONS_MAX_QUESTION_POINTS" : "Galdera bakoitzeko ezarri daitekeen gehienezko puntuazioa",
+
+       // Options for FLB_STR_ADV_OPTIONS_SHARE_SCORE_TYPE. These follow the prompt in FLB_STR_ADV_OPTIONS_SHARE_SCORE_TYPE.
+       "FLB_STR_GRADE_SHARE_SHOW_POINTS_AND_PERCENT": "puntuak eta ehunekoak",
+       "FLB_STR_GRADE_SHARE_SHOW_POINTS_ONLY": "puntuak soilik (ehunekorik ez)",
+       "FLB_STR_GRADE_SHARE_SHOW_NEITHER": "ez punturik ez ehunekorik ere",
+
+       // Text for link in "Share Grades" window that lets teacher decide to include a sticker (and choose one)
+       "FLB_STR_GRADE_SHARE_SETUP_STICKER": "Pegatina txertatu",
+
+       // Text shown next to "Setup Sticker" text, indicating  if no sticker will be sent
+       "FLB_STR_GRADE_SHARE_STICKER_NOT_ENABLED": "(gaitu gabea)",
+
+       // Text for link in "Share Grades" window that lets teacher decide to send a Certificate (and choose one)     
+       "FLB_STR_GRADE_SHARE_SETUP_CERTIFICATE": "Egiaztagiriaren ezarpenak",
+
+       // Instructions for "Include Sticker" overlay in Share Grades window
+       "FLB_STR_GRADE_SHARE_INCLUDE_STICKER_INSTR": "Ehuneko batetik gora lortzen duten ikasleei pegatina txertatzerik baduzu.0 eta %100 bitarteko ehuneko balioa eta txertatu nahi duzun pegatina aukera ezazu.",
+
+       // Text for drop-down to select score above which sticker will be sent
+       "FLB_STR_GRADE_SHARE_MIN_STICKER_PERCENT": "Txertatu puntuazio handiagorekin",
+
+       // Instructions for how to select a sticker
+       "FLB_STR_GRADE_SHARE_PICK_STICKER":  "Pegatina aukeratzeko klik egizu. Scrolla ezker eta eskuinera mugitu aukera gehiago ikusteko",
+
+       // First choice in sticker drop-down list, saying that no sticker will be included
+       "FLB_STR_GRADE_SHARE_NO_STICKER_INCLUDED": "Pegatinarik ez",
+
+       // Text shown next to checkbox to choose whether to send a sticker
+       "FLB_STR_GRADE_SHARE_STICKER_ENABLE": "Pegatina txertatu",
+
+       // Text shown in preview box when no sticker has been selected from the drop-down.
+       "FLB_STR_GRADE_SHARE_STICKER_NONE_SELECTED": "Ez da pegatinarik hautatu",
+
+       // Text shown if images couldn't be fetched (on error).
+       "FLB_STR_GRADE_SHARE_STICKER_PICKER_ERROR": 'Ez da pegatinarik hautatu. Mesedez, berriro saia zaitez. Arazoak jarraituko balu jarri kontaktuan <a target="_blank" href="http://www.flubaroo.com/contact">Flubaroo support</a>.',
+
+       // "Add more stickers!" text that shows up next to the drop-down to pick sticker when sharing grades
+       "FLB_STR_GRADE_SHARE_STICKER_ADD_MORE": "Pegatina gehiago gehitu nahi zenuke? Klik egizu hemen",
+
+       // Text on the button to save and close settings in the sticker picker
+       "FLB_STR_GRADE_SHARE_STICKER_DONE_BUTTON": "Kito",
+
+       // Message that shows in the Sticker picker window when a .zip files is being uncompressed.
+       "FLB_STR_GRADE_SHARE_UNZIPPING": "Pegatinen artxiboa deskonprimatzen. Itxaron minutu batez.",
+
+       // Name of the optional sheet which contains a list of assignable categories.
+       "FLB_STR_CATEGORIES_SHEET_NAME": "Kategoriak",
+
+       // Name of field in Step 1 of grading to select a category name for a question
+       "FLB_STR_GRADE_STEP1_LABEL_CATEGORY": "Kategoria",
+
+       // Name of sheet for the Categories Report
+       "FLB_STR_CATEGORY_SHEET_NAME": "Kategorien txostena",
+
+        // Name of the Flubaroo menu item that generates/updates the Category report.
+       "FLB_STR_MENU_VIEW_CATEGORY_REPORT" : "Kategorien txostena exekutatu",
+
+       // Advanced option to clear Grades sheet instead of deleting it when regrading (experimental).
+       "FLB_STR_ADV_OPTIONS_CLEAR_GRADES" : "Berriz kalifikatzean ‘Kalifikazioak! orriaren edukia ez batu orria ezabatu ordez (<b>Esperimentala!</b>) ",
+
+       "FBL_STR_CHANGING_STUDENT_IDENTIFIERS_WARNINGS" : "<p><b><font color=\"orange\">KONTUZ!</font></b></p><p>Oraintxe gehitu edo ezabatu duzu \"Ikasleen identifikazio eremua\" <u>dagoeneko</u> kalifikaturiko galdera edo esleipena. Honek zure orrian zenbait datu\ “Kalifikazio\” \orri galtzea ekar dezake. Bere kalifikazioak jaso dituenen erregistroak (1) galtzea, ikasleei egindako (2) iruzkinak, eta “Eskuz kalifikaturiko \” galderei eginiko iruzkin (3) <u>guztiak</u></p> \ <p>'Jarraitzeko' klik egizu <u>soilik</u> datu horiek galtzea axola ez bazaizu. Bestela, leihoa itxi eta aldaketak baliogabetuko dira. \ Ikus <a target=\"_blank\" href=\"http://www.flubaroo.com/hc/changing-student-identifiers\">artikulu hau</a> gehiago jakiteko.</p>",
+
+       // Flubaroo Tips, shown when grading completes.
+       "FLB_STR_TIP_MSG_NUMBER_1" : "<b>Flubaroo Aholkua #1:</b> Flubarook galdera zuzen bat baino gehiago onar dezake.",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_2" : "<b>Flubaroo Aholkua #2:</b> Flubarook matematikan eta zeintziatan zenbaki tarteak kalifika ditzake.",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_3" : "<b>Flubaroo Aholkua #3:</b> KATUA ala katua? Maiuskulaz ala minuskulaz kalifika dezake.",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_4" : "<b>Flubaroo Aholkua #4:</b> Oinarrizko gutxienezko puntuazioa, defektuz %70ean ezarritakoa, alda nahi zenuke?",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_5" : "<b>Flubaroo Aholkua #5:</b> Geratzen zaizun posta kopurua errebisatu nahi zenuke?",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_6" : "<b>Flubaroo Aholkua #6:</b> Zure frogak automatikoki kalifikatzea nahi zenuke?",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_7" : "<b>Flubaroo Aholkua #7:</b> Zalamtzarik baduzu? Hainbat argibide FAQetan aurki zenitzake! !",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_8" : "<b>Flubaroo Aholkua #8:</b> GAFE ikastetxe batekoa zara? Postak automatikoki jaso itzazu!!",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_9" : "<b>Flubaroo Aholkua #9:</b> Kalifikazioak postaz banatzea ez zenuke nahi? Parteka itzatzu Google Drive budez!!",
+
+
+       "FLB_STR_TIP_MSG_NUMBER_10" : "<b>Flubaroo Aholkua #10:</b> Zure ikasleen kalifikazioen kopia behar duzu? Nola inprima daitezkeen ikas ezazu!",
+   },
+   // END EUSKARA //////////////////////////////////////////////////////////////////////////////////
+
+
 
 } // end langs
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-

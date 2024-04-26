@@ -212,7 +212,7 @@ function AutogradeClass()
     if (grades_sheet && !grades_sheet_is_valid)
       {
         // Existing Grades sheet is invalid! Cannot continue with re-grading.
-        UI.showMessageBox(langstr("FLB_STR_INVALID_GRADE_SHEET_TITLE"), langstr("FLB_STR_INVALID_GRADES_SHEET"));
+        UI.showInvalidGradesSheetMessage();
         return;
       }
     
@@ -308,7 +308,18 @@ function AutogradeClass()
       }
     else
       {
-        Debug.warning("Autograde.off() - submit trigger had no recorded property.");
+        Debug.warning("Autograde.off() - submit trigger had not recorded property.");
+      }
+    
+    var monitor_trigger_id = dp.getProperty(DOC_PROP_AUTOGRADE_MONITOR_TRIGGER_ID);
+    if (monitor_trigger_id)
+      {
+        // Delete actual trigger.
+        
+        deleteProjectTrigger(ss, monitor_trigger_id);
+
+        // Clear the stored trigger ID.
+        dp.deleteProperty(DOC_PROP_AUTOGRADE_MONITOR_TRIGGER_ID);        
       }
 
     // Set autograding and ui flags.
@@ -364,6 +375,8 @@ function AutogradeClass()
     
     // create the trigger to fire on form submit.
     var trigger = checkForOnSubmitTrigger(ss);
+    var monitor_trigger = null;
+    
     if (trigger)
       {
         // Before creating the trigger, check for the (rare?) case that the trigger
@@ -374,16 +387,43 @@ function AutogradeClass()
     else
       {
         // typical case
-        trigger = ScriptApp.newTrigger("onAutogradeSubmission")
+        try
+          {
+            trigger = ScriptApp.newTrigger("onAutogradeSubmission")
                                .forSpreadsheet(ss)
                                .onFormSubmit()
                                .create();
     
-        Debug.info("Autograde.finalizeOn() - onFormSubmit trigger created: " + trigger.getUniqueId()); 
+            Debug.info("Autograde.finalizeOn() - onFormSubmit trigger created: " + trigger.getUniqueId()); 
+          }
+        catch (e)
+          {
+            Debug.info("Autograde.finalizeOn() - onFormSubmit trigger failed to create! reason: " + e);
+            Debug.writeToFieldLogSheet();
+
+            throw e;
+          }
+
+        try
+          {         
+            // also create the hourly timed trigger that checks-up on the form submit trigger.
+            monitor_trigger = ScriptApp.newTrigger("monitorAutogradeSubmission")
+                                       .timeBased()
+                                       .everyHours(1)
+                                       .create();
+        
+            Debug.info("Autograde.finalizeOn() - Autograde monitor trigger created: " + monitor_trigger.getUniqueId()); 
+          }
+        catch (e)
+          {
+            Debug.info("Autograde.finalizeOn() - monitorAutogradeSubmission trigger failed to create! reason: " + e);
+          }
+
       }
         
     dp.setProperty(DOC_PROP_AUTOGRADE_SUBMIT_TRIGGER_ID, trigger.getUniqueId());
-
+    dp.setProperty(DOC_PROP_AUTOGRADE_MONITOR_TRIGGER_ID, monitor_trigger.getUniqueId());
+    
     setAgUiState(agUIEvents.AUTOGRADE_ON);
     
     createFlubarooMenu(ss);
@@ -664,6 +704,9 @@ function AutogradeClass()
 function toggleAutograde()
 {
   Debug.info("toggleAutograde() - handling user's choice");
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss_id = ss.getId();
+  var owner = DriveApp.getFileById(ss_id).getOwner();
   
   if (Autograde.isRunning())
     {
@@ -673,6 +716,14 @@ function toggleAutograde()
                      langstr("FLB_STR_AUTOGRADE_CANNOT_DISABLE_NOW"),
                      Browser.Buttons.OK);
       
+    }
+  else if (Autograde.isOff() && (owner === null))
+    {
+      // if we're in a team drive, don't allow autograde to be enabled 
+      // (can't setup triggers).
+      Browser.msgBox(langstr("FLB_STR_NOTIFICATION"), 
+                         langstr("FLB_STR_AUTOGRADE_CANNOT_WORK_IN_TEAM_DRIVE"),
+                         Browser.Buttons.OK);
     }
   else
     {    
@@ -866,7 +917,8 @@ function onAutogradeSubmission()
     }
   catch (e)
      {
-      Debug.info("onAutogradeSubmission() - Exception: " + e);
+      /*
+      Debug.error("onAutogradeSubmission() - Exception: " + e);
       var e_msg = "onAutogradeSubmission() - ss.getID() = " + ss.getId() + ", Exception: " + e + "\n\n";
 
       if (Debug.checkFieldLog())
@@ -883,8 +935,12 @@ function onAutogradeSubmission()
               e_msg += lines[i][0] + "\n";
             }          
         }
+      */
       
       //Debug.mail(e_msg);
+
+      // daa 10/21/23: trying to track down source of autograde failures.
+      console.error("onAutogradeSubmission() - Exception for user: " + getUid() + ": " + e);    
     }
   finally
     {      
@@ -931,6 +987,56 @@ function onAutogradeSubmission()
       
 } // onAutogradeSubmission()
 
+// monitorAutogradeSubmission: Called every hour when autograde is On.
+function monitorAutogradeSubmission()
+{
+  var ss;
+  var dp;
+
+  // noticed that sometimes I get this error in log from attempting to get doc props:
+  // "No item with the given ID could be found. Possibly because you have not edited this item or you do not have permission to access it."... so putting in try/catch
+  try
+    {
+      ss = SpreadsheetApp.getActiveSpreadsheet();
+      dp = PropertiesService.getDocumentProperties();
+    }
+  catch (e)
+    {
+      return;
+    }
+  
+  // check if we think autograde is on, but the trigger is missing (Google likely deleted it).
+  // if detected, restore it and trigger autograde too incase we've missed any recent submissions.
+  //Debug.info("monitorAutogradeSubmission(): Autograde.isOn() = " + Autograde.isOn() + ", checkForOnSubmitTrigger(ss) = " + checkForOnSubmitTrigger(ss));
+  if (Autograde.isOn() && (checkForOnSubmitTrigger(ss) === null))
+    {
+      try
+        {
+          Debug.info("monitorAutogradeSubmission(): Re-creating missing form submit trigger");
+          var trigger = ScriptApp.newTrigger("onAutogradeSubmission")
+                                 .forSpreadsheet(ss)
+                                 .onFormSubmit()
+                                 .create();
+          dp.setProperty(DOC_PROP_AUTOGRADE_SUBMIT_TRIGGER_ID, trigger.getUniqueId());
+        }
+      catch (e)
+        {
+          Debug.info("monitorAutogradeSubmission(): Unable to regenerate missing autograde submit trigger: " + e);
+          return;
+        }
+
+      Debug.info("monitorAutogradeSubmission(): Triggering autograde to run");
+
+      onAutogradeSubmission();
+    }
+  
+  try {
+    Debug.writeToFieldLogSheet();
+  }
+  catch (e) {
+    
+  }
+}
 
 function notifyOwnerOfAutogradeOff()
 {

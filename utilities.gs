@@ -230,8 +230,18 @@ function logInvalidGradeSheet(reason_str)
 
 function logGrading(ss)
 {
+  var isSampleAssignment = false;
+
+  if (ss.getName().indexOf('Geography 10 - Quiz #2') !== -1)
+    {
+      isSampleAssignment = true;
+    }
+
+  logEvent(FLB_EVENT_ASSIGNMENT_GRADED, {'isSampleAssignment': isSampleAssignment});
+
   if (ss.getName().indexOf('Geography 10 - Quiz #2') == -1)
     {
+      /*
       // probably not the "try it now" sample. so anonymously record that another
       // assignment was graded!
       var ga_url = createGATrackingUrl("Assignment%20Graded");
@@ -254,7 +264,8 @@ function logGrading(ss)
       if (ga_url)
         {
           var response = UrlFetchApp.fetch(ga_url);
-        }     
+        }
+      */     
       
     }
   else // sample assignment
@@ -395,6 +406,8 @@ function logAboutFlubaroo()
 
 function logFirstInstall()
 {
+  logEvent(FLB_EVENT_FIRST_INSTALL, null);
+
   var ga_url = createGATrackingUrl("First%20Install");
   if (ga_url)
     {
@@ -410,6 +423,135 @@ function logRepeatInstall()
       var response = UrlFetchApp.fetch(ga_url);
     }
 }
+
+function logDailyPing()
+{
+  var up = PropertiesService.getUserProperties();
+
+  var last_dp = up.getProperty(USER_PROP_LAST_DAILY_PING);
+  var do_dp_now = false;
+
+  var dt = new Date();
+  var time_ms = dt.getTime();
+
+  if (!last_dp)
+    {
+      do_dp_now = true;
+    }
+  else
+    {
+      var last_dp_ms = Number(last_dp);
+      var diff_ms = time_ms - last_dp_ms;
+      var diff_hrs = diff_ms / 3600000;
+
+      if (diff_hrs > 24)
+        {
+          do_dp_now = true;
+        }
+    }
+  
+  if (!do_dp_now)
+    {
+      return false;
+    }
+
+  // Gather some specific details for this user
+  var uid = getUid(); // unique id === same as Date.getTime() at time of first install/use
+  var email = Session.getEffectiveUser().getEmail();  
+  var isWorkspaceUserAccount;
+
+  if ((email.indexOf('@gmail.com') !== -1)|| (email.indexOf('@googlemail.com') !== -1)) {
+    isWorkspaceUserAccount = false;
+  }
+  else {
+    var quota_rem = MailApp.getRemainingDailyQuota();
+    isWorkspaceUserAccount = (quota_rem > 100) ? true : false;
+  }
+
+  var timezone = up.getProperty(USER_PROP_TIMEZONE);
+  var locale = up.getProperty(USER_PROP_LOCALE);
+
+  var lifetimeGradeCount = up.getProperty(USER_PROP_GRADE_LIFETIME_COUNT);
+  if (!lifetimeGradeCount) {
+    lifetimeGradeCount = 0;
+  }
+  lifetimeGradeCount = (lifetimeGradeCount % 100) * 100;
+
+  var parameters =
+    {
+      timestamp: time_ms,
+      uid: uid, // also same as install time (in ms)
+      timezone: timezone,
+      locale: locale,
+      isWorkspaceUserAccount: isWorkspaceUserAccount,
+      lifetimeGradeCount: lifetimeGradeCount,
+    };
+    
+  up.setProperty(USER_PROP_LAST_DAILY_PING, time_ms.toString());  
+  console.log({message: 'flubarooDailyPing', pingData: parameters});
+}
+
+function logEvent(eventName, eventSpecificDetails)
+{
+  var uid = getUid();
+  var eventSpecificDetailsStr;
+
+  var dt = new Date();
+  var timeMS = dt.getTime();
+
+  if (!eventSpecificDetails)
+    {
+      eventSpecificDetailsStr = '""';
+    }
+  else
+    { 
+      Debug.info('logEvent: eventSpecificDetails = ' + JSON.stringify(eventSpecificDetails));
+      // turn eventSpecificDetails JSON into stringified JSON.
+      // we don't use JSON.stringify() though to *ensure* that the
+      // order of the fields in the JSON is always consistent, which is needed for proper
+      // grouping in BigQuery. so we instead create our own in which the fields are always sorted.
+      eventSpecificDetailsStr = '{';
+      var esd_keys = Object.keys(eventSpecificDetails);
+      esd_keys.sort(function(f1, f2) {return (f1 > f2 ? 1 : -1) });
+
+      for (var i=0; i < esd_keys.length; i++)
+        {
+          var fieldName = esd_keys[i]; 
+          if (typeof eventSpecificDetails[fieldName] === 'string') {
+            eventSpecificDetailsStr += '"' + fieldName + '": "'  + eventSpecificDetails[fieldName] + '"';
+            if (i !== (esd_keys.length -1))
+              {
+                eventSpecificDetailsStr += ',';
+              }
+          } else if ((typeof eventSpecificDetails[fieldName] === 'number')
+                     || (typeof eventSpecificDetails[fieldName] === 'boolean')) {
+            eventSpecificDetailsStr += '"' + fieldName + '": ' + eventSpecificDetails[fieldName];
+            if (i !== (esd_keys.length -1))
+              {
+                eventSpecificDetailsStr += ',';
+              }
+          }
+        }
+      eventSpecificDetailsStr += '}';
+    }
+  
+  //Debug.info('eventSpecificDetailsStr = ' + eventSpecificDetailsStr);
+  var up = PropertiesService.getUserProperties();
+  var timezone = up.getProperty(USER_PROP_TIMEZONE);
+
+  var parameters =
+    {
+      eventName: eventName,
+      eventSpecificDetails: eventSpecificDetailsStr,
+      timestamp: timeMS,
+      uid: uid, // also same as install time (in ms)
+      timezone: timezone
+    };
+
+  console.log({message: 'flubarooEventLog', eventData: parameters});
+}
+
+
 
 // setCurrentVersionInfo:
 // Called just before grading occurs. So new version isn't set after install
@@ -448,6 +590,12 @@ function setFlubarooUid()
       up.setProperty("flubaroo_uid", ms_str);
       logFirstInstall();
     }
+}
+
+function getUid()
+{
+  var up = PropertiesService.getUserProperties();
+  return up.getProperty("flubaroo_uid");
 }
 
 // Spreadsheet Access
@@ -649,6 +797,11 @@ setNotification = function(ss, title, msg)
   ss.toast(msg, title, 300);  
   
 } // setNotification()
+
+clearNotification = function(ss)
+{
+  ss.toast("", "", 0.10);
+}
   
 // deleteTrigger()
 // ---------------
@@ -682,6 +835,38 @@ deleteTrigger = function(ss, trigger_id)
   
 } // deleteTrigger()
   
+// deleteProjectTrigger()
+// ---------------
+
+deleteProjectTrigger = function(ss, trigger_id)
+{
+  // Locate a trigger by unique ID.
+  var t = getProjectTrigger(ss, trigger_id);
+
+  if (!t) 
+    {
+      // trigger not found
+      Debug.warning("Project trigger " + trigger_id + " didn't exist, so could not delete!");
+      return false;
+    }
+  
+  // Found the trigger so delete it.
+  try
+    {
+      ScriptApp.deleteTrigger(t);
+    }
+  catch(e)
+    {
+      Debug.warning("deleteProjectTrigger() - unable to delete existing trigger: " + e);  
+
+      // trigger didn't exist
+    }
+  
+  return true;
+  
+  
+} // deleteProjectTrigger()
+  
 
 // getTrigger()
 // ---------------
@@ -711,6 +896,30 @@ getTrigger = function(ss, trigger_id)
 
 } // getTrigger()
   
+getProjectTrigger = function(ss, trigger_id)
+{
+  // Locate a trigger by unique ID.
+  var all_triggers = ScriptApp.getProjectTriggers(); 
+  var i;
+  var found_trigger = null;
+  
+  Debug.info("getTrigger - searching for trigger: " + trigger_id);
+  
+  // Loop over all triggers.
+  for (i = 0; i < all_triggers.length; i++) 
+    {
+      if (all_triggers[i].getUniqueId() === trigger_id) 
+        {
+          Debug.info("found trigger " + trigger_id);
+          found_trigger = all_triggers[i];
+          break;
+        }
+    }
+
+  return found_trigger;
+
+} // getProjectTrigger()
+
 // checkForOnSubmitTrigger()
 //----------------------------
 checkForOnSubmitTrigger = function(ss)
@@ -958,7 +1167,7 @@ function showUpdateNotice()
           up.setProperty(USER_PROP_FIRST_TIME_WELCOME_SHOWN, "true");    
         }
     }
-  else if (notice_date != gbl_update_notice_date)
+  else if (gbl_update_notice_msg && (notice_date != gbl_update_notice_date))
     {
       // new message. show it!
       var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1133,7 +1342,26 @@ function expandFormulaTokens(formula, col_num, student_subm_copy_row, ak_row_num
 {
   // form the A1 notation for the cell where the copy of the student's submission resides
   var ss_a1 = "$" + convertColNumToColLetter(col_num) + "$" + student_subm_copy_row; 
-  var expanded = formula.replace(/FLB_RESPONSE/ig, ss_a1);
+ 
+  var expanded = formula;
+
+  for (var i = 3; i > 0; i--)
+    {
+      var ss_a1_prev = "$" + convertColNumToColLetter(col_num - i) + "$" + student_subm_copy_row;
+      var token = 'FLB_RESPONSE_PREV' + i;
+      var re = new RegExp(token,"ig");
+      expanded = expanded.replace(re, ss_a1_prev);
+    }
+  
+  for (var i = 3; i > 0; i--)
+    {
+      var ss_a1_next = "$" + convertColNumToColLetter(col_num + i) + "$" + student_subm_copy_row;
+      var token = 'FLB_RESPONSE_NEXT' + i;
+      var re = new RegExp(token,"ig");
+      expanded = expanded.replace(re, ss_a1_next);
+    }
+
+  expanded = expanded.replace(/FLB_RESPONSE/ig, ss_a1);
   
   // form the A1 notation for the cell where the answer key for this question resides
   if (ak_row_num)

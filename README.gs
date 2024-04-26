@@ -108,3 +108,21 @@
 //   Version 58: 3/17/17:  Added logging of reasons for invalid grades sheet detection.
 //   Version 59: 4/19/17:  Added Greek language. Added warning pop-up when changing questions that identify student. Fixed Grade By Hand bug.
 //   Version 60: 4/24/17:  Changed "percent correct" formulas to be average score for that question. Now shown for Grade by Hand too.
+//   Version 61: 7/24/17:  Added detection for Team Drive when user trying to enable Autograde (won't work). Also added emailCorruptedGradesSheetHeader()
+//   Version 62: 5/31/18:  Added Euskara language. Made all stickers free. Fixed %pm bug with negative numbers. Now show reason for invalid Grades sheet.
+//                         Added "tip" for Grade by Hand for how to skip to particular student.
+//   Version 63: 7/12/18:  Added FLB_RESPONSE_PREVX token.
+//   Version 64: 8/17/18:  Added FLB_RESPONSE_NEXTX token .
+//   Version 65: 1/4/19:   Fixed Kaylee's (Stanford) bug with reading-in student's response when using Autograde with custom formula answer key.
+//   Version 66: 7/15/19:  Got rid of last UiApp.createApplication() call ("Please wait..." while grading). Replaced with ss.toast for now.
+//   Version 67: 10/30/19: Removed remaining calls to UiApp.getActiveApplication() and app.close (unused, but causing exceptions)
+//   Version 68: 10/7/20:  Now move Drive file (for shared or printed grades) to destination folder (file.moveTo), instead of adding to dest 
+//                         folder (folder.addFile) to avoid DriveApp error with file in 2 locations (per Google Drive changes rolling out).
+//   Version 69: 10/8/20:  Updated file.moveTo call (still has error) to Drive.Files.patch call per https://developers.google.com/drive/api/v2/multi-parenting
+//   Version 70: 12/13/20: Added hourly trigger when autograde is on to monitor for (and restore) missing form submit trigger.
+//   Version 71: 9/10/21:   To accomodate Drive resource_key changes on files shared with link, modified uiShareGradesSaveSticker (and functions that led to it) to take id *and* resource_key.
+//   Version 72: 10/11/23: Minor display bug fixes, and added console logging for daily ping and events.
+//   Version 73: 11/11/23: Replacing references to flubaroo2.appspot.com to scooper.gleeda.net for static images.
+//   Version 74, 11/28/23: Added code to all .html files to handle new enforcement of Content Security Policy (CSP)
+//                         by Chrome browser as of yesterday/today which was causing breakage.
+//   Version 75, 1/17/23:  Updated URL for stickers (due to https://b.corp.google.com/issues/319531488)

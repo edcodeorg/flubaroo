@@ -17,4 +17,3 @@ function runCategoriesReport()
       Logger.log(q.getFullQuestionText() + " - " + q.getCategoryName());
     }
 }
-

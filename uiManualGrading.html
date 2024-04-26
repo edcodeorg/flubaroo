@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 
-<?!= HtmlService.createHtmlOutputFromFile('uiStyle').getContent(); ?>
+<script>
+  if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    window.trustedTypes.createPolicy('default', {
+      createHTML: string => string,
+      createScriptURL: string => string,
+      createScript: string => string,
+    });
+  }
+</script>
+
+<?!= HtmlService.createTemplateFromFile('uiStyle').evaluate().getContent(); ?>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</script>
 
 <div id="mgr_mw">
 
@@ -22,6 +35,9 @@
                 <table border="0" width="100%" id="mgr_mw_stud_ident_data">
                 </table>
             </td>
+        </tr>
+        <tr>
+        <td><font size="-2"><?= langstr("FLB_STR_MANUAL_GRADING_SKIP_TIP") ?></font></td>
         </tr>
         </table>
       </div>
@@ -72,11 +88,6 @@
     </div>
 
 </div>
-
-    
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
-</script>
 
 <script>
 

@@ -835,6 +835,9 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
   
   writeBody();
   finalizeWriting();
+
+  // if all succeeded with writing/recording grades, log active usage
+  logDailyPing();
   
   return status;
   
@@ -1405,6 +1408,7 @@ GradesWorksheet.prototype.writeGradesSheet = function(gws_existing,
     // Keep track (anonymously) of number of assignments manually 
     // graded using Flubaroo, as well as active monthly users.
     logActiveUserGrading();
+    
     if (!Autograde.isOn())
       {
         logGrading(self.spreadsheet); 
@@ -1665,6 +1669,9 @@ GradesWorksheet.prototype.hasFormulaAnswerKey = function()
   return this.has_formula_anskey;
 }
 
+// global used for debugging. see emailCorruptedGradesSheetHeader()
+gws_invalid_grades_sheet_reason = 0;
+
 // gwsGradesSheetIsValid: Returns true if grades_sheet is valid (grading completed). False otherwise.
 // Assumes the grades_sheet passed isn't null (Grades sheet exists)
 function gwsGradesSheetIsValid(grades_sheet)
@@ -1676,6 +1683,20 @@ function gwsGradesSheetIsValid(grades_sheet)
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var subm_sheet = getSheetWithSubmissions(ss);
   var subm_mod = Math.floor(subm_sheet.getLastRow() / 25) * 25;
+  gws_invalid_grades_sheet_reason = 0;
+  
+  // check for "Grading in progress..." message in cell A2.
+  // indicates that grading died previously
+  var single_cell = grades_sheet.getRange(2, 1, 1, 1);  
+  var val = single_cell.getValue();
+  if (val === langstr("FLB_STR_GRADING_CELL_MESSAGE"))
+    {
+      gbl_invalid_grades_sheet_error = "Previous grading attempt never completed.";
+      Debug.info(gbl_invalid_grades_sheet_error);
+      logInvalidGradeSheet("Previous Incomplete");
+      gws_invalid_grades_sheet_reason = 5;
+      return false;
+    }  
   
   // check for a minimum number of rows
   var min_rows = gbl_grades_start_row_num
@@ -1688,10 +1709,10 @@ function gwsGradesSheetIsValid(grades_sheet)
   var num_rows = grades_sheet.getLastRow();
   if (num_rows < min_rows)
     {
-      gbl_invalid_grades_sheet_error = "Invalid Grades sheet: Less than minimum required number of rows";
+      gbl_invalid_grades_sheet_error = "Fewer rows found in Grades sheet than expected.";
       Debug.info(gbl_invalid_grades_sheet_error);
       logInvalidGradeSheet("Too Few Rows/" + num_rows);
-      logInvalidGradeSheet("Subm Rows/" + subm_mod);
+      gws_invalid_grades_sheet_reason = 1;
       return false;
     }
   
@@ -1701,10 +1722,10 @@ function gwsGradesSheetIsValid(grades_sheet)
 
   if (val == "" || isNaN(val))
     {
-      gbl_invalid_grades_sheet_error = "Invalid Grades sheet: No points in grades summary"
+      gbl_invalid_grades_sheet_error = "Summary (top-left of Grades sheet) is missing expected information."
       Debug.info(gbl_invalid_grades_sheet_error);
       logInvalidGradeSheet("No Points");
-      logInvalidGradeSheet("Subm Rows/" + subm_mod);
+      gws_invalid_grades_sheet_reason = 2;
       return false;
     }
   
@@ -1714,20 +1735,13 @@ function gwsGradesSheetIsValid(grades_sheet)
   
   if (val == "" || isNaN(val))
     {
-      gbl_invalid_grades_sheet_error = "Invalid Grades sheet: No timestamp column A of first graded submisssion";
+      gbl_invalid_grades_sheet_error = "Missing the required timestamps in Column A of Grades sheet.";
       Debug.info(gbl_invalid_grades_sheet_error);
       logInvalidGradeSheet("No Timestamp");
+      gws_invalid_grades_sheet_reason = 3;
       return false;
     }
   
-  // timestamp present, but valid?
-  var d = new Date(val);
-  if (d === "Invalid Date")
-    {
-      Debug.info("Invalid Grades sheet: First graded submission doesn't have a valid timestamp");
-      logInvalidGradeSheet("Invalid Timestamp");
-      return false;
-    }
   
   /* Potential future check: Check that the user hasn't deleted columns in the 
    * Student Submissions sheet without updating grading options. Only for Autograde,

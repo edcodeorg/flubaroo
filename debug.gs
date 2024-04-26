@@ -274,48 +274,58 @@ DebugClass.prototype.getFieldLogRate = function()
 
 DebugClass.prototype.writeToFieldLogSheet = function() 
 {  
-  if (!this.checkFieldLog())
+  // wrapping below in try/catch b/c call to add rows (more_rows_needed) sometimes
+  // results in Exception "Those rows are out of bounds"
+  try 
+    {
+      if (!this.checkFieldLog())
+        {
+          return;
+        }
+      else if (this.field_log_messages.length == 0)
+        {
+          return;
+        }
+  
+      var rd_sheet = SpreadsheetApp.getActiveSpreadsheet()
+                                  .getSheetByName(FIELD_LOG_SHEET_NAME);
+
+      // set max size of log. poor man's wrap-around for now.
+      if (rd_sheet.getLastRow() > FIELD_LOG_WRAP_AROUND)
+        {
+          rd_sheet.getRange(2, 1, rd_sheet.getLastRow() - 1, 1).clear();
+        }
+      
+      // if first log in sheet, want to skip past the first row (where the rate is kept)
+      var first_log = (rd_sheet.getLastRow() <= 1) ? 1: 0;
+      
+      var total_rows_needed = rd_sheet.getLastRow() + this.field_log_messages.length;
+      var more_rows_needed = total_rows_needed - rd_sheet.getMaxRows();
+      
+      if (more_rows_needed >= 0)
+        {
+          rd_sheet.insertRowsAfter(rd_sheet.getLastRow(), more_rows_needed + 1);
+        }
+
+      var range_start = rd_sheet.getLastRow() + 1 + first_log;
+
+      var r = rd_sheet.getRange(range_start, 1, this.field_log_messages.length, 1);
+      var vals = [];
+
+      for (var i=0; i < this.field_log_messages.length; i++)
+        {
+          vals[i] = [this.field_log_messages[i]];
+        }
+
+      r.setValues(vals);
+      
+      this.field_log_messages = new Array();
+
+    }
+  catch (e)
     {
       return;
     }
-  else if (this.field_log_messages.length == 0)
-    {
-      return;
-    }
-  
-  var rd_sheet = SpreadsheetApp.getActiveSpreadsheet()
-                               .getSheetByName(FIELD_LOG_SHEET_NAME);
-
-  // set max size of log. poor man's wrap-around for now.
-  if (rd_sheet.getLastRow() > FIELD_LOG_WRAP_AROUND)
-    {
-      rd_sheet.getRange(2, 1, rd_sheet.getLastRow() - 1, 1).clear();
-    }
-  
-  // if first log in sheet, want to skip past the first row (where the rate is kept)
-  var first_log = (rd_sheet.getLastRow() <= 1) ? 1: 0;
-  
-  var total_rows_needed = rd_sheet.getLastRow() + this.field_log_messages.length;
-  var more_rows_needed = total_rows_needed - rd_sheet.getMaxRows();
-  
-  if (more_rows_needed >= 0)
-    {
-      rd_sheet.insertRowsAfter(rd_sheet.getLastRow(), more_rows_needed + 1);
-    }
-
-  var range_start = rd_sheet.getLastRow() + 1 + first_log;
-
-  var r = rd_sheet.getRange(range_start, 1, this.field_log_messages.length, 1);
-  var vals = [];
-
-  for (var i=0; i < this.field_log_messages.length; i++)
-    {
-      vals[i] = [this.field_log_messages[i]];
-    }
-
-  r.setValues(vals);
-  
-  this.field_log_messages = new Array();
 }
 
 DebugClass.prototype.createHiddenFieldLog = function() 

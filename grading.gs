@@ -110,11 +110,6 @@ function gradeStep1(enough_subm_source)
       return STATUS_CANNOT_CONTINUE;
     }
   
-  // Added 8/21/2015 to help with debugging intermittent issue affecting many users.
-  // Should leave here no more than 2-3 weeks, then replace for equal amount of time with
-  // Debug.deleteHiddenFieldLog() (to be written), and then remove entirely.
-  Debug.createHiddenFieldLog();
-  
   // Check submission sheet
   // ----------------------
   
@@ -251,10 +246,14 @@ function gradingStep2SubmitHandler(ak_subm_row)
         
       // Give the instructor some notice that we're 
       // grading their assignment.
+      setNotification(ss, langstr("FLB_STR_GRADING_WINDOW_TITLE"), langstr("FLB_STR_WAIT_INSTR2"));
+      
+      /*
       app = UI.pleaseWait(sheet,
                           langstr("FLB_STR_GRADING_WINDOW_TITLE"),
                           langstr("FLB_STR_WAIT_INSTR2"));
       ss.show(app);
+      */
     }
   
   Debug.info("invalidate grades sheet on update?: " + invalidateGradesOnUpdate());
@@ -298,7 +297,7 @@ function gradingStep2SubmitHandler(ak_subm_row)
   if (grades_sheet && !grades_sheet_is_valid)
     {
       // Existing Grades sheet is invalid! Cannot continue with re-grading.
-      UI.showMessageBox(langstr("FLB_STR_INVALID_GRADE_SHEET_TITLE"), langstr("FLB_STR_INVALID_GRADES_SHEET"));
+      UI.showInvalidGradesSheetMessage();
       
       if (Autograde.isOn())
         {
@@ -306,6 +305,11 @@ function gradingStep2SubmitHandler(ak_subm_row)
           // Also turn off Autograde. Better to have it off than to have it running and failing on a corrupted sheet.
           notifyOwnerOfCorruptedGradesSheet();
           Autograde.off();
+        }
+      else
+        {
+          // 7/24/17: email me some info to help debug, as this is apparently a common issue.
+          //emailCorruptedGradesSheetHeader();
         }
       
       return STATUS_CANNOT_CONTINUE;
@@ -381,7 +385,8 @@ function gradingStep2SubmitHandler(ak_subm_row)
   if (UI.isOn())
   {
     // Close the waiting UI.
-    app.close();
+    //app.close();
+    clearNotification(ss);
     
     if (status == STATUS_OK)
       {
@@ -712,4 +717,35 @@ function enoughSubmToGrade(subm_sheet, enough_subm_source)
     }
   
   return false;  
+}
+
+function emailCorruptedGradesSheetHeader()
+{
+  var min_rows = gbl_grades_start_row_num
+                 + 1 // at least one graded submission
+                 + 2 // blank row, then percentages row
+                 + gbl_num_space_before_hidden - 1 // blank rows before hidden rows
+                 + gbl_num_hidden_rows // hidden information rows (grading opts, ans key, etc)
+                 + 1 // at least one hidden row for original response
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  var grades_sheet = getSheetWithGrades(ss);
+  
+  var num_rows = grades_sheet.getLastRow();
+
+  var dbg_header = grades_sheet.getRange(1, 1, 9, 2);
+  var dbg_vals = dbg_header.getValues();
+  
+  var msg = "gws_invalid_grades_sheet_reason = " + gws_invalid_grades_sheet_reason + "\n\n";
+  msg += "Number rows: " + num_rows + ", Min rows: " + min_rows + "\n\n";
+  
+  for (var i=0; i < dbg_vals.length - 1; i++)
+    {
+      msg += dbg_vals[i][0] + ", " + dbg_vals[i][1] + "\n";
+    }
+  
+  msg += dbg_vals[dbg_vals.length - 1][0] + "\n";
+  
+  Debug.mail("Corrupted Grades sheet: \n\n" + msg);
 }
