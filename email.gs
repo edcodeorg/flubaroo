@@ -93,7 +93,7 @@ function doShareGrades()
   var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
   var sticker_threshold_percent = dp.getProperty(DOC_PROP_STICKER_THRESHOLD1);
   var sticker_blob_name = "";
-  var img_file = null;
+  var img_blob = null;
   
   
   // ensure a valid file and percent are set before allowing stickers to be sent out.
@@ -102,7 +102,7 @@ function doShareGrades()
       || !sticker_file_id || sticker_file_id === "")
     {
       sticker_enabled = false;
-      img_file = null;
+      img_blog = null;
     }
   else if (sticker_enabled)
     {
@@ -111,21 +111,14 @@ function doShareGrades()
 
       try
         {
-          if (sticker_resource_key)
-            {
-              img_file = DriveApp.getFileByIdAndResourceKey(sticker_file_id, sticker_resource_key);
-            }
-          else
-            {
-              img_file = DriveApp.getFileById(sticker_file_id);
-            }
-          
-          img_file.getBlob().setName(sticker_blob_name);
+          var response = UrlFetchApp.fetch(INCLUDED_STICKER_BASE_IMG_URL + sticker_file_id);
+          img_blob = response.getBlob();
+          img_blob.setName(sticker_blob_name);
         }
       catch (e)
         {
           Debug.info("Unable to load sticker with id=" + sticker_file_id + ", e: " + e);
-          img_file = null;
+          img_blob = null;
         }
     }
   
@@ -142,7 +135,6 @@ function doShareGrades()
   // checkout the drive sharing options and create a drive folder for this assignment if needed
   var drive_share_assignment_folder_name = assignment_name;
   var assignment_folder = null;
-  var mydrive_folder = null;
    
   Debug.info("grade_share_option: '" + grade_share_option + "'");
   
@@ -150,9 +142,7 @@ function doShareGrades()
        || (grade_share_option == GRADE_SHARE_METHOD_BOTH))
     {
       // create a folder for this assignment, and return a reference to that folder.
-      mydrive_folder = DriveApp.getRootFolder();
-
-      assignment_folder = createAssignmentFolder(mydrive_folder, assignment_name);
+      assignment_folder = createAssignmentFolder(assignment_name);
       if (assignment_folder === null)
         {
           Debug.info("unable to share grades. user may have Drive permissions issue");
@@ -343,12 +333,12 @@ function doShareGrades()
                 // Create a document with a summary of this student's grades, and 
                 // share it with the student. The teacher will remain the owner, but the student
                 // will have Comment rights. 
-                var grdoc = createGradeDocument(mydrive_folder, assignment_name, assignment_folder, 
+                var grdoc = createGradeDocument(assignment_name, assignment_folder, 
                                                 instructor_message_doc, show_questions,
                                                 show_questions_type, show_answers, show_student_response,
                                                 points_possible, show_score_option, email_address, 
                                                 has_manually_graded_question, show_anskey_for_mgr_ques, 
-                                                gs, img_file, sticker_threshold_percent);
+                                                gs, img_blob, sticker_threshold_percent);
                 grdoc_url = grdoc.getUrl();
               }
                                                
@@ -389,7 +379,8 @@ function doShareGrades()
                     && (gs.getScorePercent() >= sticker_threshold_percent))
                   {
                     var inlineImages = {};
-                    inlineImages[sticker_blob_name] = img_file.getBlob();
+                    inlineImages[sticker_blob_name] = img_blob;
+                    //inlineImages[sticker_blob_name] = img_file.getBlob();
                     email_opts.inlineImages = inlineImages;
                   }
                 
@@ -1080,7 +1071,7 @@ function doPrintGrades()
 
   var sticker_enabled = dp.getProperty(DOC_PROP_STICKER_ENABLED);
   var sticker_threshold_percent = dp.getProperty(DOC_PROP_STICKER_THRESHOLD1);
-  var img_file = null;
+  var img_blob = null;
   var sticker_blob_name = "";
   
   // ensure a valid file and percent are set before allowing stickers to be sent out.
@@ -1089,7 +1080,7 @@ function doPrintGrades()
       || !sticker_file_id || sticker_file_id === "")
     {
       sticker_enabled = false;
-      img_file = null;
+      img_blob = null;
     }
   else if (sticker_enabled)
     {
@@ -1098,21 +1089,14 @@ function doPrintGrades()
 
       try
         {
-          if (sticker_resource_key)
-            {
-              img_file = DriveApp.getFileByIdAndResourceKey(sticker_file_id, sticker_resource_key);
-            }
-          else
-            {
-              img_file = DriveApp.getFileById(sticker_file_id);
-            }
-          
-          img_file.getBlob().setName(sticker_blob_name);
+          var response = UrlFetchApp.fetch(INCLUDED_STICKER_BASE_IMG_URL + sticker_file_id);
+          img_blob = response.getBlob();
+          img_blob.setName(sticker_blob_name);
         }
       catch (e)
         {
           Debug.info("Unable to load sticker with id=" + sticker_file_id + ", e: " + e);
-          img_file = null;
+          img_blob = null;
         }
     }
   
@@ -1126,9 +1110,7 @@ function doPrintGrades()
   assignment_name = assignment_name.replace(/'/g, "");
   
   // create a folder for this assignment, and return a reference to that folder.
-  var mydrive_folder = DriveApp.getRootFolder();
-
-  var assignment_folder = createAssignmentFolder(mydrive_folder, assignment_name);
+  var assignment_folder = createAssignmentFolder(assignment_name);
   if (assignment_folder === null)
     {
       Debug.info("unable to print Grades. user may have Drive permissions issue.");
@@ -1158,7 +1140,7 @@ function doPrintGrades()
           // first time only, create the doc and record its ID.
           try
             {
-              pr_doc = startPrintableGradesDocument(mydrive_folder, assignment_name, assignment_folder);
+              pr_doc = startPrintableGradesDocument(assignment_name, assignment_folder);
               pr_doc_id = pr_doc.getId()
             }
           catch (e)
@@ -1186,7 +1168,7 @@ function doPrintGrades()
                                        show_questions_type, show_answers, show_student_response,
                                        points_possible, show_score_option,
                                        has_manually_graded_question, show_anskey_for_mgr_ques,
-                                       gs, true, img_file, sticker_threshold_percent);
+                                       gs, true, img_blob, sticker_threshold_percent);
                
         }
       catch (exception)

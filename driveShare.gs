@@ -5,13 +5,12 @@
 // createAssignmentFolder:
 // Creates a folder for this assignment and puts it in the user's main Flubaroo folder.
 // Returns the folder as a Drive Folder object.
-function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_name)
+function createAssignmentFolder(drive_share_assignment_folder_name)
 {
   var af = null;
-  var mydrive_folder_id = mydrive_folder.getId();
   
   // First locate the main "Flubaroo - Shared Grades" folder. If doesn't exist, create it.
-  var drive_iter = DriveApp.getFoldersByName(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"));
+  var drive_iter = ReDriveApp.getFoldersByName(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"));
   var main_folder = null;
   if (drive_iter.hasNext())
     {
@@ -21,7 +20,7 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
     {
       try
         {
-          main_folder = DriveApp.createFolder(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"));
+          main_folder = ReDriveApp.createFolder(langstr("FLB_STR_DRIVE_SHARE_FOLDER_NAME"));
         }
       catch (e)
         {
@@ -45,7 +44,7 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
       Debug.info("Folder '" + drive_share_assignment_folder_name + "' didn't exist. Creating it.");
       try
         {
-          af = DriveApp.createFolder(drive_share_assignment_folder_name);
+          af = ReDriveApp.createFolder(drive_share_assignment_folder_name);
         }
       catch (e)
         {
@@ -54,19 +53,8 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
         }
     }
   
-  // move the folder for this assignment into the main folder. but first, remove it from "My Drive"
-  drive_iter = af.getParents();
-  while (drive_iter.hasNext())
-    {
-      if (drive_iter.next().getId() == mydrive_folder_id)
-        {
-          mydrive_folder.removeFolder(af);
-          break;
-        }
-    }
-  
-  main_folder.addFolder(af);
-  
+  // move the folder for this assignment into the main folder.  
+  af.moveTo(main_folder);
   return af;
 }
 
@@ -74,18 +62,18 @@ function createAssignmentFolder(mydrive_folder, drive_share_assignment_folder_na
 // Creates a document with a summary of grades for a specific graded submission, places it in the
 // teacher's folder for the assignment, and then shares it with the student ('Comment' access).
 // Returns the document as a Drive File object.
-function createGradeDocument(mydrive_folder, assignment_name, assignment_folder, 
+function createGradeDocument(assignment_name, assignment_folder, 
                              instructor_message, show_questions, show_questions_type,
                              show_answers, show_student_response,
                              points_possible, show_score_option, email_address, 
                              has_manually_graded_ques, show_anskey_for_mgr_ques,
-                             graded_subm, sticker_img, sticker_percent)
+                             graded_subm, sticker_blob, sticker_percent)
 
 {
   var clean_email_address = email_address.replace(/'/g, "");
   var doc_title = langstr("FLB_STR_DRIVE_SHARE_DOC_TITLE_PRE") + " " + clean_email_address + ": " + assignment_name;
       
-  var new_doc = createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title);
+  var new_doc = createUniqueEmptyFile(assignment_folder, doc_title);
     
   if (new_doc === null)
     {
@@ -101,7 +89,7 @@ function createGradeDocument(mydrive_folder, assignment_name, assignment_folder,
                                show_questions_type, show_answers, show_student_response,
                                points_possible, show_score_option,
                                has_manually_graded_ques, show_anskey_for_mgr_ques,
-                               graded_subm, false, sticker_img, sticker_percent);
+                               graded_subm, false, sticker_blob, sticker_percent);
       
   // save and close the doc
   new_doc.saveAndClose();
@@ -130,18 +118,18 @@ function createGradeDocument(mydrive_folder, assignment_name, assignment_folder,
 // startPrintableGradesDocument:
 // Creates an empty document that will hold the printable grades. Places it in the
 // teacher's folder for the assignment. Returns the document as a Drive File object.
-function startPrintableGradesDocument(mydrive_folder, assignment_name, assignment_folder)
+function startPrintableGradesDocument(assignment_name, assignment_folder)
 {
   var doc_title = langstr("FBL_STR_PRINT_GRADES_TITLE_PRE") + " " + assignment_name;
   
   // Create new doc, and remove it from "My Drive" just after creation.
   // (less clutter in My Drive view this way).
-  var new_doc = createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title);
+  var new_doc = createUniqueEmptyFile(assignment_folder, doc_title);
   
   return new_doc;
 }
 
-function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
+function createUniqueEmptyFile(assignment_folder, doc_title)
 {
   // find if this doc already exists, and if so, remove it.
   Debug.info("searching for existing file: " + doc_title);
@@ -151,7 +139,7 @@ function createUniqueEmptyFile(mydrive_folder, assignment_folder, doc_title)
     {
       // file exists in the assignment folder. remove it and trash it.
       var existing_doc = d_iter.next();
-      assignment_folder.removeFile(existing_doc);
+      //assignment_folder.removeFile(existing_doc);
       existing_doc.setTrashed(true);
     }
   
@@ -208,7 +196,7 @@ function writeContentsOfGradeDocument(grades_doc,
                                       show_questions_type, show_answers, show_student_response,
                                       points_possible, show_score_option, 
                                       has_manually_graded_ques, show_anskey_for_mgr_ques,
-                                      graded_subm, append, sticker_img, sticker_percent)
+                                      graded_subm, append, sticker_blob, sticker_percent)
 {
   var body = grades_doc.getBody();
   
@@ -236,9 +224,9 @@ function writeContentsOfGradeDocument(grades_doc,
     }
   par.setBold(true);
   
-  if (sticker_img && (graded_subm.getScorePercent() >= sticker_percent))
+  if (sticker_blob && (graded_subm.getScorePercent() >= sticker_percent))
     {
-      var blob = sticker_img.getBlob();
+      var blob = sticker_blob; // sticker_img.getBlob();
       var pi = par.addPositionedImage(blob);
       pi.setLayout( DocumentApp.PositionedLayout.WRAP_TEXT);
    

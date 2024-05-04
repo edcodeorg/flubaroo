@@ -158,9 +158,11 @@
       <input type="button" id="sticker_picker_button" class="action" value="<?= langstr("FLB_STR_GRADE_SHARE_STICKER_DONE_BUTTON") ?>" onclick="stickerPickerSubmit();" />    
     </div>
     
+    <!--
     <div style="position: absolute;left:0;bottom:0;margin-top:20px;margin-bottom:15px;margin-left:10px;">
       <a href="https://sites.google.com/a/flubaroo.com/welcome-to-flubaroo/hc/add-more-stickers" target="_blank"><b><?= langstr("FLB_STR_GRADE_SHARE_STICKER_ADD_MORE") ?></b></a>
     </div>
+    -->
     </div>
     
     <div id="fade-sticker" class="share_grades_picker_black_overlay"></div>
@@ -399,7 +401,7 @@ function loadListOfStickersPost(data)
     {
       if (data.ids[i] !== "0")
         {
-          var thumb_url = "<?!=DRIVE_EMBED_IMAGE_URL?>" + data.ids[i];
+          var thumb_url = "<?!=INCLUDED_STICKER_BASE_IMG_URL?>" + data.ids[i];
           if (data.resource_keys[i])
             {
               thumb_url += "&resourcekey=" + data.resource_keys[i];
@@ -463,11 +465,14 @@ function updateStickerIcon(sticker_enabled, sticker_file_id, sticker_file_resour
   // update the icon on the main Share Grades window to match
   if (sticker_file_id !== "")
     {
-      var thumb_url = "<?!=DRIVE_EMBED_IMAGE_URL?>" + sticker_file_id;
+      var thumb_url = "<?!=INCLUDED_STICKER_BASE_IMG_URL?>" + sticker_file_id;
+
+      /*
       if (sticker_file_resource_key)
         {
           thumb_url += "&resourcekey=" + sticker_file_resource_key;
         }
+      */
 
       document.getElementById('chosen_sticker_icon').src = thumb_url;
     }

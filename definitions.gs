@@ -21,7 +21,7 @@ FIELD_LOG_DEFAULT_RATE = 25;
 FIELD_LOG_WRAP_AROUND = 20000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 75";
+gbl_version_str = "Version 76";
                   
 // NOTE: Update version in README.gas                  
 
@@ -91,8 +91,6 @@ FLUBAROO_MARQUEE_IMG_URL =
 
 DRIVE_EMBED_IMAGE_URL = 
   'https://drive.google.com/thumbnail?id=';
-
-FLUBAROO_SAMPLE_STICKER_ICON_URL = DRIVE_EMBED_IMAGE_URL + "0B3gmIDjKT36hdXl0c3ZvcWlTNW8";
 
 FLB_AUTOGRADE_SELECT_MODE_URL = "http://www.flubaroo.com/hc/selecting-an-autograde-mode";
 
@@ -231,9 +229,9 @@ DOC_PROP_MGR_STORED_METADATA = "flubaroo_mgr_stored_metadata";
 DOC_PROP_UI_OFF = "flubaroo_ui_off"; // Default - if not set - is on.
 DOC_PROP_UI_WAS_OFF = "flubaroo_ui_was_off"; // The UI state before the last autograde transition.
 
-DOC_PROP_STICKER_ENABLED = "flubaroo_sticker_enabled";
-DOC_PROP_STICKER_FILE_ID = "flubaroo_sticker_file_id";
-DOC_PROP_STICKER_RESOURCE_KEY = "flubaroo_sticker_resource_key";
+DOC_PROP_STICKER_ENABLED = "flubaroo_sticker_enabled_2";
+DOC_PROP_STICKER_FILE_ID = "flubaroo_sticker_file_id_2";
+DOC_PROP_STICKER_RESOURCE_KEY = "flubaroo_sticker_resource_key_2";
 
 DOC_PROP_STICKER_THRESHOLD1 = "flubaroo_sticker_threshold1";
 
@@ -337,16 +335,18 @@ FLB_EVENT_FIRST_INSTALL = 'FLB_EVENT_FIRST_INSTALL';
 // as Flubaroo will only show a message for that same date one time.
 // TODO: How do we localize this for other languages? For now, we don't.
 gbl_update_notice_date  = '4/25/24';
-gbl_update_notice_title = 'Flubaroo Update Notice';
-gbl_update_notice_msg   = '';
+gbl_update_notice_title = 'Flubaroo Update Notice - Stickers';
+gbl_update_notice_msg   = '<p>Due to a change from Google related to Google Drive, Flubaroo can no longer support custom stickers. The stickers that are included with Flubaroo can still be used, though will need to be re-selected in each assignment. Apologies for the change.</p><p>If there is a sticker you use that you want to keep using, and it is generic (not specific to your school), please email a copy to us at flubarooshare@edcode.org and we will consider including it with Flubaroo.<p>--The Flubaroo Team</p>';
 
 INCLUDED_STICKER_BASE_IMG_URL = 'https://flubaroo2.appspot.com/stickers/';
-INCLUDED_STICKERS = [
+FLUBAROO_SAMPLE_STICKER_ICON_URL = INCLUDED_STICKER_BASE_IMG_URL + 'Trophy.png';
+
+INCLUDED_STICKERS_FILE_NAMES = [
   'Baseball.png',
   'ChocolateBar.png',
   'Notepad.png',
   'Robot-RedLight.png',
-  'Star-SuperJob.png',
+  'Star-Super%20Job.png',
   'Basketball.png',
   'Flower.png',
   'Pizza.png',

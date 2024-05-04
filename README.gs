@@ -125,4 +125,5 @@
 //   Version 73: 11/11/23: Replacing references to flubaroo2.appspot.com to scooper.gleeda.net for static images.
 //   Version 74, 11/28/23: Added code to all .html files to handle new enforcement of Content Security Policy (CSP)
 //                         by Chrome browser as of yesterday/today which was causing breakage.
-//   Version 75, 1/17/23:  Updated URL for stickers (due to https://b.corp.google.com/issues/319531488)
+//   Version 75, 1/17/24:  Updated URL for stickers (due to https://b.corp.google.com/issues/319531488)
+//   Version 76, 5/xx/24:  Removed all use of DriveApp in prep for movement to using only /drive.file scope.

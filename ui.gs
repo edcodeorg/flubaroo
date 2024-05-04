@@ -1646,79 +1646,12 @@ function uiShareGradesLoadStickerList()
       sd.sticker_percent = sticker_percent;
     }
     
-  // Pull in list of free/public stickers
-  //var public_stickers_folder = DriveApp.getFolderById("0B3gmIDjKT36hSXRPdmp3ZDBSN28");
-  var public_stickers_folder = DriveApp.getFolderByIdAndResourceKey("0B3gmIDjKT36hSXRPdmp3ZDBSN28", "0-PX71bl0BeAkpsmJMyyPIhA");
-  var public_stickers = public_stickers_folder.getFiles();
-  
-  while (public_stickers.hasNext())
-    {
-      var sticker = public_stickers.next();
-      
-      var fname = sticker.getName();
-      var clean_name = fname.substr(0, fname.lastIndexOf('.')) || fname;
-      var ext_name = fname.substr(fname.lastIndexOf('.') + 1).toLowerCase();
-      
-      if (ext_name === "jpg" || ext_name === "png")
-        {
-          sd.names.push(clean_name);
-          sd.ids.push(sticker.getId());
-          sd.resource_keys.push(sticker.getResourceKey());
-        }
-    }
-  
-  
-  // Pull in this user's own stickers, from "Flubaroo - Stickers" in their My Drive
-  var status = unzipStickers();
-  
-  if (status)
-    {
-      // something went worng unzipping. let user know.
-      throw "Unable to complete unzip successfully";
-    }
-  
-  //var folders = DriveApp.getFoldersByName(MY_FLUBAROO_STICKERS_FOLDER);
-  var folders = DriveApp.searchFolders("title = '" + MY_FLUBAROO_STICKERS_FOLDER + "' and 'me' in owners");
-  var my_stickers_folder = null;
-  if (folders.hasNext())
-    {
-      my_stickers_folder = folders.next();
-    }
-  else
-    {
-      Debug.info("uiShareGradesLoadStickerList: No \"Flubaroo - Stickers\" folder found.");
-    }
-    
-  if (my_stickers_folder)
-    {      
-      // ensure permission is set to be viewable for folks with link
-      try
-        {
-          my_stickers_folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        }
-      catch (e)
-        {
-          Debug.info("uiShareGradesLoadStickerList: Unable to set sharing permissions to VIEW for ANYONE_WITH_LINK on Flubaroo Stickers folder");
-        }
-      
-      var my_stickers = my_stickers_folder.getFiles();
-      
-      while (my_stickers.hasNext())
-        {
-          var sticker = my_stickers.next();
-      
-          var fname = sticker.getName();
-          var clean_name = fname.substr(0, fname.lastIndexOf('.')) || fname;
-          var ext_name = fname.substr(fname.lastIndexOf('.') + 1).toLowerCase();
-          
-          if (ext_name === "jpg" || ext_name === "png")
-            {
-              sd.names.push(clean_name);
-              sd.ids.push(sticker.getId());
-              sd.resource_keys.push(sticker.getResourceKey());
-            }
-        }
-    }
+    for (var i=0; i < INCLUDED_STICKERS_FILE_NAMES.length; i++)
+      {
+        sd.names.push(INCLUDED_STICKERS_FILE_NAMES[i]);
+        sd.ids.push(INCLUDED_STICKERS_FILE_NAMES[i]);
+        sd.resource_keys.push('');
+      }
   
   Debug.info("uiShareGradesLoadStickerList: Returning information about " + sd.ids.length + " stickers");
   Debug.writeToFieldLogSheet();
