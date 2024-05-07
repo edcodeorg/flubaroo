@@ -362,18 +362,24 @@ function loadListOfStickers1()
   // make sure "Done" button starts out disabled.
   document.getElementById('sticker_picker_button').disabled = true;
 
+  /*
   google.script.run.withSuccessHandler(loadListOfStickers2)
                    .checkIfZipFilePresent();
+  */
+
+  loadListOfStickers2(false);
 }
 
 function loadListOfStickers2(zip_present)
 {
+  /*
   if (zip_present)
     {
       // let the user know that this might take a little big.
       var picker_div = document.getElementById('sticker_picker_div');
       picker_div.innerHTML = '<?=langstr("FLB_STR_GRADE_SHARE_UNZIPPING")?>&nbsp;&nbsp;<img height=20 src="<?!=FLUBAROO_WORKING_IMG_SPIN_URL?>">';
     }
+  */
 
   google.script.run.withSuccessHandler(loadListOfStickersPost)
                    .withFailureHandler(loadListOfStickersError)

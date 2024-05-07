@@ -706,7 +706,7 @@ function toggleAutograde()
   Debug.info("toggleAutograde() - handling user's choice");
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var ss_id = ss.getId();
-  var owner = DriveApp.getFileById(ss_id).getOwner();
+  var owner = ReDriveApp.getFileById(ss_id).getOwner();
   
   if (Autograde.isRunning())
     {

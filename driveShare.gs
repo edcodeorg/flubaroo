@@ -97,7 +97,7 @@ function createGradeDocument(assignment_name, assignment_folder,
   Debug.info("Contents of new file have been written! Now sharing with student: " + email_address);
   
   // share the document with the student
-  var new_doc_drive_file = DriveApp.getFileById(new_doc.getId());
+  var new_doc_drive_file = ReDriveApp.getFileById(new_doc.getId());
   Drive.Permissions.insert(
     {
      'role': 'reader',
@@ -174,7 +174,7 @@ function createUniqueEmptyFile(assignment_folder, doc_title)
   style[DocumentApp.Attribute.FONT_SIZE] = 10;
   body.setAttributes(style); 
   
-  var new_doc_drive_file = DriveApp.getFileById(new_doc.getId());
+  var new_doc_drive_file = ReDriveApp.getFileById(new_doc.getId());
   
   //mydrive_folder.removeFile(new_doc_drive_file);
   //assignment_folder.addFile(new_doc_drive_file);
