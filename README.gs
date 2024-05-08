@@ -127,3 +127,4 @@
 //                         by Chrome browser as of yesterday/today which was causing breakage.
 //   Version 75, 1/17/24:  Updated URL for stickers (due to https://b.corp.google.com/issues/319531488)
 //   Version 76, 5/7/24:  Removed all use of DriveApp in prep for movement to using only /drive.file scope.
+//   Version 77, 5/7/24:  Removed check for autograde running in Team/Shared Drive (can't do with just /drive.file scope)

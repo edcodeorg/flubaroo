@@ -704,9 +704,9 @@ function AutogradeClass()
 function toggleAutograde()
 {
   Debug.info("toggleAutograde() - handling user's choice");
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var ss_id = ss.getId();
-  var owner = ReDriveApp.getFileById(ss_id).getOwner();
+  //var ss = SpreadsheetApp.getActiveSpreadsheet();
+  //var ss_id = ss.getId();
+  //var owner = ReDriveApp.getFileById(ss_id).getOwner();
   
   if (Autograde.isRunning())
     {
@@ -717,6 +717,10 @@ function toggleAutograde()
                      Browser.Buttons.OK);
       
     }
+
+  // removing b/c now with /drive.file scope (vs full /drive scope), can no longer
+  // open spreadsheet Flubaroo is installed in (since it did not create this file)
+  /*
   else if (Autograde.isOff() && (owner === null))
     {
       // if we're in a team drive, don't allow autograde to be enabled 
@@ -725,6 +729,7 @@ function toggleAutograde()
                          langstr("FLB_STR_AUTOGRADE_CANNOT_WORK_IN_TEAM_DRIVE"),
                          Browser.Buttons.OK);
     }
+  */
   else
     {    
       Autograde.isOn() ? Autograde.off() : Autograde.on();
