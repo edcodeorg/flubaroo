@@ -75,6 +75,8 @@ var continue_with_changed_student_idents_g = false;
 
 function populateQuestionData(qdata)
 {
+  console.log('populateQuestionData: returned with qdata: ' + JSON.stringify(qdata));
+
   var h = '<table id="s1_mw_sel_table">';
   h += '<tr><td style="white-space:nowrap;"><b><?= langstr("FLB_STR_GRADE_STEP1_LABEL_GRADING_OPTION") ?></b></td>';
   
@@ -211,7 +213,11 @@ function populateQuestionData(qdata)
   
   h  += '</table>';
 
+  console.log('populateQuestionData: setting html');
+
   $('#s1_mw_sel').html(h);
+
+  console.log('populateQuestionData: returning');
   
   // record (globally) any pre-existing grading options
 }

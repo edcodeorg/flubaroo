@@ -41,7 +41,7 @@
     <table border="0" id="s2_mw_continue"><tr>
     <td><img id="s2_mw_working" src="<?= FLUBAROO_WORKING_IMG_BAR_URL ?>" style="display:none;"></td>
     <td width="35px"></td>
-    <td><input type="button" class="action" value="Continue" onclick="step2Continue()" /></td>
+    <td><input id="step2ContinueButton" type="button" class="action" value="Continue" onclick="step2Continue()" /></td>
     </tr></table>
     </div>
     
@@ -122,15 +122,18 @@ function step2Continue()
     }
   
   // show the animation next to the continue button
-  // $('#s2_mw_working').show();
-  
+  $('#s2_mw_working').show();
+  $('step2ContinueButton').prop('disabled', true);
+
   // call server-side function, passing it the selected answer key row.
   google.script.run.gradingStep2SubmitHandler(ak_subm_row);
   
-  google.script.host.close();
-  
   // show please wait...
+  setTimeout(step2CloseWindow, 3000);
+}
 
+function step2CloseWindow() {
+  google.script.host.close();
 }
 
 function showAlert(alert)

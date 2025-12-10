@@ -270,6 +270,10 @@ function aboutFlubaroo()
 
 function menuGradeStep1()
 {
+  if (authHandleMissingScopeGrants()) {
+    return;
+  }
+
   // Housecleaning. Clear this anytime a user explicitly chooses to grade
   // the assignment. It could be left set if a user quit prematurely while
   // setting autograde options, which could in turn mess up the UI flow for 

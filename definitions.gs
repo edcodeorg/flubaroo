@@ -21,7 +21,7 @@ FIELD_LOG_DEFAULT_RATE = 25;
 FIELD_LOG_WRAP_AROUND = 20000;
 
 // Current version. Shown in "About Flubaroo" dialogue.
-gbl_version_str = "Version 76";
+gbl_version_str = "Version 82";
                   
 // NOTE: Update version in README.gas                  
 
@@ -202,6 +202,7 @@ DOC_PROP_EMPTY_SUBM_ROW_PTR = "flubaroo_submission_empty_subm_row_ptr";
 DOC_PROP_SKIP_EMAIL = "flubaroo_skip_email";
 DOC_PROP_LAST_GRADED_ROW_COUNT = "flubaroo_auto_grade_last_row_count";
 DOC_PROP_NUM_COLS_IN_GRADES = "flubaroo_num_cols_in_grades";
+DOC_PROP_ACTIVE_SS_ID = "flubaroo_active_ss_id";
 
 DOC_PROP_EMAIL_ADDRESS_QUESTION = "flubaroo_email_address_question";
 DOC_PROP_EMAIL_SHARE_OPTION = "flubaroo_email_share_option";

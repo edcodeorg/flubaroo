@@ -128,3 +128,8 @@
 //   Version 75, 1/17/24:  Updated URL for stickers (due to https://b.corp.google.com/issues/319531488)
 //   Version 76, 5/7/24:  Removed all use of DriveApp in prep for movement to using only /drive.file scope.
 //   Version 77, 5/7/24:  Removed check for autograde running in Team/Shared Drive (can't do with just /drive.file scope)
+//   Version 78, 5/8/24:  Removed calls for logging to GA. Fixed error seen when disabling autograde due to missing monitor trigger.
+//   Version 79, 9/26/24: Fixed (leftover) issue with printing grades that resulted from move to drive.file scope.
+//   Version 80, 3/17/25: Migrating JS runtime from Rhino (ES6) to V8. No other changes.
+//   Version 81, 10/6/25: Fix for UI Step 2 due to recent Chromium change. 
+//   Version 82, 12/1/25: Introducing calls to authHandleMissingScopeGrants() to handle launch of granular OAuth.

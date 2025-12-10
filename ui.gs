@@ -1059,6 +1059,8 @@ function uiStep1GetQuestionData(tz, locale)
   var dp = PropertiesService.getDocumentProperties();
   var up = PropertiesService.getUserProperties();
   
+  Debug.info('uiStep1GetQuestionData: num_questions = ' + num_questions);
+
   var existing_gopts = dp.getProperty(DOC_PROP_UI_GRADING_OPT);
   if (existing_gopts)
     {
@@ -1066,6 +1068,8 @@ function uiStep1GetQuestionData(tz, locale)
       qdata.existing_gopts_exist = true;
     }
   
+  Debug.info('uiStep1GetQuestionData: existing_gopts = ' + existing_gopts);
+
   var existing_category_names = dp.getProperty(DOC_PROP_UI_CATEGORY_NAMES);
   if (existing_category_names)
     {
@@ -1081,6 +1085,8 @@ function uiStep1GetQuestionData(tz, locale)
   
   for (var i = 1; i < num_questions; i++)
     {
+      Debug.info('uiStep1GetQuestionData: processing question #' + i);
+
       // Display a summary of the question, so the instructor can identify it.
       var qd = createQuestionSummary(question_vals[i]);
       var default_gopt_sel;
@@ -1092,6 +1098,7 @@ function uiStep1GetQuestionData(tz, locale)
       
       if (!existing_gopts || (existing_gopts.length != num_questions))
         {
+          Debug.info('uiStep1GetQuestionData: using default grading options');
           qdata.default_extra_credit.push(ex_cb);
           
           // Try to detect the type of question (identifies student / skip / 1 pt).
@@ -1114,6 +1121,7 @@ function uiStep1GetQuestionData(tz, locale)
       else
         {
           // restore previously selected grading options.
+          Debug.info('uiStep1GetQuestionData: restoring previously selected grading options');
           var ext_gopt_pair = existing_gopts[i].split("|");
           
           var ext_gopt = ext_gopt_pair[0];
@@ -1133,6 +1141,8 @@ function uiStep1GetQuestionData(tz, locale)
               // turned them off.
               default_gopt_sel = 2; // Normal Grading
             }
+
+          Debug.info('uiStep1GetQuestionData: default_gopt_sel = ' + default_gopt_sel);
           
           if (ext_gopt_pair.length > 1)
             {
@@ -1144,6 +1154,8 @@ function uiStep1GetQuestionData(tz, locale)
               // just default to first choice ("1" point).
               default_pt_sel = 0;
             }
+
+           Debug.info('uiStep1GetQuestionData: default_pt_sel = ' + default_pt_sel);
         }
       
       // restore category selection.
@@ -1160,6 +1172,7 @@ function uiStep1GetQuestionData(tz, locale)
     } // for each question.
   
   // populate optional list of categories, if present  
+  Debug.info('uiStep1GetQuestionData: Loading sheet with categories...');
   var cat_sheet = getSheetWithCategories(ss);
   if (cat_sheet)
     { 
@@ -1169,7 +1182,10 @@ function uiStep1GetQuestionData(tz, locale)
           qdata.category_names.push(cat_names[i][0]);
         }
     }
-   
+  
+  Debug.info('uiStep1GetQuestionData: returning qdata = ' + JSON.stringify(qdata));
+  Debug.writeToFieldLogSheet();
+
   return qdata;
 }
 

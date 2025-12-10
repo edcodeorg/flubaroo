@@ -422,7 +422,9 @@ function AutogradeClass()
       }
         
     dp.setProperty(DOC_PROP_AUTOGRADE_SUBMIT_TRIGGER_ID, trigger.getUniqueId());
-    dp.setProperty(DOC_PROP_AUTOGRADE_MONITOR_TRIGGER_ID, monitor_trigger.getUniqueId());
+    if (monitor_trigger) {
+      dp.setProperty(DOC_PROP_AUTOGRADE_MONITOR_TRIGGER_ID, monitor_trigger.getUniqueId());
+    }
     
     setAgUiState(agUIEvents.AUTOGRADE_ON);
     
@@ -703,6 +705,10 @@ function AutogradeClass()
 // "toggle Autograde" menu event handler.
 function toggleAutograde()
 {
+  if (authHandleMissingScopeGrants()) {
+    return;
+  }
+  
   Debug.info("toggleAutograde() - handling user's choice");
   //var ss = SpreadsheetApp.getActiveSpreadsheet();
   //var ss_id = ss.getId();
@@ -993,7 +999,7 @@ function onAutogradeSubmission()
 } // onAutogradeSubmission()
 
 // monitorAutogradeSubmission: Called every hour when autograde is On.
-function monitorAutogradeSubmission()
+function monitorAutogradeSubmission(ctx)
 {
   var ss;
   var dp;
@@ -1013,6 +1019,21 @@ function monitorAutogradeSubmission()
   // check if we think autograde is on, but the trigger is missing (Google likely deleted it).
   // if detected, restore it and trigger autograde too incase we've missed any recent submissions.
   //Debug.info("monitorAutogradeSubmission(): Autograde.isOn() = " + Autograde.isOn() + ", checkForOnSubmitTrigger(ss) = " + checkForOnSubmitTrigger(ss));
+
+  // DAA 11/7/25: Adding this check as I try to track down errors seen in the Error Console in GCP.
+  // In this case it's this exception: "You do not have permission to call ScriptApp.getUserTriggers. Required 
+  //    permissions: https://www.googleapis.com/auth/script.scriptapp."
+  // I have a suspision this is happening b/c the trigger is being called with Auth Mode LIMITED (vs FULL).
+  // For now I'll return if this error is encountered, but log it temporarily to check my suspision.
+  //
+  try {
+    checkForOnSubmitTrigger(ss);
+  }
+  catch (e) {
+    console.log('daa: call to checkForOnSubmitTrigger() failed: e=' + e + ", auth mode = " + (ctx ? ctx.authMode : 'unknown'));
+    return;
+  }
+
   if (Autograde.isOn() && (checkForOnSubmitTrigger(ss) === null))
     {
       try

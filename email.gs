@@ -923,6 +923,10 @@ function menuShareGrades()
 {
   Debug.info("menuShareGrades()");
   
+  if (authHandleMissingScopeGrants()) {
+    return;
+  }
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
 
   // Housecleaning. Set this to false anytime a user explicitly chooses to grade

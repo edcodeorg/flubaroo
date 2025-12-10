@@ -40,19 +40,65 @@ function onOpen(e)
        // Script is present in a sheet where it hasn't been used yet.
        // (added as an Add-On in a different sheet where it *was* used).
        // This is needed to ensure we don't try to read properties.
-       createNonAuthMenu();
+       try {
+         createNonAuthMenu();
+       }
+       catch (e) {
+         // DAA 11/7/25: Adding try/catch here as "You do not have access to perform that action"
+         // is one of the most common errors I see in Error Reporting. I suspect this could be due
+         // to a case where the user has installed the Add-on in a different Sheet, but then 
+         // opened it in a sheet they only have Viewer or Commenter access to. The onOpen() trigger
+         // is still called, but a meny can't be added b/c the user doesn't have Editor access to
+         // the sheet.
+       }
      }
    
    else
      {             
        createFlubarooMenu();
-       showUpdateNotice();
      } 
 }
 
 function onEnable(e) 
 {
   onOpen(e);
+}
+
+// for potential future use
+function getActiveSpreadsheet() {
+  var dp = PropertiesService.getDocumentProperties();
+  var ss;
+
+  var ss_id = dp.getProperty(DOC_PROP_ACTIVE_SS_ID);
+  if (ss_id) {
+    try {
+      Debug.info('getActiveSpreadsheet: opening sheet by stored id: ' + ss_id);
+      ss = SpreadsheetApp.openById(ss_id);
+      return ss;
+    }
+    catch (e) {
+      // couldn't open by id. pass through to method below...
+    }
+  }
+
+  // haven't yet recorded the id of this sheet, or some other failure.
+  // try getting from getActiveSpreadsheet() instead, and if successful, store
+  // the associated Spreadsheet ID for future use.
+  try {
+    ss = SpreadsheetApp.getActiveSpreadsheet();
+    Debug.info('getActiveSpreadsheet: opened sheet by call to getActiveSpreadsheet');
+
+    ss_id = ss.getId();
+    dp.setProperty(DOC_PROP_ACTIVE_SS_ID, ss_id);
+    Debug.info('getActiveSpreadsheet: stored spreadsheet id for future use: ' + ss_id);
+
+    return ss;
+  }
+  catch (e) {
+    Debug.info('Unable to open active spreadsheet!');
+  }
+
+  return null;
 }
 
 
@@ -221,11 +267,13 @@ function createGACookie()
 
 function logInvalidGradeSheet(reason_str)
 {
+  /*
   var ga_url = createGATrackingUrl("Invalid%20Grades%20Sheet%2F" + encodeURIComponent(reason_str));
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
-    }  
+    }
+  */  
 }
 
 function logGrading(ss)
@@ -270,11 +318,13 @@ function logGrading(ss)
     }
   else // sample assignment
     {
+      /*
       var ga_url = createGATrackingUrl("Sample%20Graded");
       if (ga_url)
         {
           var response = UrlFetchApp.fetch(ga_url);
         }
+      */
     }
 }
 
@@ -328,6 +378,7 @@ function logActiveUserGrading()
   up.setProperty(USER_PROP_GRADE_LIFETIME_COUNT, track_lifetime_count);
   
   // log once and only once per month
+  /*
   if ((track_lifetime_count > 4) && (track_month_count == "1"))
     {  
       var ga_url = createGATrackingUrl("Active%20Monthly%20Users"); 
@@ -347,81 +398,98 @@ function logActiveUserGrading()
             }
         }
     }
+    */
 }
 
 function logEmail()
 {
+  /*
   var ga_url = createGATrackingUrl("Emailed%20Grades");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 function logFlubarooUpdateNotice()
 {
+  /*
   var ga_url = createGATrackingUrl("Flubaroo%20Update%20Notice");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 function logStickerIncluded()
 {
+  /*
   var ga_url = createGATrackingUrl("Sticker%20Included");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 function logSharedGradesViaDrive()
 {
+  /*
   var ga_url = createGATrackingUrl("Shared%20Grades%20Via%20Drive");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 function logPrintedGrades()
 {
+  /*
   var ga_url = createGATrackingUrl("Printed%20Grades");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 
 function logAboutFlubaroo()
 {
+  /*
   var ga_url = createGATrackingUrl("About%20Flubaroo");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 function logFirstInstall()
 {
   logEvent(FLB_EVENT_FIRST_INSTALL, null);
 
+/*
   var ga_url = createGATrackingUrl("First%20Install");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 function logRepeatInstall()
 {
+  /*
   var ga_url = createGATrackingUrl("Repeat%20Install");
   if (ga_url)
     {
       var response = UrlFetchApp.fetch(ga_url);
     }
+    */
 }
 
 function logDailyPing()
@@ -488,7 +556,7 @@ function logDailyPing()
     };
     
   up.setProperty(USER_PROP_LAST_DAILY_PING, time_ms.toString());  
-  console.log({message: 'flubarooDailyPing', pingData: parameters});
+  Logger.log({message: "flubarooDailyPing", pingData: parameters});
 }
 
 function logEvent(eventName, eventSpecificDetails)
@@ -548,7 +616,7 @@ function logEvent(eventName, eventSpecificDetails)
       timezone: timezone
     };
 
-  console.log({message: 'flubarooEventLog', eventData: parameters});
+  Logger.log({message: "flubarooEventLog", eventData: parameters});
 }
 
 

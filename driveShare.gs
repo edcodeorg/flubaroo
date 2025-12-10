@@ -2,6 +2,7 @@
 // Description: 
 // This file contains functions needed for sharing grades in Google Drive.
 
+
 // createAssignmentFolder:
 // Creates a folder for this assignment and puts it in the user's main Flubaroo folder.
 // Returns the folder as a Drive Folder object.
@@ -148,7 +149,9 @@ function createUniqueEmptyFile(assignment_folder, doc_title)
   var new_doc;
   try
     {
-      new_doc = DocumentApp.create(doc_title);
+      var new_drive_file = ReDriveApp.createFile(doc_title, '', 'application/vnd.google-apps.document');
+      new_doc = DocumentApp.openById(new_drive_file.getId());
+      Debug.info("Created new doc '" + doc_title + "' with id: " + new_doc.getId());
     }
   catch (e)
     {
@@ -174,12 +177,14 @@ function createUniqueEmptyFile(assignment_folder, doc_title)
   style[DocumentApp.Attribute.FONT_SIZE] = 10;
   body.setAttributes(style); 
   
-  var new_doc_drive_file = ReDriveApp.getFileById(new_doc.getId());
+  //var new_doc_drive_file = ReDriveApp.getFileById(new_doc.getId());
   
   //mydrive_folder.removeFile(new_doc_drive_file);
   //assignment_folder.addFile(new_doc_drive_file);
 
   //new_doc_drive_file.moveTo(assignment_folder);
+
+  Debug.info('Trying to move assignment doc with id ' + new_doc.getId() + ' into parent folder with id ' + assignment_folder.getId());
 
   var patch_resource = {};
   var optional_args = {addParents:assignment_folder.getId(), enforceSingleParent: true};
@@ -199,6 +204,8 @@ function writeContentsOfGradeDocument(grades_doc,
                                       graded_subm, append, sticker_blob, sticker_percent)
 {
   var body = grades_doc.getBody();
+
+  Debug.info('writeContentsOfGradeDocument: writing contents to doc with id ' + grades_doc.getId());
   
   // write a header that includes the assignment name, student identifying information and timestamp
   var header = assignment_name + "\r\r";
