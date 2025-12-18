@@ -1,7 +1,5 @@
 {
   "timeZone": "America/Los_Angeles",
-  "exceptionLogging": "STACKDRIVER",
-  "runtimeVersion": "V8",
   "dependencies": {
     "enabledAdvancedServices": [
       {
@@ -11,6 +9,8 @@
       }
     ]
   },
+  "runtimeVersion": "V8",
+  "exceptionLogging": "STACKDRIVER",
   "oauthScopes": [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",

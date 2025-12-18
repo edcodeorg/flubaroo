@@ -11,7 +11,7 @@
 
 // TODO_AJR - Use enums.
 
-DEBUG_ON = false;
+DEBUG_ON = true;
 LOGGING_ON = false;
 
 LOG_SHEET_NAME = "log";

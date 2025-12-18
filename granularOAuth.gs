@@ -56,7 +56,6 @@ function authHandleMissingScopeGrants() {
  * return {Boolean}.
  */
 function authUserHasGrantedAllScopes() {
-  return true;
   
   let authInfo = ScriptApp.getAuthorizationInfo(ScriptApp.AuthMode.FULL);
   let authStatus = authInfo.getAuthorizationStatus();
